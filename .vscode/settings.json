@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.css": "tailwindcss",
+    ".env.*": "properties"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "cSpell.words": ["effectify", "jsxs"]
+}
