@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    /* Output */
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist/types",
+
+    /* Module resolution */
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["ESNext"],
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "allowImportingTsExtensions": true,
+    "composite": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+
+    /* Optimization */
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "moduleDetection": "force"
+  },
+  "include": ["./src"],
+  "exclude": ["./dist"]
+}
