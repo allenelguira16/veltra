@@ -1,0 +1,52 @@
+{
+  "name": "@veltra/app",
+  "type": "module",
+  "version": "0.0.0",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "dev": "NODE_ENV=development && rollup -c -w",
+    "build": "NODE_ENV=production && rollup -c",
+    "prepare": "NODE_ENV=development && rollup -c",
+    "clean": "rimraf dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./jsx-runtime": {
+      "require": "./dist/cjs/jsx-runtime.js",
+      "import": "./dist/esm/jsx-runtime.js",
+      "types": "./dist/types/jsx-runtime.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "jsx-runtime": [
+        "dist/types/jsx-runtime.d.ts"
+      ]
+    }
+  },
+  "dependencies": {
+    "@babel/preset-typescript": "^7.27.1",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@types/rollup-plugin-delete": "^1.0.0",
+    "esbuild": "^0.25.5",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.41.1",
+    "rollup-plugin-delete": "^3.0.1",
+    "rollup-plugin-dts": "^6.2.1",
+    "rollup-plugin-esbuild": "^6.2.1",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "tslib": "^2.8.1",
+    "typescript": "~5.6.2"
+  }
+}

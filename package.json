@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "sandbox/*"
+  ],
+  "scripts": {
+    "build": "tsx ./scripts/build.ts",
+    "clean": "tsx ./scripts/clean.ts",
+    "dev-ssr": "yarn workspace vite-sandbox-ssr dev",
+    "dev": "yarn workspace vite-sandbox dev"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4"
+  },
+  "packageManager": "yarn@4.9.1"
+}
