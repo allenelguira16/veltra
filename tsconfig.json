@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "emitDeclarationOnly": false,
+    "module": "esnext",
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  },
+  "exclude": ["node_modules"]
+}
