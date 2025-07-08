@@ -1,21 +1,7 @@
-import { setDestroyContext, setEffectContext, setMountContext, setStateContext } from "~/context";
-import { EffectFn, removeEffect, State } from "~/reactivity";
+import { getComponentContext } from "~/context/runtime-context";
+import { removeEffect } from "~/reactivity";
 
 import { setComponentCleanup } from "./component-cleanup";
-import { DestroyFn } from "./on-destroy";
-import { MountFn } from "./on-mount";
-
-export type LifecycleContext = {
-  mount: MountFn[];
-  effect: EffectFn[];
-  state: {
-    states: State<any>[];
-    index: number;
-  };
-  destroy: DestroyFn[];
-};
-
-export const componentLifecycleContexts = new Map<Node, LifecycleContext>();
 
 /**
  * run the life cycle
@@ -24,15 +10,11 @@ export const componentLifecycleContexts = new Map<Node, LifecycleContext>();
  * @param targetNode - The target node.
  */
 export function runLifecycle(targetNode: Node) {
-  const context = componentLifecycleContexts.get(targetNode);
+  const context = getComponentContext(targetNode);
+
   if (!context) return;
 
   const cleanups: (() => void)[] = [];
-
-  setMountContext(null);
-  setStateContext(null);
-  setEffectContext(null);
-  setDestroyContext(null);
 
   setComponentCleanup(targetNode, cleanups);
 

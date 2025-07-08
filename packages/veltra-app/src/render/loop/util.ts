@@ -1,5 +1,5 @@
 import { runComponentCleanup } from "~/life-cycle";
-import { state, untrack } from "~/reactivity";
+import { State, state, untrack } from "~/reactivity";
 import { toArray } from "~/util";
 
 import { Entry } from "./loop";
@@ -106,13 +106,7 @@ export function removeOldNodes<T>(parentNode: Node, items: T[], entries: Entry<T
 export function newEntries<T>(
   items: T[],
   entries: Entry<T>[],
-  children: (
-    item: T,
-    index: {
-      value: number;
-    },
-  ) => JSX.Element,
-  idCounter: number,
+  children: (item: T, index: State<number>) => JSX.Element,
 ) {
   const addedEntries: Entry<T>[] = [];
   const seenCounts = new Map<T, number>();
@@ -125,7 +119,6 @@ export function newEntries<T>(
       const indexState = state(-1);
       const nodes = toArray(children(item, indexState)) as Node[];
       addedEntries.push({
-        id: idCounter++,
         item,
         nodes,
         index: indexState,

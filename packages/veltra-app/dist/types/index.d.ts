@@ -1,5 +1,27 @@
 export { F as Fragment } from './fragment-DHIT8DJc.js';
 
+declare function createContext<T>(): readonly [(props: {
+    value: T;
+    children: JSX.Element;
+}) => Node | (Node | undefined)[] | undefined, () => T];
+
+type DestroyFn = () => void;
+/**
+ * on destroy
+ *
+ * @param fn - The function to run on destroy.
+ */
+declare function onDestroy(fn: () => void): void;
+
+type MountFn = () => void | (() => void);
+/**
+ * on mount
+ *
+ * @param fn - The function to run on mount.
+ */
+declare function onMount(fn: () => () => void): void;
+declare function onMount(fn: () => void): void;
+
 type Computed<T> = {
     readonly value: T;
 };
@@ -12,10 +34,7 @@ type Computed<T> = {
 declare function computed<T>(getter: () => T): Computed<T>;
 
 /**
- * Create an effect
- *
- * @param fn - The effect function.
- * @returns The cleanup function.
+ * Create an effect with an attached render frame
  */
 declare function effect(fn: () => void): () => void;
 declare function stopEffect(): void;
@@ -58,45 +77,7 @@ declare function store<T extends object>(initialObject: T): Store<T>;
  */
 declare function untrack<T>(fn: () => T): T;
 
-type DestroyFn = () => void;
-/**
- * on destroy
- *
- * @param fn - The function to run on destroy.
- */
-declare function onDestroy(fn: () => void): void;
-
-type MountFn = () => void | (() => void);
-/**
- * on mount
- *
- * @param fn - The function to run on mount.
- */
-declare function onMount(fn: () => () => void): void;
-declare function onMount(fn: () => void): void;
-
-/**
- * create root app
- *
- * @param rootElement - The root element.
- * @param App - The app to render.
- */
-declare function createApp(App: () => JSX.Element): {
-    mount: (id: string) => void;
-    unmount: () => void;
-};
-
-declare function lazy<M extends Record<string, any>, K extends keyof M = "default">(loader: () => Promise<M>, namedExport?: K): () => any;
-
-/**
- * create a loop component
- *
- * @param items - The items to loop through.
- * @returns The loop component.
- */
-declare function loop<T>(items: T[]): {
-    each: (children: (item: T, index: State<number>) => JSX.Element) => any;
-};
+declare function lazy<M extends Record<string, any>, K extends keyof M = "default">(loader: () => Promise<M>, namedExport?: K): () => JSX.Element;
 
 /**
  * Suspense component
@@ -108,6 +89,28 @@ declare function Suspense(props: {
     fallback?: JSX.Element;
     children: JSX.Element;
 }): Text;
+
+/**
+ * create root app
+ *
+ * @param App - The app to render.
+ */
+declare function createApp(App: () => JSX.Element): {
+    mount: (id: string) => void;
+    unmount: () => void;
+};
+
+/**
+ * create a loop component
+ *
+ * @param items - The items to loop through.
+ * @returns The loop component.
+ */
+declare function loop<T>(items: T[]): {
+    each: (children: (item: T, index: State<number>) => JSX.Element) => JSX.Element;
+};
+
+declare function resolveChildren(child: JSX.Element): (...args: any[]) => Node | (Node | undefined)[] | undefined;
 
 /**
  * log the JSX elements
@@ -123,7 +126,7 @@ declare function logJsx(nodes: Node[]): Node | Node[];
  * @param fn - The function to memoize.
  * @returns The memoized function.
  */
-declare function memo<T>(fn: () => T): () => T;
+declare function memo<T>(fn: (...args: any[]) => T): (...args: any[]) => T;
 
 /**
  * unwraps proxy objects
@@ -133,5 +136,5 @@ declare function memo<T>(fn: () => T): () => T;
  */
 declare function unwrap<T>(value: any): Partial<T>;
 
-export { Suspense, computed, createApp, effect, lazy, logJsx, loop, memo, onDestroy, onMount, resource, state, stopEffect, store, untrack, unwrap };
+export { Suspense, computed, createApp, createContext, effect, lazy, logJsx, loop, memo, onDestroy, onMount, resolveChildren, resource, state, stopEffect, store, untrack, unwrap };
 export type { Computed, DestroyFn, MountFn, State };

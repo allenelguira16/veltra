@@ -1,9 +1,8 @@
 import { MATH_ML_TAGS, SVG_TAGS } from "~/const";
 import { Fragment } from "~/jsx-runtime";
 
-import { applyProps } from "./apply-props";
+import { applyProps, renderChildren } from "./dom";
 import { mountComponent } from "./mount-component";
-import { renderChildren } from "./render-children";
 
 /**
  * create a JSX element
@@ -18,9 +17,9 @@ export function h(
   props: Record<string, any>,
   children: JSX.Element[],
   key?: () => string,
-) {
+): Node | Node[] | (() => Node[]) {
   if (type === Fragment) {
-    return children;
+    return children as Node[];
   }
 
   if (typeof type === "function") {

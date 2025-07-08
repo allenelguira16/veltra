@@ -1,12 +1,10 @@
-// export {};
-
 import {
-  DataHTMLAttributes,
-  DelHTMLAttributes,
   HTMLAnchorAttributes,
   HTMLAttributes,
   HTMLAudioAttributes,
   HTMLButtonAttributes,
+  HTMLDataAttributes,
+  HTMLDelAttributes,
   HTMLDetailsAttributes,
   HTMLEmbedAttributes,
   HTMLFieldsetAttributes,
@@ -14,6 +12,7 @@ import {
   HTMLIframeAttributes,
   HTMLImgAttributes,
   HTMLInputAttributes,
+  HTMLInsAttributes,
   HTMLLabelAttributes,
   HTMLLegendAttributes,
   HTMLLinkAttributes,
@@ -27,17 +26,16 @@ import {
   HTMLProgressAttributes,
   HTMLScriptAttributes,
   HTMLSelectAttributes,
+  HTMLSourceAttributes,
   HTMLSummaryAttributes,
   HTMLTableAttributes,
+  HTMLTdAttributes,
   HTMLTextAreaAttributes,
+  HTMLThAttributes,
+  HTMLTimeAttributes,
+  HTMLTrackAttributes,
   HTMLVideoAttributes,
   HTMLVoidAttributes,
-  InsHTMLAttributes,
-  SourceHTMLAttributes,
-  TdHTMLAttributes,
-  ThHTMLAttributes,
-  TimeHTMLAttributes,
-  TrackHTMLAttributes,
 } from "./types";
 
 declare global {
@@ -65,10 +63,10 @@ declare global {
       caption: HTMLAttributes<HTMLElement>;
       col: HTMLVoidAttributes<HTMLTableColElement>;
       colgroup: HTMLAttributes<HTMLTableColElement>;
-      data: DataHTMLAttributes<HTMLDataElement>;
+      data: HTMLDataAttributes<HTMLDataElement>;
       datalist: HTMLAttributes<HTMLDataListElement>;
       dd: HTMLAttributes<HTMLElement>;
-      del: DelHTMLAttributes<HTMLModElement>;
+      del: HTMLDelAttributes<HTMLModElement>;
       details: HTMLDetailsAttributes<HTMLDetailsElement>;
       dfn: HTMLAttributes<HTMLElement>;
       dialog: HTMLAttributes<HTMLDialogElement>;
@@ -97,7 +95,7 @@ declare global {
       iframe: HTMLIframeAttributes<HTMLIFrameElement>;
       img: HTMLImgAttributes<HTMLImageElement>;
       input: HTMLInputAttributes<HTMLInputElement>;
-      ins: InsHTMLAttributes<HTMLModElement>;
+      ins: HTMLInsAttributes<HTMLModElement>;
       kbd: HTMLAttributes<HTMLElement>;
       // keygen: HTMLAttributes<HTMLElement>;
       label: HTMLLabelAttributes<HTMLLabelElement>;
@@ -135,7 +133,7 @@ declare global {
       section: HTMLAttributes<HTMLElement>;
       select: HTMLSelectAttributes<HTMLSelectElement>;
       small: HTMLAttributes<HTMLElement>;
-      source: SourceHTMLAttributes<HTMLSourceElement>;
+      source: HTMLSourceAttributes<HTMLSourceElement>;
       span: HTMLAttributes<HTMLSpanElement>;
       strong: HTMLAttributes<HTMLElement>;
       style: HTMLAttributes<HTMLStyleElement>;
@@ -145,15 +143,15 @@ declare global {
       table: HTMLTableAttributes<HTMLTableElement>;
       template: HTMLAttributes<HTMLTemplateElement>;
       tbody: HTMLAttributes<HTMLTableSectionElement>;
-      td: TdHTMLAttributes<HTMLTableDataCellElement>;
+      td: HTMLTdAttributes<HTMLTableDataCellElement>;
       textarea: HTMLTextAreaAttributes<HTMLTextAreaElement>;
       tfoot: HTMLAttributes<HTMLTableSectionElement>;
-      th: ThHTMLAttributes<HTMLTableHeaderCellElement>;
+      th: HTMLThAttributes<HTMLTableHeaderCellElement>;
       thead: HTMLAttributes<HTMLTableSectionElement>;
-      time: TimeHTMLAttributes<HTMLTimeElement>;
+      time: HTMLTimeAttributes<HTMLTimeElement>;
       title: HTMLAttributes<HTMLTitleElement>;
       tr: HTMLAttributes<HTMLTableRowElement>;
-      track: TrackHTMLAttributes<HTMLTrackElement>;
+      track: HTMLTrackAttributes<HTMLTrackElement>;
       u: HTMLAttributes<HTMLElement>;
       ul: HTMLAttributes<HTMLUListElement>;
       var: HTMLAttributes<HTMLElement>;
@@ -175,6 +173,11 @@ declare global {
       key?: string | number;
     }
 
-    type LibraryManagedAttributes<_C, P> = P & { key?: string | number };
+    // type LibraryManagedAttributes<_C, P> = P & { key?: string | number };
+    type WithNormalizedChildren<P> = P extends { children: () => infer R } ? { children: R } : P;
+
+    type LibraryManagedAttributes<_C, P> = WithNormalizedChildren<P> & {
+      key?: string | number;
+    };
   }
 }

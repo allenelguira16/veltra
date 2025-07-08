@@ -1,4 +1,4 @@
-import { destroyContext } from "~/context";
+import { getRuntimeContext } from "~/context/runtime-context";
 
 export type DestroyFn = () => void;
 
@@ -8,8 +8,9 @@ export type DestroyFn = () => void;
  * @param fn - The function to run on destroy.
  */
 export function onDestroy(fn: () => void) {
-  if (destroyContext) {
-    destroyContext.push(fn);
+  const context = getRuntimeContext();
+  if (context && context.destroy) {
+    context.destroy.push(fn);
   } else {
     throw new Error("onDestroy called outside of component");
   }

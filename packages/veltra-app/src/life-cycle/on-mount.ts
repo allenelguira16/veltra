@@ -1,4 +1,4 @@
-import { mountContext } from "~/context";
+import { getRuntimeContext } from "~/context/runtime-context";
 
 export type MountFn = () => void | (() => void);
 
@@ -10,8 +10,9 @@ export type MountFn = () => void | (() => void);
 export function onMount(fn: () => () => void): void;
 export function onMount(fn: () => void): void;
 export function onMount(fn: MountFn): void {
-  if (mountContext) {
-    mountContext.push(fn);
+  const context = getRuntimeContext();
+  if (context && context.mount) {
+    context.mount.push(fn);
   } else {
     throw new Error("onMount called outside of component");
   }

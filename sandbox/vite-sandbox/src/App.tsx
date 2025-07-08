@@ -1,5 +1,6 @@
 import { location, navigate, Route, Router } from "@veltra/router";
 
+import { Contextual } from "./components/Contextual";
 import { Dropdowns } from "./components/DropdownList";
 import { Forms } from "./components/Forms";
 import { PokeDex } from "./components/PokeDex";
@@ -12,34 +13,7 @@ export const App = () => {
       <ButtonPageList />
       <Router routes={routes} />
     </div>
-    // <StackedSuspense />
   );
-  // const msg = resource(async () => {
-  //   await new Promise((resolve) => {
-  //     setTimeout(resolve, 1000); // delay for 1 second
-  //   });
-  //   return "hello world";
-  // });
-
-  // const msg2 = resource(async () => {
-  //   await new Promise((resolve) => {
-  //     setTimeout(resolve, 2000); // delay for 1 second
-  //   });
-  //   return "hello world 2";
-  // });
-
-  // return (
-  //   <div class="p-2 flex flex-col container m-auto">
-  //     <Suspense fallback={<div>loading 1...</div>}>
-  //       {() => (
-  //         <>
-  //           <div>{msg.data}</div>
-  //           <Suspense fallback={<div>loading 2...</div>}>{() => <div>{msg2.data}</div>}</Suspense>
-  //         </>
-  //       )}
-  //     </Suspense>
-  //   </div>
-  // );
 };
 
 const routes: Route[] = [
@@ -47,6 +21,9 @@ const routes: Route[] = [
     path: "/",
     component: () => (
       <>
+        <Template title="Contexts">
+          <Contextual />
+        </Template>
         <Template title="PokeDex List">
           <PokeDex />
         </Template>
@@ -63,6 +40,14 @@ const routes: Route[] = [
           <Forms />
         </Template>
       </>
+    ),
+  },
+  {
+    path: "/contexts",
+    component: () => (
+      <Template title="Contexts">
+        <Contextual />
+      </Template>
     ),
   },
   {
@@ -123,6 +108,14 @@ const ButtonPageList = () => {
         <li>
           <button onClick={() => navigate("/")} disabled={location.value.pathname === "/"}>
             All
+          </button>
+        </li>
+        <li>
+          <button
+            onClick={() => navigate("/contexts")}
+            disabled={location.value.pathname === "/contexts"}
+          >
+            Contexts
           </button>
         </li>
         <li>

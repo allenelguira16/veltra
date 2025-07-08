@@ -1,3 +1,5 @@
+export * from "./children";
+export * from "./component-cache";
 export * from "./get-node";
 export * from "./is-node-nil";
 export * from "./log-jsx";

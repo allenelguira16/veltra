@@ -135,6 +135,7 @@ export type HTMLAttributes<T extends Element = Element> = CoreAttributes &
   EventAttributes<T> &
   AriaAttributes & {
     children?: JSX.Element;
+    ref?: ((element: T) => void) | T;
   };
 
 export type HTMLVoidAttributes<T extends Element = Element> = Omit<HTMLAttributes<T>, "children">;
@@ -405,7 +406,7 @@ export type HTMLTableAttributes<T extends Element = HTMLTableElement> = HTMLAttr
   summary?: string;
 };
 
-export type TdHTMLAttributes<T extends Element = HTMLTableDataCellElement> = HTMLAttributes<T> & {
+export type HTMLTdAttributes<T extends Element = HTMLTableDataCellElement> = HTMLAttributes<T> & {
   colSpan?: number;
   headers?: string;
   rowSpan?: number;
@@ -414,7 +415,7 @@ export type TdHTMLAttributes<T extends Element = HTMLTableDataCellElement> = HTM
   align?: string;
 };
 
-export type ThHTMLAttributes<T extends Element = HTMLTableHeaderCellElement> = HTMLAttributes<T> & {
+export type HTMLThAttributes<T extends Element = HTMLTableHeaderCellElement> = HTMLAttributes<T> & {
   colSpan?: number;
   headers?: string;
   rowSpan?: number;
@@ -423,11 +424,11 @@ export type ThHTMLAttributes<T extends Element = HTMLTableHeaderCellElement> = H
   align?: string;
 };
 
-export type TimeHTMLAttributes<T extends Element = HTMLTimeElement> = HTMLAttributes<T> & {
+export type HTMLTimeAttributes<T extends Element = HTMLTimeElement> = HTMLAttributes<T> & {
   dateTime?: string;
 };
 
-export type TrackHTMLAttributes<T extends Element = HTMLTrackElement> = HTMLVoidAttributes<T> & {
+export type HTMLTrackAttributes<T extends Element = HTMLTrackElement> = HTMLVoidAttributes<T> & {
   default?: boolean;
   kind?: string;
   label?: string;
@@ -435,7 +436,7 @@ export type TrackHTMLAttributes<T extends Element = HTMLTrackElement> = HTMLVoid
   srcLang?: string;
 };
 
-export type SourceHTMLAttributes<T extends Element = HTMLSourceElement> = HTMLVoidAttributes<T> & {
+export type HTMLSourceAttributes<T extends Element = HTMLSourceElement> = HTMLVoidAttributes<T> & {
   media?: string;
   sizes?: string;
   src?: string;
@@ -443,16 +444,16 @@ export type SourceHTMLAttributes<T extends Element = HTMLSourceElement> = HTMLVo
   type?: string;
 };
 
-export type DataHTMLAttributes<T extends Element = HTMLDataElement> = HTMLAttributes<T> & {
+export type HTMLDataAttributes<T extends Element = HTMLDataElement> = HTMLAttributes<T> & {
   value?: string | number;
 };
 
-export type DelHTMLAttributes<T extends Element = HTMLModElement> = HTMLAttributes<T> & {
+export type HTMLDelAttributes<T extends Element = HTMLModElement> = HTMLAttributes<T> & {
   cite?: string;
   dateTime?: string;
 };
 
-export type InsHTMLAttributes<T extends Element = HTMLModElement> = HTMLAttributes<T> & {
+export type HTMLInsAttributes<T extends Element = HTMLModElement> = HTMLAttributes<T> & {
   cite?: string;
   dateTime?: string;
 };

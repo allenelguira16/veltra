@@ -1,28 +1,21 @@
-import {
-  createStateContext,
-  setDestroyContext,
-  setEffectContext,
-  setMountContext,
-  setStateContext,
-} from "~/context";
+import { RuntimeContext, setRuntimeContext } from "~/context";
+import { createStateContext } from "~/context";
 
-import { LifecycleContext } from "./run-lifecycle";
-
-export function createLifeCycleContext(
-  type: (props: Record<string, any>) => any,
-  key?: number | string,
-) {
-  const context: LifecycleContext = {
+/**
+ * Creates a lifecycle context for managing component lifecycle events.
+ *
+ * @param key - The key for the lifecycle context, used to associate state with a specific component instance.
+ * @returns LifecycleContext - The created lifecycle context.
+ */
+export function createLifeCycleContext(key?: string) {
+  const context: RuntimeContext = {
     mount: [],
-    state: createStateContext(type, key),
+    state: createStateContext(key),
     effect: [],
     destroy: [],
   };
 
-  setMountContext(context.mount);
-  setStateContext(context.state);
-  setEffectContext(context.effect);
-  setDestroyContext(context.destroy);
+  setRuntimeContext(context);
 
   return context;
 }

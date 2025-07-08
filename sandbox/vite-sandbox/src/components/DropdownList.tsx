@@ -1,4 +1,4 @@
-import { loop, onDestroy, onMount, state, store } from "@veltra/app";
+import { onDestroy, onMount, state, store } from "@veltra/app";
 
 import { name } from "../globalState";
 
@@ -104,12 +104,12 @@ const DropdownList = ({ dropdowns }: TDropdownListProps) => {
 
   return (
     <div class="flex gap-2 flex-col lg:flex-row">
-      {loop(dropdowns.numbers).each((number) => (
+      {/* {loop(dropdowns.numbers).each((number) => (
         <Dropdown number={number} />
-      ))}
-      {/* {dropdowns.numbers.map((number) => (
+      ))} */}
+      {dropdowns.numbers.map((number) => (
         <Dropdown number={number} key={number} />
-        ))} */}
+      ))}
     </div>
   );
 };
@@ -120,8 +120,6 @@ const Dropdown = ({ number }: { number: number }) => {
   const handleToggle = () => {
     isOpen.value = !isOpen.value;
   };
-
-  const value = Array.from({ length: 3 }).map((_, i) => i + 1);
 
   return (
     <>
@@ -135,9 +133,11 @@ const Dropdown = ({ number }: { number: number }) => {
         {isOpen.value && (
           <div class="absolute bg-white border border-gray-200 rounded p-4 w-[200px] z-10">
             <ul>
-              {value.map((item) => (
-                <li class="cursor-pointer p-2 rounded hover:bg-gray-100">Dropdown {item}</li>
-              ))}
+              {Array.from({ length: 3 })
+                .map((_, i) => i + 1)
+                .map((item) => (
+                  <li class="cursor-pointer p-2 rounded hover:bg-gray-100">Dropdown {item}</li>
+                ))}
             </ul>
           </div>
         )}

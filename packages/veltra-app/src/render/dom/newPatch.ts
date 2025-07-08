@@ -1,7 +1,7 @@
 import { runComponentCleanup } from "~/life-cycle";
 import { isNil } from "~/util";
 
-import { copyEventListeners } from "../event-registry";
+import { copyEventListeners } from "./event-registry";
 import { componentRootNodes } from "../mount-component";
 
 export function newPatch(

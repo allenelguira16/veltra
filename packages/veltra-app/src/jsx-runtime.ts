@@ -18,10 +18,10 @@ const jsx = (
   key?: () => string,
 ) => {
   if (IS_SSR) {
-    return hSSR(type, props, toArray(children));
+    return hSSR(type, props, toArray(children)) as JSX.Element;
   }
 
-  return h(type, props, toArray(children), key);
+  return h(type, props, children, key) as JSX.Element;
 };
 
 export { Fragment, jsx, jsx as jsxs };

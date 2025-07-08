@@ -2,13 +2,8 @@ import { ConfigAPI, TransformOptions } from "@babel/core";
 // @ts-expect-error - babel-preset-react is not typed
 import babelReactPlugin from "@babel/preset-react";
 
-import {
-  logJsxPlugin,
-  loopAutoWrapPlugin,
-  loopMemoPlugin,
-  suspenseWrapPlugin,
-  wrapJSXExpressionsPlugin,
-} from "./plugins";
+import { logJsxPlugin, loopAutoWrapPlugin, wrapJSXExpressionsPlugin } from "./plugins";
+import { wrapComponentChildrenPlugin } from "./plugins/wrap-component-children";
 
 /**
  * babel preset for veltra
@@ -31,10 +26,9 @@ export default function babelPresetVeltra(api: ConfigAPI): TransformOptions {
     ],
     plugins: [
       logJsxPlugin,
-      suspenseWrapPlugin,
       loopAutoWrapPlugin,
-      loopMemoPlugin,
       wrapJSXExpressionsPlugin,
+      wrapComponentChildrenPlugin,
     ],
   };
 }

@@ -1,7 +1,7 @@
 import { effect } from "~/reactivity";
 import { getNode, toArray } from "~/util";
 
-import { getCurrentSuspenseHandler } from "../suspense";
+import { getSuspenseHandler } from "../async/suspense";
 import { patch } from "./patch";
 
 /**
@@ -16,30 +16,26 @@ export function renderChildren(parentNode: Node, children: JSX.Element[], baseAn
     oldNodes: [],
   };
 
-  for (const child of children) {
+  for (const child of toArray(children)) {
     const anchor = document.createTextNode("");
     parentNode.insertBefore(anchor, baseAnchor ?? null); // insert before main anchor
 
     let oldNodes: (ChildNode | undefined)[] = [];
-    const handler = getCurrentSuspenseHandler();
+    const handler = getSuspenseHandler();
 
     const run = () => {
       const disposer = effect(() => {
-        // let result: JSX.Element;
         let newNodes: (ChildNode | undefined)[] = [];
 
         try {
-          // result = typeof child === "function" ? child() : child;
           newNodes = toArray(getNode(child)) as ChildNode[];
         } catch (error) {
           if (error instanceof Promise) {
             if (handler) {
               handler(error);
             } else {
-              error.then(() => {
-                disposer();
-                run();
-              });
+              queueMicrotask(() => disposer());
+              error.then(() => run());
             }
           } else {
             throw error;

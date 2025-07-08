@@ -1,18 +1,16 @@
-import { memo } from "~/util";
-
-import { getCurrentSuspenseHandler } from "./suspense";
+import { jsx } from "~/jsx-runtime";
 
 export function lazy<M extends Record<string, any>, K extends keyof M = "default">(
   loader: () => Promise<M>,
   namedExport?: K,
-): () => any {
-  let component: any;
-  let error: any;
+): () => JSX.Element {
+  let component: M[K] | undefined;
+  let error: Error | undefined;
   let promise: Promise<void> | null = null;
 
   const key = namedExport ?? ("default" as K);
 
-  const getComponent = memo(() => {
+  const getComponent = (): M[K] => {
     if (component) return component;
     if (error) throw error;
     if (!promise) {
@@ -24,16 +22,15 @@ export function lazy<M extends Record<string, any>, K extends keyof M = "default
           component = mod[key];
         })
         .catch((err) => {
-          error = err;
+          error = err instanceof Error ? err : new Error(String(err));
         });
     }
 
     throw promise;
-  });
+  };
 
   return () => {
-    const handler = getCurrentSuspenseHandler();
-
-    return handler ? getComponent() : getComponent;
+    const Comp = getComponent();
+    return jsx(Comp, {});
   };
 }

@@ -1,3 +1,4 @@
+export { createContext } from "./context";
 export { type DestroyFn, type MountFn, onDestroy, onMount } from "./life-cycle";
 export {
   type Computed,
@@ -11,4 +12,4 @@ export {
   untrack,
 } from "./reactivity";
 export { createApp, Fragment, lazy, loop, Suspense } from "./render";
-export { logJsx, memo, unwrap } from "./util";
+export { logJsx, memo, resolveChildren, unwrap } from "./util";

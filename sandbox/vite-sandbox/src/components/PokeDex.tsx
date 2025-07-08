@@ -1,7 +1,7 @@
 import { effect, loop, store } from "@veltra/app";
-import { sleep } from "src/sleep";
 
 import { name } from "../globalState";
+import { sleep } from "../sleep";
 
 type PokeDexData = {
   count: number;
@@ -67,24 +67,30 @@ export const PokeDex = () => {
           </tr>
         </thead>
         <tbody>
-          {pokeDex.isLoading &&
-            loop(Array.from({ length: 20 }).map((_, i) => i + 1)).each((number) => (
-              <tr>
-                <td colspan="3" class="h-[24px] text-center">
-                  {number === 10 && "loading..."}
-                </td>
-              </tr>
-            ))}
-          {!pokeDex.isLoading &&
-            loop(pokeDex.pokeDexList).each(({ name, url }, index) => (
-              <tr>
-                <td class="w-1/3 text-center">{index.value + 1}</td>
-                <td class="w-1/3 text-center truncate">{name}</td>
-                <td class="w-1/3 text-center truncate" onClick={() => alert(url)}>
-                  {url}
-                </td>
-              </tr>
-            ))}
+          {pokeDex.isLoading && (
+            <>
+              {loop(Array.from({ length: 20 }).map((_, i) => i + 1)).each((number) => (
+                <tr>
+                  <td colSpan={3} class="h-[24px] text-center">
+                    {number === 10 && "loading..."}
+                  </td>
+                </tr>
+              ))}
+            </>
+          )}
+          {!pokeDex.isLoading && (
+            <>
+              {loop(pokeDex.pokeDexList).each(({ name, url }, index) => (
+                <tr>
+                  <td class="w-1/3 text-center">{index.value + 1}</td>
+                  <td class="w-1/3 text-center truncate">{name}</td>
+                  <td class="w-1/3 text-center truncate" onClick={() => alert(url)}>
+                    {url}
+                  </td>
+                </tr>
+              ))}
+            </>
+          )}
         </tbody>
       </table>
       <div class="flex gap-4 justify-center">

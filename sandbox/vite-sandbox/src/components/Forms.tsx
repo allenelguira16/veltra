@@ -19,7 +19,7 @@ export const Forms = () => {
   );
 };
 
-function Counter() {
+export function Counter() {
   const state = store({
     count: 0,
     get double() {

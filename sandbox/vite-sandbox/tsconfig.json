@@ -22,14 +22,14 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
+    "noUncheckedSideEffectImports": true
 
-    "paths": {
-      "@veltra/app": ["../../packages/veltra-app/src"],
-      "@veltra/router": ["../../packages/veltra-router/src"],
-      "@veltra/app/jsx-runtime": ["../../packages/veltra-app/src/jsx-runtime.ts"],
-      "vite-plugin-veltra": ["../../packages/vite-plugin-veltra/src"]
-    }
+    // "paths": {
+    //   "@veltra/app": ["../../packages/veltra-app/src"],
+    //   "@veltra/router": ["../../packages/veltra-router/src"],
+    //   "@veltra/app/jsx-runtime": ["../../packages/veltra-app/src/jsx-runtime.ts"],
+    //   "vite-plugin-veltra": ["../../packages/vite-plugin-veltra/src"]
+    // }
   },
   "include": ["src", "./vite.config.ts"]
 }

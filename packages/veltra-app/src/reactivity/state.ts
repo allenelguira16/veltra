@@ -1,4 +1,4 @@
-import { stateContext } from "~/context";
+import { getRuntimeContext } from "~/context/runtime-context";
 
 import { track, trigger } from "./track";
 
@@ -13,15 +13,16 @@ export type State<T> = { value: T };
 export function state<T>(initialValue: T): State<T>;
 export function state<T = undefined>(): State<T | undefined>;
 export function state<T>(initialValue?: T): State<T | undefined> {
-  if (stateContext) {
-    const { states, index } = stateContext;
+  const context = getRuntimeContext();
+  if (context && context.state) {
+    const { states, index } = context.state;
     if (states.length <= index) {
       // Create new state if it doesn't exist
       const s = createState(initialValue);
       states.push(s);
     }
     // Return existing state and increment index
-    return states[stateContext.index++];
+    return states[context.state.index++];
   }
   // fallback: not in a component context
   return createState(initialValue);

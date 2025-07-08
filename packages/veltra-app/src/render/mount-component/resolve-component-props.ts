@@ -1,4 +1,4 @@
-import { Suspense } from "../suspense";
+import { Suspense } from "../async/suspense";
 
 const IGNORE_COMPONENT = [Suspense] as Array<(...args: any[]) => any>;
 

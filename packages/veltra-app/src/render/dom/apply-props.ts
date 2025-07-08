@@ -1,6 +1,6 @@
 import { UNIT_LESS_PROPS } from "~/const";
 
-import { effect } from "../reactivity";
+import { effect } from "../../reactivity";
 import { addEventListener, removeEventListener } from "./event-registry";
 
 /**
@@ -28,9 +28,9 @@ export function applyProps(element: HTMLElement, props: Record<string, any>) {
       });
     } else {
       const run = () => {
-        const value = typeof props[key] === "function" ? props[key]() : props[key];
+        const value = typeof props[key] === "function" && key !== "ref" ? props[key]() : props[key];
 
-        if (key === "ref" && typeof value === "function") {
+        if (key === "ref") {
           value(element);
         } else if (key === "style") {
           applyStyle(element, value);

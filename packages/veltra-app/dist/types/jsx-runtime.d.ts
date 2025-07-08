@@ -121,6 +121,7 @@ type AriaAttributes = {
 };
 type HTMLAttributes<T extends Element = Element> = CoreAttributes & EventAttributes<T> & AriaAttributes & {
     children?: JSX.Element;
+    ref?: ((element: T) => void) | T;
 };
 type HTMLVoidAttributes<T extends Element = Element> = Omit<HTMLAttributes<T>, "children">;
 type HTMLAnchorAttributes<T extends Element = HTMLAnchorElement> = HTMLAttributes<T> & {
@@ -361,7 +362,7 @@ type HTMLTableAttributes<T extends Element = HTMLTableElement> = HTMLAttributes<
     cellSpacing?: number | string;
     summary?: string;
 };
-type TdHTMLAttributes<T extends Element = HTMLTableDataCellElement> = HTMLAttributes<T> & {
+type HTMLTdAttributes<T extends Element = HTMLTableDataCellElement> = HTMLAttributes<T> & {
     colSpan?: number;
     headers?: string;
     rowSpan?: number;
@@ -369,7 +370,7 @@ type TdHTMLAttributes<T extends Element = HTMLTableDataCellElement> = HTMLAttrib
     abbr?: string;
     align?: string;
 };
-type ThHTMLAttributes<T extends Element = HTMLTableHeaderCellElement> = HTMLAttributes<T> & {
+type HTMLThAttributes<T extends Element = HTMLTableHeaderCellElement> = HTMLAttributes<T> & {
     colSpan?: number;
     headers?: string;
     rowSpan?: number;
@@ -377,38 +378,34 @@ type ThHTMLAttributes<T extends Element = HTMLTableHeaderCellElement> = HTMLAttr
     abbr?: string;
     align?: string;
 };
-type TimeHTMLAttributes<T extends Element = HTMLTimeElement> = HTMLAttributes<T> & {
+type HTMLTimeAttributes<T extends Element = HTMLTimeElement> = HTMLAttributes<T> & {
     dateTime?: string;
 };
-type TrackHTMLAttributes<T extends Element = HTMLTrackElement> = HTMLVoidAttributes<T> & {
+type HTMLTrackAttributes<T extends Element = HTMLTrackElement> = HTMLVoidAttributes<T> & {
     default?: boolean;
     kind?: string;
     label?: string;
     src?: string;
     srcLang?: string;
 };
-type SourceHTMLAttributes<T extends Element = HTMLSourceElement> = HTMLVoidAttributes<T> & {
+type HTMLSourceAttributes<T extends Element = HTMLSourceElement> = HTMLVoidAttributes<T> & {
     media?: string;
     sizes?: string;
     src?: string;
     srcSet?: string;
     type?: string;
 };
-type DataHTMLAttributes<T extends Element = HTMLDataElement> = HTMLAttributes<T> & {
+type HTMLDataAttributes<T extends Element = HTMLDataElement> = HTMLAttributes<T> & {
     value?: string | number;
 };
-type DelHTMLAttributes<T extends Element = HTMLModElement> = HTMLAttributes<T> & {
+type HTMLDelAttributes<T extends Element = HTMLModElement> = HTMLAttributes<T> & {
     cite?: string;
     dateTime?: string;
 };
-type InsHTMLAttributes<T extends Element = HTMLModElement> = HTMLAttributes<T> & {
+type HTMLInsAttributes<T extends Element = HTMLModElement> = HTMLAttributes<T> & {
     cite?: string;
     dateTime?: string;
 };
-
-// export {};
-
-
 
 declare global {
   namespace JSX {
@@ -435,10 +432,10 @@ declare global {
       caption: HTMLAttributes<HTMLElement>;
       col: HTMLVoidAttributes<HTMLTableColElement>;
       colgroup: HTMLAttributes<HTMLTableColElement>;
-      data: DataHTMLAttributes<HTMLDataElement>;
+      data: HTMLDataAttributes<HTMLDataElement>;
       datalist: HTMLAttributes<HTMLDataListElement>;
       dd: HTMLAttributes<HTMLElement>;
-      del: DelHTMLAttributes<HTMLModElement>;
+      del: HTMLDelAttributes<HTMLModElement>;
       details: HTMLDetailsAttributes<HTMLDetailsElement>;
       dfn: HTMLAttributes<HTMLElement>;
       dialog: HTMLAttributes<HTMLDialogElement>;
@@ -467,7 +464,7 @@ declare global {
       iframe: HTMLIframeAttributes<HTMLIFrameElement>;
       img: HTMLImgAttributes<HTMLImageElement>;
       input: HTMLInputAttributes<HTMLInputElement>;
-      ins: InsHTMLAttributes<HTMLModElement>;
+      ins: HTMLInsAttributes<HTMLModElement>;
       kbd: HTMLAttributes<HTMLElement>;
       // keygen: HTMLAttributes<HTMLElement>;
       label: HTMLLabelAttributes<HTMLLabelElement>;
@@ -505,7 +502,7 @@ declare global {
       section: HTMLAttributes<HTMLElement>;
       select: HTMLSelectAttributes<HTMLSelectElement>;
       small: HTMLAttributes<HTMLElement>;
-      source: SourceHTMLAttributes<HTMLSourceElement>;
+      source: HTMLSourceAttributes<HTMLSourceElement>;
       span: HTMLAttributes<HTMLSpanElement>;
       strong: HTMLAttributes<HTMLElement>;
       style: HTMLAttributes<HTMLStyleElement>;
@@ -515,15 +512,15 @@ declare global {
       table: HTMLTableAttributes<HTMLTableElement>;
       template: HTMLAttributes<HTMLTemplateElement>;
       tbody: HTMLAttributes<HTMLTableSectionElement>;
-      td: TdHTMLAttributes<HTMLTableDataCellElement>;
+      td: HTMLTdAttributes<HTMLTableDataCellElement>;
       textarea: HTMLTextAreaAttributes<HTMLTextAreaElement>;
       tfoot: HTMLAttributes<HTMLTableSectionElement>;
-      th: ThHTMLAttributes<HTMLTableHeaderCellElement>;
+      th: HTMLThAttributes<HTMLTableHeaderCellElement>;
       thead: HTMLAttributes<HTMLTableSectionElement>;
-      time: TimeHTMLAttributes<HTMLTimeElement>;
+      time: HTMLTimeAttributes<HTMLTimeElement>;
       title: HTMLAttributes<HTMLTitleElement>;
       tr: HTMLAttributes<HTMLTableRowElement>;
-      track: TrackHTMLAttributes<HTMLTrackElement>;
+      track: HTMLTrackAttributes<HTMLTrackElement>;
       u: HTMLAttributes<HTMLElement>;
       ul: HTMLAttributes<HTMLUListElement>;
       var: HTMLAttributes<HTMLElement>;
@@ -545,7 +542,12 @@ declare global {
       key?: string | number;
     }
 
-    type LibraryManagedAttributes<_C, P> = P & { key?: string | number };
+    // type LibraryManagedAttributes<_C, P> = P & { key?: string | number };
+    type WithNormalizedChildren<P> = P extends { children: () => infer R } ? { children: R } : P;
+
+    type LibraryManagedAttributes<_C, P> = WithNormalizedChildren<P> & {
+      key?: string | number;
+    };
   }
 }
 
@@ -557,6 +559,6 @@ declare global {
  * @param children - The children of the element.
  * @returns The JSX element.
  */
-declare const jsx: (type: string | ((props: any) => any), { children, ...props }: Record<string, any>, key?: () => string) => any;
+declare const jsx: (type: string | ((props: any) => any), { children, ...props }: Record<string, any>, key?: () => string) => JSX.Element;
 
 export { jsx, jsx as jsxs };
