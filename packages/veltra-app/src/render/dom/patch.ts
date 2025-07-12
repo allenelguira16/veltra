@@ -1,4 +1,4 @@
-import { runComponentCleanup, runLifecycle } from "~/life-cycle";
+import { runComponentCleanup, runLifecycle } from "~/lifecycle";
 import { isNil } from "~/util";
 
 /**

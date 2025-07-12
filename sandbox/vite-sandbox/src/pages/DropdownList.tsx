@@ -44,12 +44,12 @@ export const Dropdowns = () => {
     },
   });
 
-  onMount(() => {
-    console.log("Dropdown List onMount");
+  onMount(async () => {
+    console.log("Dropdowns onMount");
   });
 
-  onDestroy(() => {
-    console.log("Dropdown List onDestroy");
+  onDestroy(async () => {
+    console.log("Dropdowns onDestroy");
   });
 
   return (
@@ -94,14 +94,6 @@ type TDropdownListProps = {
 };
 
 const DropdownList = ({ dropdowns }: TDropdownListProps) => {
-  onMount(() => {
-    console.log("DropdownList onMount");
-  });
-
-  onDestroy(() => {
-    console.log("DropdownList onDestroy");
-  });
-
   return (
     <div class="flex gap-2 flex-col lg:flex-row">
       {/* {loop(dropdowns.numbers).each((number) => (

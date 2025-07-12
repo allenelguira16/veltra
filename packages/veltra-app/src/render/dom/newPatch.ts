@@ -1,8 +1,8 @@
-import { runComponentCleanup } from "~/life-cycle";
+import { runComponentCleanup } from "~/lifecycle";
 import { isNil } from "~/util";
 
-import { copyEventListeners } from "./event-registry";
 import { componentRootNodes } from "../mount-component";
+import { copyEventListeners } from "./event-registry";
 
 export function newPatch(
   parentNode: Node,

@@ -1,16 +1,14 @@
-import { getRuntimeContext } from "~/context/runtime-context";
+import { getRuntimeContext } from "~/context";
 
 /**
- * Effect function type with dependency tracking
+ * Effect function type with dependency tracking and cleanup
  */
-export type EffectFn = (() => void) & {
+export type EffectFn = (() => Promise<void>) & {
   deps?: Set<EffectFn>[];
   owner?: string;
+  cleanup?: () => void;
 };
 
-/**
- * Currently active effect
- */
 export let activeEffect: EffectFn | null = null;
 
 export function setActiveEffect(newActiveEffect: EffectFn | null) {
@@ -18,24 +16,48 @@ export function setActiveEffect(newActiveEffect: EffectFn | null) {
 }
 
 let lastDisposer: (() => void) | null = null;
-
 let currentOwner: string | null = null;
 
 export function getCurrentOwner(): string {
   if (!currentOwner) {
     throw new Error("Must be inside an effect");
   }
-
   return currentOwner;
+}
+
+/**
+ * Effect scheduling queue
+ */
+const effectQueue = new Set<EffectFn>();
+let isFlushing = false;
+
+export function scheduleEffect(effect: EffectFn) {
+  effectQueue.add(effect);
+  if (!isFlushing) {
+    isFlushing = true;
+    queueMicrotask(() => {
+      for (const effect of effectQueue) {
+        effect();
+      }
+      effectQueue.clear();
+      isFlushing = false;
+    });
+  }
 }
 
 /**
  * Create an effect with an attached render frame
  */
-export function effect(fn: () => void): () => void {
+export function effect(fn: (() => void | (() => void)) | (() => Promise<void | (() => void)>)) {
   const context = getRuntimeContext();
-  const wrappedEffect: EffectFn = () => {
+  const wrappedEffect: EffectFn = async () => {
     removeEffect(wrappedEffect);
+
+    // Cleanup previous effect if any
+    if (wrappedEffect.cleanup) {
+      wrappedEffect.cleanup();
+      wrappedEffect.cleanup = undefined;
+    }
 
     const previousEffect = activeEffect;
     const previousOwner = currentOwner;
@@ -46,7 +68,15 @@ export function effect(fn: () => void): () => void {
     if (context) context.effect.push(wrappedEffect);
 
     try {
-      fn();
+      const result = fn();
+      if (typeof result === "function") {
+        wrappedEffect.cleanup = result;
+      } else if (result instanceof Promise) {
+        const cleanup = await result;
+        if (typeof cleanup === "function") {
+          wrappedEffect.cleanup = cleanup;
+        }
+      }
     } finally {
       activeEffect = previousEffect;
       currentOwner = previousOwner;
@@ -57,7 +87,6 @@ export function effect(fn: () => void): () => void {
   lastDisposer = disposer;
 
   wrappedEffect.deps = [];
-
   wrappedEffect.owner = crypto.randomUUID();
 
   wrappedEffect();
@@ -73,7 +102,7 @@ export function stopEffect() {
 }
 
 /**
- * Remove an effect
+ * Remove an effect and run its cleanup
  */
 export function removeEffect(effect: EffectFn) {
   if (effect.deps) {
@@ -81,5 +110,10 @@ export function removeEffect(effect: EffectFn) {
       depSet.delete(effect);
     }
     effect.deps.length = 0;
+  }
+
+  if (effect.cleanup) {
+    effect.cleanup();
+    effect.cleanup = undefined;
   }
 }

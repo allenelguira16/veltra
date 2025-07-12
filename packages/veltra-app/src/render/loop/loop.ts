@@ -1,9 +1,10 @@
 import { jsx } from "~/jsx-runtime";
-import { onDestroy, onMount } from "~/life-cycle";
+import { onDestroy, onMount } from "~/lifecycle";
 import { effect, State } from "~/reactivity";
-import { componentRootNodes, getSuspenseHandler } from "~/render";
 import { componentCache } from "~/util";
 
+import { getSuspenseHandler } from "../async";
+import { componentRootNodes } from "../mount-component";
 import { newEntries, removeEntryNodes, removeOldNodes, reorderEntries } from "./util";
 
 export type Entry<T> = {
@@ -29,7 +30,7 @@ export function loop<T>(items: T[]) {
       // Use jsx to register it as a component
       // That way we can use life cycles hooks
       const component = componentCache(() =>
-        jsx(() => {
+        jsx(function Loop() {
           const rootNode = document.createTextNode("");
 
           let entries: Entry<T>[] = [];

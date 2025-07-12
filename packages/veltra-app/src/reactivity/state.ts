@@ -1,4 +1,4 @@
-import { getRuntimeContext } from "~/context/runtime-context";
+import { getRuntimeContext } from "~/context";
 
 import { track, trigger } from "./track";
 

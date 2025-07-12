@@ -1,13 +1,13 @@
-import { getRuntimeContext } from "~/context/runtime-context";
+import { getRuntimeContext } from "~/context";
 
-export type DestroyFn = () => void;
+export type DestroyFn = () => Promise<void> | void;
 
 /**
  * on destroy
  *
  * @param fn - The function to run on destroy.
  */
-export function onDestroy(fn: () => void) {
+export function onDestroy(fn: () => Promise<void>) {
   const context = getRuntimeContext();
   if (context && context.destroy) {
     context.destroy.push(fn);

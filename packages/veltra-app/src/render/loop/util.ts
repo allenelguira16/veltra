@@ -1,4 +1,4 @@
-import { runComponentCleanup } from "~/life-cycle";
+import { runComponentCleanup } from "~/lifecycle";
 import { State, state, untrack } from "~/reactivity";
 import { toArray } from "~/util";
 

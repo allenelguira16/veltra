@@ -1,4 +1,4 @@
-import { onMount } from "~/life-cycle";
+import { onMount } from "~/lifecycle";
 import { memo } from "~/util";
 
 import { renderChildren } from "../dom";

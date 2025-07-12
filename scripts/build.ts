@@ -13,5 +13,4 @@ for (const workspace of workspaces) {
   }
 }
 
-console.clear();
 console.log("Done building packages");

@@ -18,8 +18,6 @@ export const logJsxPlugin = declare((api) => {
 
         // Skip Veltra internal or installed files
         if (
-          filename.includes("/veltra-router/") ||
-          filename.includes("\\veltra-router\\") ||
           filename.includes("/veltra-app/") ||
           filename.includes("\\veltra-app\\") ||
           filename.includes("/node_modules/@veltra/app/") ||

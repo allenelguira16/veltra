@@ -1,4 +1,6 @@
-import { effect, state, untrack } from "~/reactivity";
+import { effect } from "./effect";
+import { state } from "./state";
+import { untrack } from "./untrack";
 
 export type ResourceReturn<T> = {
   readonly loading: boolean;
@@ -18,7 +20,7 @@ export function resource<T>(fetcher: () => Promise<T>): ResourceReturn<T> {
   let loading = true;
   let error = null as Error | null;
   let data = undefined as T | undefined;
-  let realPromise: Promise<T> | null = null;
+  let promise: Promise<T> | null = null;
   let promiseStatus = "pending" as "pending" | "fulfilled" | "rejected";
 
   const version = state(0);
@@ -28,9 +30,9 @@ export function resource<T>(fetcher: () => Promise<T>): ResourceReturn<T> {
     error = null;
     data = undefined as T | undefined;
     promiseStatus = "pending";
-    realPromise = fetcher();
+    promise = fetcher();
 
-    realPromise
+    promise
       .then((result) => {
         data = result;
         error = null;
@@ -66,7 +68,7 @@ export function resource<T>(fetcher: () => Promise<T>): ResourceReturn<T> {
       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       version.value;
 
-      if (promiseStatus === "pending") throw realPromise;
+      if (promiseStatus === "pending") throw promise;
       if (promiseStatus === "rejected") throw error;
 
       return data as T;

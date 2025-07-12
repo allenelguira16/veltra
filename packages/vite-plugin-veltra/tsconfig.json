@@ -24,11 +24,7 @@
     /* Optimization */
     "skipLibCheck": true,
     "isolatedModules": true,
-    "moduleDetection": "force",
-
-    "paths": {
-      "@babel/preset-veltra": ["../../packages/babel-preset-veltra/src"]
-    }
+    "moduleDetection": "force"
   },
   "include": ["src"],
   "exclude": ["dist"]

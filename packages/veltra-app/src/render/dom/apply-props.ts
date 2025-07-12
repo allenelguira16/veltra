@@ -1,6 +1,6 @@
 import { UNIT_LESS_PROPS } from "~/const";
+import { effect } from "~/reactivity";
 
-import { effect } from "../../reactivity";
 import { addEventListener, removeEventListener } from "./event-registry";
 
 /**
@@ -11,47 +11,64 @@ import { addEventListener, removeEventListener } from "./event-registry";
  */
 export function applyProps(element: HTMLElement, props: Record<string, any>) {
   for (const key in props) {
-    if (key.startsWith("on") && typeof props[key] === "function") {
-      const type = key.slice(2).toLowerCase();
-      let cleanup: () => void;
+    effect(() => {
+      const raw = props[key];
+      const value = typeof raw === "function" && key !== "ref" ? raw() : raw;
 
-      effect(() => {
-        // Remove the previous listener if there was one
-        if (cleanup) cleanup();
+      // Event listeners
+      if (key.startsWith("on") && typeof value === "function") {
+        const type = key.slice(2).toLowerCase();
+        addEventListener(element, type, value);
+        return () => removeEventListener(element, type);
+      }
 
-        const fn = props[key]();
-        if (typeof fn === "function") {
-          addEventListener(element, type, fn);
-          // Setup cleanup for next effect run
-          cleanup = () => removeEventListener(element, type);
-        }
-      });
-    } else {
-      const run = () => {
-        const value = typeof props[key] === "function" && key !== "ref" ? props[key]() : props[key];
+      // Controlled form elements: <input>, <textarea>, <select>
+      const isFormControl =
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLTextAreaElement ||
+        element instanceof HTMLSelectElement;
 
-        if (key === "ref") {
-          value(element);
-        } else if (key === "style") {
-          applyStyle(element, value);
-        } else if (key === "disabled") {
-          element.toggleAttribute(key, value);
-        } else {
-          element.setAttribute(key, value);
-        }
-      };
-      effect(() => {
-        try {
-          run();
-        } catch (error) {
-          if (error instanceof Promise) {
-            error.then(run);
-          } else {
-            throw error;
+      if (
+        key === "value" &&
+        isFormControl &&
+        typeof props["onInput"] !== "function" &&
+        typeof props["onChange"] !== "function"
+      ) {
+        // Force revert if no handler is present
+        element.value = value;
+
+        const revert = () => {
+          if (element.value !== value) {
+            element.value = value;
           }
-        }
-      });
-    }
+        };
+
+        element.setAttribute(key, value);
+        element.addEventListener("input", revert);
+        return () => element.removeEventListener("input", revert);
+      }
+
+      // Ref
+      if (key === "ref" && typeof value === "function") {
+        value(element);
+        return;
+      }
+
+      // Style
+      if (key === "style") {
+        applyStyle(element, value);
+        return;
+      }
+
+      // Boolean attributes
+      if (typeof value === "boolean") {
+        element.toggleAttribute(key, value);
+        return;
+      }
+
+      // Default attribute handling
+      element.setAttribute(key, value);
+    });
   }
 }
 

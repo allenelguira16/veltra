@@ -1,5 +1,5 @@
 export { createContext } from "./context";
-export { type DestroyFn, type MountFn, onDestroy, onMount } from "./life-cycle";
+export { type DestroyFn, type MountFn, onDestroy, onMount } from "./lifecycle";
 export {
   type Computed,
   computed,

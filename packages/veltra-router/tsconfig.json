@@ -31,8 +31,6 @@
 
     "paths": {
       "~/*": ["./src/*"]
-      // "@veltra/app": ["../../packages/veltra-app/src"],
-      // "@veltra/app/jsx-runtime": ["../../packages/veltra-app/src/jsx-runtime.ts"]
     }
   },
   "include": ["./src"],

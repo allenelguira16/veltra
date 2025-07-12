@@ -1,4 +1,4 @@
-import { componentRootNodes } from "../render";
+import { componentRootNodes } from "~/render";
 
 /**
  * log the JSX elements

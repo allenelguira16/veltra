@@ -1,3 +1,4 @@
+import resolve from "@rollup/plugin-node-resolve";
 import { defineConfig } from "rollup";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
@@ -37,6 +38,7 @@ export default defineConfig([
     plugins: [
       del({ targets: "dist/*", runOnce: IS_DEV, verbose: true }),
       tsConfigPaths(),
+      resolve(),
       esbuild({
         tsconfig: "tsconfig.json",
         minify: !IS_DEV,

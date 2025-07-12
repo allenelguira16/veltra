@@ -1,7 +1,7 @@
 import { effect } from "~/reactivity";
 import { getNode, toArray } from "~/util";
 
-import { getSuspenseHandler } from "../async/suspense";
+import { getSuspenseHandler } from "../async";
 import { patch } from "./patch";
 
 /**
@@ -20,13 +20,13 @@ export function renderChildren(parentNode: Node, children: JSX.Element[], baseAn
     const anchor = document.createTextNode("");
     parentNode.insertBefore(anchor, baseAnchor ?? null); // insert before main anchor
 
-    let oldNodes: (ChildNode | undefined)[] = [];
     const handler = getSuspenseHandler();
 
     const run = () => {
-      const disposer = effect(() => {
-        let newNodes: (ChildNode | undefined)[] = [];
+      let oldNodes: (ChildNode | undefined)[] = [];
+      let newNodes: (ChildNode | undefined)[] = [];
 
+      const disposer = effect(() => {
         try {
           newNodes = toArray(getNode(child)) as ChildNode[];
         } catch (error) {

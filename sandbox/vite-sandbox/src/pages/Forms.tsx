@@ -9,7 +9,9 @@ export const Forms = () => {
         <label class="break-all" for="name-input2">
           Hi {name.firstName}
         </label>
-        <input type="text" value={name.firstName} id="name-input2" />
+        <div>
+          <input type="text" value={name.firstName} id="name-input2" />
+        </div>
       </div>
       <div>
         <Counter />
@@ -57,14 +59,16 @@ function Input() {
       <label class="break-all" for="name-input">
         Name {name.firstName}
       </label>
-      <input
-        id="name-input"
-        type="text"
-        onInput={(event) => {
-          name.firstName = event.currentTarget.value;
-        }}
-        value={name.firstName}
-      />
+      <div>
+        <input
+          id="name-input"
+          type="text"
+          onInput={(event) => {
+            name.firstName = event.currentTarget.value;
+          }}
+          value={name.firstName}
+        />
+      </div>
     </div>
   );
 }

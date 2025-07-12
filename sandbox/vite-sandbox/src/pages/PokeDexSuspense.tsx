@@ -1,4 +1,4 @@
-import { effect, loop, resource, state, store, Suspense } from "@veltra/app";
+import { loop, resource, store, Suspense } from "@veltra/app";
 
 import { name } from "../globalState";
 import { sleep } from "../sleep";
@@ -52,12 +52,6 @@ export const PokeDexSuspense = () => {
   const showUrlOnClick = (url: string) => () => alert(url);
   const sortOnClick = (key: SortKey) => () => pokeDex.sort(key);
 
-  const ref = state<HTMLTableRowElement>();
-
-  effect(() => {
-    console.log(ref.value);
-  });
-
   return (
     <div>
       <div class="break-all">Hi {name.firstName}</div>
@@ -75,40 +69,23 @@ export const PokeDexSuspense = () => {
         </thead>
         <tbody>
           <Suspense
-            fallback={
-              <>
-                {loop(Array.from({ length: 20 }).map((_, i) => i + 1)).each((number) => (
-                  <tr>
-                    <td colSpan={3} class="h-[24px] text-center">
-                      {number === 10 && "loading..."}
-                    </td>
-                  </tr>
-                ))}
-              </>
-            }
+            fallback={loop(Array.from({ length: 20 }).map((_, i) => i + 1)).each((number) => (
+              <tr>
+                <td colSpan={3} class="h-[24px] text-center">
+                  {number === 10 && "loading..."}
+                </td>
+              </tr>
+            ))}
           >
-            {/* <>
-              {loop(pokeDexResource.data?.results).each(({ name, url }, index) => (
-                <tr ref={ref.value}>
-                  <td class="w-1/3 text-center">{index.value + 1}</td>
-                  <td class="w-1/3 text-center truncate">{name}</td>
-                  <td class="w-1/3 text-center truncate" onClick={showUrlOnClick(url)}>
-                    {url}
-                  </td>
-                </tr>
-              ))}
-            </> */}
-            <>
-              {pokeDexResource.data.results.map(({ name, url }, index) => (
-                <tr ref={ref.value}>
-                  <td class="w-1/3 text-center">{index + 1}</td>
-                  <td class="w-1/3 text-center truncate">{name}</td>
-                  <td class="w-1/3 text-center truncate" onClick={showUrlOnClick(url)}>
-                    {url}
-                  </td>
-                </tr>
-              ))}
-            </>
+            {loop(pokeDexResource.data?.results).each(({ name, url }, index) => (
+              <tr>
+                <td class="w-1/3 text-center">{index.value + 1}</td>
+                <td class="w-1/3 text-center truncate">{name}</td>
+                <td class="w-1/3 text-center truncate" onClick={showUrlOnClick(url)}>
+                  {url}
+                </td>
+              </tr>
+            ))}
           </Suspense>
         </tbody>
       </table>

@@ -1,4 +1,4 @@
-import { effect, loop, store } from "@veltra/app";
+import { loop, onMount, store } from "@veltra/app";
 
 import { name } from "../globalState";
 import { sleep } from "../sleep";
@@ -23,12 +23,13 @@ export const PokeDex = () => {
     prevLink: "" as PokeDexData["previous"],
     nextLink: "" as PokeDexData["next"],
     sortDirection: "asc" as SortDirection,
-    async fetchData(url: string | null) {
+
+    async fetchData(url: string | null, controller?: AbortController) {
       if (!url) return;
 
       this.isLoading = true;
 
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller?.signal });
       const json = (await response.json()) as PokeDexData;
 
       await sleep(500);
@@ -47,8 +48,14 @@ export const PokeDex = () => {
     },
   });
 
-  effect(async () => {
-    await pokeDex.fetchData("https://pokeapi.co/api/v2/pokemon/?offset=1100&limit=20");
+  onMount(async () => {
+    const controller = new AbortController();
+
+    await pokeDex.fetchData("https://pokeapi.co/api/v2/pokemon/?offset=1100&limit=20", controller);
+    return () => {
+      console.log("Cleaning up PokeDex component");
+      controller.abort();
+    };
   });
 
   return (

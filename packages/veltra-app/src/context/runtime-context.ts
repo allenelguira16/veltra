@@ -1,4 +1,4 @@
-import { DestroyFn, MountFn } from "~/life-cycle";
+import { DestroyFn, MountFn } from "~/lifecycle";
 import { EffectFn, State } from "~/reactivity";
 
 export interface RuntimeContext {

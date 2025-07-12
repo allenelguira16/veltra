@@ -5,22 +5,22 @@ declare function createContext<T>(): readonly [(props: {
     children: JSX.Element;
 }) => Node | (Node | undefined)[] | undefined, () => T];
 
-type DestroyFn = () => void;
+type DestroyFn = () => Promise<void> | void;
 /**
  * on destroy
  *
  * @param fn - The function to run on destroy.
  */
-declare function onDestroy(fn: () => void): void;
+declare function onDestroy(fn: () => Promise<void>): void;
 
-type MountFn = () => void | (() => void);
+type MountFn = () => Promise<void | DestroyFn> | (void | DestroyFn);
 /**
  * on mount
  *
  * @param fn - The function to run on mount.
  */
-declare function onMount(fn: () => () => void): void;
-declare function onMount(fn: () => void): void;
+declare function onMount(fn: () => Promise<DestroyFn> | DestroyFn): void;
+declare function onMount(fn: () => Promise<void> | void): void;
 
 type Computed<T> = {
     readonly value: T;
@@ -36,7 +36,7 @@ declare function computed<T>(getter: () => T): Computed<T>;
 /**
  * Create an effect with an attached render frame
  */
-declare function effect(fn: () => void): () => void;
+declare function effect(fn: (() => void | (() => void)) | (() => Promise<void | (() => void)>)): () => void;
 declare function stopEffect(): void;
 
 type ResourceReturn<T> = {

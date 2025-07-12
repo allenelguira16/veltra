@@ -1,4 +1,4 @@
-import { activeEffect, EffectFn } from "./effect";
+import { activeEffect, EffectFn, scheduleEffect } from "./effect";
 
 /**
  * WeakMap to track which targets/keys map to which effects
@@ -12,7 +12,7 @@ const targetToPropertyEffectsMap: WeakMap<object, Map<PropertyKey, Set<EffectFn>
  * @param key - The property key.
  */
 export function track(target: object, key: PropertyKey) {
-  if (!activeEffect) return; // No effect is currently running
+  if (!activeEffect) return;
 
   let propertyEffectsMap = targetToPropertyEffectsMap.get(target);
   if (!propertyEffectsMap) {
@@ -50,9 +50,7 @@ export function trigger(target: object, key: PropertyKey) {
   const effects = propertyEffectsMap.get(key);
   if (!effects) return;
 
-  // Clone the effects set to avoid infinite loops if the effect triggers itself
-  const effectsToRun = new Set(effects);
-  for (const effect of effectsToRun) {
-    effect();
+  for (const effect of effects) {
+    scheduleEffect(effect);
   }
 }

@@ -16,9 +16,17 @@ export function setComponentCleanup(node: Node, cleanups: (() => void)[]) {
  * @param node - The node.
  */
 export function runComponentCleanup(node: Node) {
-  const cleanups = cleanupMap.get(node) || [];
-  for (const cleanup of cleanups) {
-    cleanup();
+  // Cleanup for the current node
+  const cleanups = cleanupMap.get(node);
+  if (cleanups) {
+    for (const cleanup of cleanups) {
+      cleanup();
+    }
     cleanupMap.delete(node);
+  }
+
+  // Recursively clean child nodes
+  for (const child of node.childNodes) {
+    runComponentCleanup(child);
   }
 }

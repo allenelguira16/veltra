@@ -11,6 +11,7 @@ export function onNodeReattached(callback: () => void, targetNode: Node) {
       // Check for added nodes
       for (const node of mutation.addedNodes) {
         if (node === targetNode) {
+          observer.disconnect();
           callback();
           break;
         }
@@ -25,8 +26,23 @@ export function onNodeReattached(callback: () => void, targetNode: Node) {
 
     observer.observe(targetNode.parentNode, { childList: true, subtree: true });
   });
+}
 
-  return () => {
-    observer.disconnect();
-  };
+/**
+ * observe a node and call a callback when it is removed
+ *
+ * @param callback - The callback to call when the node is removed.
+ * @param targetNode - The node to observe.
+ */
+export function onNodeRemove(callback: () => void, targetNode: Node) {
+  const observer = new MutationObserver(() => {
+    if (!targetNode.isConnected) {
+      observer.disconnect();
+      callback();
+    }
+  });
+
+  queueMicrotask(() => {
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
 }

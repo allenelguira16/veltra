@@ -1,13 +1,15 @@
 import { createContext, store } from "@veltra/app";
 
-export function Contextual() {
+export function Contexts() {
   return (
     <>
       <Form>
         <Input />
       </Form>
       <Form>
-        <Input />
+        <Wrapper>
+          <Input />
+        </Wrapper>
       </Form>
     </>
   );
@@ -19,6 +21,10 @@ function Form({ children }: { children: () => JSX.Element }) {
   const state = store<{ name: string }>({ name: "" });
 
   return <FormProvider value={state}>{children()}</FormProvider>;
+}
+
+function Wrapper({ children }: { children: () => JSX.Element }) {
+  return <div>{children}</div>;
 }
 
 function Input() {
