@@ -1,0 +1,2 @@
+"use strict";var n=require("./chunks/h-Bk5UZl24.js"),a=require("./chunks/h-BuEEFqWK.js");exports.isStreaming=!1;let i;function s(e){return exports.isStreaming=!0,new ReadableStream({start(r){const t=a.r(e,{});r.enqueue(new TextEncoder().encode(t)),r.close(),exports.isStreaming=!1}})}function o(e){return e()}exports.h=n.h,exports.renderToStream=s,exports.renderToString=o,exports.resolveStream=i;
+//# sourceMappingURL=server.js.map
