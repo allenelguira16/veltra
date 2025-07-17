@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "vynn/jsx-runtime": ["./src/jsx-runtime.ts"],
+      "~/*": ["./src/*"]
+    },
+    "composite": true,
+    "jsx": "preserve",
+    "jsxImportSource": "src",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}
