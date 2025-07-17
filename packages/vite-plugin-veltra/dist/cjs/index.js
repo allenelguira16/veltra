@@ -1,0 +1,2 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0});var a=require("@babel/core"),s=require("@babel/preset-typescript"),n=require("@babel/preset-veltra");const c=()=>({name:"vite-plugin-veltra",enforce:"pre",async transform(t,r){if(/\.(tsx?|jsx?)$/.test(r)){const e=await a.transformAsync(t,{filename:r,sourceMaps:!0,presets:[n,s]});if(e?.code)return{code:e.code,map:e.map}}}});exports.default=c;
+//# sourceMappingURL=index.js.map

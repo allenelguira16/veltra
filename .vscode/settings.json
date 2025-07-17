@@ -1,0 +1,16 @@
+{
+  "files.associations": {
+    "*.css": "tailwindcss",
+    ".env.*": "properties"
+  },
+  // "typescript.tsdk": ".yarn/sdks/typescript/lib",
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "cSpell.words": ["daisyui", "effectify", "jsxs", "onwarn", "pokedex", "shiki", "Veltra"],
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "eslint.nodePath": ".yarn/sdks",
+  "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs"
+}
