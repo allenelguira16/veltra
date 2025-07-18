@@ -10,9 +10,16 @@ export const wrapJsxChildrenPlugin = declare((api) => {
       JSXElement(path) {
         const processedChildren: t.Expression[] = [];
 
-        path.node.children.forEach((child) => {
-          if (t.isJSXText(child) && child.value.trim() !== "") {
-            processedChildren.push(t.stringLiteral(child.value));
+        path.node.children.forEach((child, i, items) => {
+          if (t.isJSXText(child)) {
+            let value = child.value;
+
+            if (!value.includes("\n") || value.trim() !== "") {
+              if (i === 0) value = value.trimStart();
+              if (i === items.length - 1) value = value.trimEnd();
+
+              processedChildren.push(t.stringLiteral(value));
+            }
           } else if (t.isJSXElement(child) || t.isJSXFragment(child)) {
             processedChildren.push(child);
           } else if (
@@ -31,7 +38,6 @@ export const wrapJsxChildrenPlugin = declare((api) => {
             : t.arrayExpression(processedChildren);
 
         const arrowFn = t.arrowFunctionExpression([], body);
-
         path.node.children = [t.jsxExpressionContainer(arrowFn)];
       },
 

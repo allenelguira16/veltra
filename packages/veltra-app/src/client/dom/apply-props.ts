@@ -9,14 +9,14 @@ import { addEventListener, removeEventListener } from "./event-registry";
  * @param element - The element to apply the properties to.
  * @param props - The properties to apply.
  */
-export function applyProps(element: HTMLElement, props: Record<string, any>) {
+export function applyProps(element: Element, props: Record<string, any>) {
   for (const key in props) {
     effect(() => {
       const raw = props[key];
       const value = typeof raw === "function" && key !== "ref" ? raw() : raw;
 
       // Event listeners
-      if (key.startsWith("on") && typeof value === "function") {
+      if (key.startsWith("on") && element instanceof HTMLElement) {
         const type = key.slice(2).toLowerCase();
         addEventListener(element, type, value);
         return () => removeEventListener(element, type);
@@ -55,7 +55,7 @@ export function applyProps(element: HTMLElement, props: Record<string, any>) {
       }
 
       // Style
-      if (key === "style") {
+      if (key === "style" && element instanceof HTMLElement) {
         applyStyle(element, value);
         return;
       }
@@ -84,29 +84,22 @@ export function applyProps(element: HTMLElement, props: Record<string, any>) {
  * @param element - The element to apply the style to.
  * @param style - The style to apply.
  */
-function applyStyle(element: HTMLElement, style: Record<string, any>) {
+function applyStyle(element: HTMLElement, style: Partial<CSSStyleDeclaration>) {
   if (!(element instanceof HTMLElement)) return;
 
-  for (const [key, value] of Object.entries(style)) {
-    const cssKey = key as keyof CSSStyleDeclaration;
-    if (cssKey === "length" || cssKey === "parentRule") continue;
+  for (const key in style) {
+    if (!Object.hasOwn(style, key)) continue;
 
-    const isNumber = typeof value === "number";
-    const needsUnit = isNumber && !isUnitLessCSSProperty(key);
-    const finalValue = needsUnit ? `${value}px` : String(value);
+    const value = style[key];
+    if (value == null) continue;
 
-    element.style.setProperty(String(cssKey), finalValue);
+    if (key === "length" || key === "parentRule") continue;
+
+    const isNumeric = typeof value === "number";
+    const needsUnit = isNumeric && !UNIT_LESS_PROPS.has(key);
+    element.style.setProperty(
+      key,
+      isNumeric ? (needsUnit ? `${value}px` : `${value}`) : String(value),
+    );
   }
-}
-
-/**
- * check if a property is a unit less CSS property
- *
- * @param prop - The property to check.
- * @returns True if the property is a unit less CSS property.
- */
-function isUnitLessCSSProperty(prop: string): boolean {
-  const unitLessProps = new Set(UNIT_LESS_PROPS);
-
-  return unitLessProps.has(prop);
 }

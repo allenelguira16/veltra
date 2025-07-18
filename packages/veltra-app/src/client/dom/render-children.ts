@@ -17,11 +17,11 @@ export function renderChildren(parentNode: Node, rawChildren: JSX.Element[], bas
     oldNodes: [],
   };
 
-  const anchor = createTargetNode("renderChildren");
   const children = toArray(rawChildren instanceof Function ? rawChildren() : rawChildren);
 
   for (let i = 0; i < children.length; i++) {
     const child = children[i];
+    const anchor = createTargetNode("renderChildren");
     parentNode.insertBefore(anchor, baseAnchor ?? null);
 
     const handler = getSuspenseHandler();

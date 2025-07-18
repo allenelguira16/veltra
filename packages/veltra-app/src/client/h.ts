@@ -1,4 +1,3 @@
-import { MATH_ML_TAGS, SVG_TAGS } from "~/const";
 import { Fragment } from "~/jsx-runtime";
 
 import { applyProps, renderChildren } from "./dom";
@@ -46,9 +45,5 @@ export function h(
 const xmlnsStack: (string | undefined)[] = [];
 
 function createElement(tag: string, namespace?: string) {
-  if ((SVG_TAGS.has(tag) || MATH_ML_TAGS.has(tag)) && namespace) {
-    return document.createElementNS(namespace, tag) as HTMLElement;
-  }
-
-  return document.createElement(tag);
+  return namespace ? document.createElementNS(namespace, tag) : document.createElement(tag);
 }

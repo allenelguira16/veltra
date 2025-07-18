@@ -32,8 +32,8 @@ export default function babelPresetVeltra(api: ConfigAPI): TransformOptions {
     plugins: [
       logJsxPlugin,
       loopAutoWrapPlugin,
-      wrapJsxAttributesPlugin,
       wrapJsxChildrenPlugin,
+      wrapJsxAttributesPlugin,
       wrapJsxReturnExpressionPlugin,
     ],
   };

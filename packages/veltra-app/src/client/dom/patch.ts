@@ -22,7 +22,6 @@ export function patch(
 
     // Add new node
     if (isNil(oldNode) && !isNil(newNode)) {
-      console.log();
       parentNode.insertBefore(newNode, insertBeforeNode ?? null);
       runLifecycle(newNode);
       oldNodes[i] = newNode;

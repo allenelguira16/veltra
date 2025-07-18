@@ -53,11 +53,11 @@ export function Counter() {
   );
 }
 
-function Input() {
+export function Input() {
   return (
     <div>
       <label class="break-all" for="name-input">
-        Name {name.firstName}
+        Name {name.firstName} <span>Hi</span>
       </label>
       <div>
         <input

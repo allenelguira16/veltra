@@ -1,4 +1,4 @@
-export const UNIT_LESS_PROPS = [
+export const UNIT_LESS_PROPS = new Set([
   "animationIterationCount",
   "borderImageOutset",
   "borderImageSlice",
@@ -33,4 +33,4 @@ export const UNIT_LESS_PROPS = [
   "strokeMiterlimit",
   "strokeOpacity",
   "strokeWidth",
-];
+]);
