@@ -55,7 +55,7 @@ export function applyProps(element: Element, props: Record<string, any>) {
       }
 
       // Style
-      if (key === "style" && element instanceof HTMLElement) {
+      if (key === "style" && typeof value === "object" && element instanceof HTMLElement) {
         applyStyle(element, value);
         return;
       }
@@ -97,9 +97,7 @@ function applyStyle(element: HTMLElement, style: Partial<CSSStyleDeclaration>) {
 
     const isNumeric = typeof value === "number";
     const needsUnit = isNumeric && !UNIT_LESS_PROPS.has(key);
-    element.style.setProperty(
-      key,
-      isNumeric ? (needsUnit ? `${value}px` : `${value}`) : String(value),
-    );
+
+    element.style[key] = isNumeric ? (needsUnit ? `${value}px` : `${value}`) : String(value);
   }
 }
