@@ -44,7 +44,6 @@ export const Home = () => {
           <CodeBlock
             lang="tsx"
             code={`
-              // main.ts
               import { createApp } from "@veltra/app";
 
               function App() {

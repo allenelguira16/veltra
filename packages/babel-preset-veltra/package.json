@@ -22,6 +22,8 @@
     "@babel/core": "^7.27.4",
     "@babel/generator": "^7.27.5",
     "@babel/helper-plugin-utils": "^7.27.1",
+    "@babel/plugin-transform-react-jsx": "^7.27.1",
+    "@babel/plugin-transform-react-jsx-development": "^7.27.1",
     "@babel/preset-react": "^7.27.1",
     "@babel/template": "^7.27.2",
     "@babel/traverse": "^7.27.4",
@@ -44,6 +46,7 @@
     "rollup-plugin-delete": "^3.0.1",
     "rollup-plugin-dts": "^6.2.1",
     "rollup-plugin-esbuild": "^6.2.1",
+    "rollup-plugin-filesize": "^10.0.0",
     "ts-morph": "^26.0.0",
     "typescript": "^5.8.3"
   }

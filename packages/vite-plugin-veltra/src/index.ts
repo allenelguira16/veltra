@@ -14,8 +14,8 @@ export default function vitePlugin(): Plugin {
   return {
     name: "vite-plugin-veltra",
     enforce: "pre",
-    transform: (code, filename) => {
-      if (/\.(tsx?|jsx?)$/.test(filename)) {
+    transform(code, filename) {
+      if (/\.(t|j)sx?$/.test(filename)) {
         const result = transform(code, {
           filename,
           sourceMaps: true,

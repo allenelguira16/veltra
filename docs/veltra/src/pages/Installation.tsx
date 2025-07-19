@@ -39,9 +39,7 @@ export const Installation = () => {
         <h2>Installing @veltra/app</h2>
         <CodeBlock
           lang="bash"
-          code={`
-            yarn add "@veltra/app@git+https://github.com/allenelguira16/veltra.git#workspace=@veltra/app"
-          `}
+          code={`yarn add "@veltra/app@git+https://github.com/allenelguira16/veltra.git#workspace=@veltra/app"`}
         />
         <p>tsconfig.json (important)</p>
         <p>
@@ -55,7 +53,7 @@ export const Installation = () => {
             {
               "compilerOptions": {
                 // add the following...
-                "jsx": "react-jsx",
+                "jsx": "preserve",
                 "jsxImportSource": "@veltra/app"
               }
             }
@@ -66,19 +64,17 @@ export const Installation = () => {
         <h2>Installing vite plugin</h2>
         <CodeBlock
           lang="json5"
-          code={`
-            yarn add "vite-plugin-veltra@git+https://github.com/allenelguira16/veltra.git#workspace=vite-plugin-veltra"
-          `}
+          code={`yarn add "vite-plugin-veltra@git+https://github.com/allenelguira16/veltra.git#workspace=vite-plugin-veltra"`}
         />
         <p>And in your vite config add it to the plugin</p>
         <CodeBlock
           lang="tsx"
           code={`
             import { defineConfig } from "vite";
-            import veltraPlugin from "vite-plugin-veltra";
+            import veltra from "vite-plugin-veltra";
 
             export default defineConfig({
-              plugins: [veltraPlugin()],
+              plugins: [veltra()],
             });
           `}
         />

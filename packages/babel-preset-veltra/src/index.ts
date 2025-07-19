@@ -1,6 +1,6 @@
 import { ConfigAPI, TransformOptions } from "@babel/core";
 // @ts-expect-error - babel-preset-react is not typed
-import babelReactPlugin from "@babel/preset-react";
+import jsxTransformPlugin from "@babel/plugin-transform-react-jsx";
 
 import {
   logJsxPlugin,
@@ -20,16 +20,14 @@ export default function babelPresetVeltra(api: ConfigAPI): TransformOptions {
   api.assertVersion(7);
 
   return {
-    presets: [
+    plugins: [
       [
-        babelReactPlugin,
+        jsxTransformPlugin,
         {
           runtime: "automatic",
           importSource: "@veltra/app",
         },
       ],
-    ],
-    plugins: [
       logJsxPlugin,
       loopAutoWrapPlugin,
       wrapJsxChildrenPlugin,

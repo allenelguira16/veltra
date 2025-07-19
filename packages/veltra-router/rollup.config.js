@@ -4,6 +4,7 @@ import { defineConfig } from "rollup";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
 import esbuild from "rollup-plugin-esbuild";
+import filesize from "rollup-plugin-filesize";
 import tsConfigPaths from "rollup-plugin-tsconfig-paths";
 
 const { default: pkg } = await import("./package.json", {
@@ -41,6 +42,7 @@ export default defineConfig([
         sourcemap: true,
         entryFileNames: "cjs/[name].js",
         chunkFileNames: "cjs/chunks/[name]-[hash].js",
+        inlineDynamicImports: true,
       },
     ],
     plugins: [
@@ -55,6 +57,10 @@ export default defineConfig([
       esbuild({
         tsconfig: "tsconfig.json",
         minify: !IS_DEV,
+      }),
+      filesize({
+        showGzippedSize: true,
+        showBrotliSize: true,
       }),
     ],
   },

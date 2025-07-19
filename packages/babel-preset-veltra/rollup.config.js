@@ -5,6 +5,7 @@ import { defineConfig } from "rollup";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
 import esbuild from "rollup-plugin-esbuild";
+import filesize from "rollup-plugin-filesize";
 
 const { default: pkg } = await import("./package.json", {
   with: { type: "json" },
@@ -47,6 +48,10 @@ export default defineConfig([
       esbuild({
         tsconfig: "./tsconfig.json",
         minify: !IS_DEV,
+      }),
+      filesize({
+        showGzippedSize: true,
+        showBrotliSize: true,
       }),
     ],
   },
