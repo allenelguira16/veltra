@@ -1,5 +1,5 @@
 import { transform } from "@babel/core";
-// @ts-expect-error - babel-preset-typescript is not typed
+// @ts-expect-error - not typed
 import babelPluginTS from "@babel/preset-typescript";
 import type { Plugin } from "vite";
 

@@ -1,5 +1,5 @@
-import { J as JSX } from './fragment-BbyLuDT8.js';
-export { F as Fragment } from './fragment-BbyLuDT8.js';
+import { J as JSX } from './fragment-CX6EvM6I.js';
+export { F as Fragment } from './fragment-CX6EvM6I.js';
 
 declare function lazy<M extends Record<string, any>, K extends keyof M = "default">(loader: () => Promise<M>, namedExport?: K): () => JSX.Element;
 

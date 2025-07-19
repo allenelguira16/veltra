@@ -6584,7 +6584,6 @@ __metadata:
   dependencies:
     "@babel/core": "npm:^7.27.4"
     "@babel/preset-typescript": "npm:^7.27.1"
-    "@babel/preset-veltra": "workspace:^"
     "@rollup/plugin-commonjs": "npm:^28.0.3"
     "@rollup/plugin-json": "npm:^6.1.0"
     "@rollup/plugin-node-resolve": "npm:^16.0.1"

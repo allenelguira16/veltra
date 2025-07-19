@@ -1,4 +1,4 @@
-import * as _veltra_app from '@veltra/app';
+import { JSX } from '@veltra/app';
 
 type Route = {
     path: string;
@@ -34,13 +34,13 @@ declare const params: Record<string, string>;
  */
 declare function Router({ routes }: {
     routes: Route[];
-}): () => _veltra_app.JSX.Element;
+}): () => JSX.Element;
 declare function Link({ children, href, activeClass, class: className, }: {
     children: () => JSX.Element;
     href: string;
     activeClass?: string;
     class?: string;
-}): _veltra_app.JSX.Element;
+}): JSX.Element;
 
 export { Link, Router, isActiveRoute, location, navigate, params };
 export type { Location, Route };
