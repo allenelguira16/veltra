@@ -16,15 +16,17 @@ const input = {
 
 const IS_DEV = process.env.NODE_ENV === "development";
 
+const external = [
+  "@veltra/app",
+  "@veltra/app/jsx-runtime",
+  ...Object.keys(pkg.dependencies ?? {}),
+  ...Object.keys(pkg.peerDependencies ?? {}),
+];
+
 export default defineConfig([
   {
     input,
-    external: [
-      "@veltra/app",
-      "@veltra/app/jsx-runtime",
-      ...Object.keys(pkg.dependencies ?? {}),
-      ...Object.keys(pkg.peerDependencies ?? {}),
-    ],
+    external,
     output: [
       {
         dir: "dist",
@@ -42,7 +44,7 @@ export default defineConfig([
       },
     ],
     plugins: [
-      del({ targets: "dist/*", runOnce: IS_DEV, verbose: true }),
+      del({ targets: "dist/*", runOnce: IS_DEV }),
       tsConfigPaths(),
       resolve(),
       babel({
@@ -58,11 +60,7 @@ export default defineConfig([
   },
   {
     input,
-    external: [
-      "@veltra/app",
-      ...Object.keys(pkg.dependencies ?? {}),
-      ...Object.keys(pkg.peerDependencies ?? {}),
-    ],
+    external,
     output: {
       dir: "dist/types",
       format: "es",

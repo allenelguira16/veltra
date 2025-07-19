@@ -1,4 +1,5 @@
 import { effect } from "~/reactivity";
+import { JSX } from "~/types";
 
 import { renderChildren } from "./dom";
 import { mountComponent } from "./mount-component";

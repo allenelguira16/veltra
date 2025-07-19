@@ -1,3 +1,4 @@
+import { JSX } from "~/types";
 import { resolveChildren } from "~/util";
 
 const contextStack: any[] = [];

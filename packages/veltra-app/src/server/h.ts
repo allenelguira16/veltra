@@ -1,3 +1,5 @@
+import { JSX } from "~/types";
+
 import { applyProps } from "./apply-props";
 import { renderChildren } from "./render-children";
 

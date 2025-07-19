@@ -1,3 +1,4 @@
+import { JSX } from "~/types";
 /**
  * Create a fragment
  *

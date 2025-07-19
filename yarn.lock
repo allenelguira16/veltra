@@ -1847,6 +1847,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@veltra/app@workspace:packages/veltra-app"
   dependencies:
+    "@babel/core": "npm:^7.27.4"
     "@babel/preset-typescript": "npm:^7.27.1"
     "@rollup/plugin-node-resolve": "npm:^16.0.1"
     "@types/rollup-plugin-delete": "npm:^1.0.0"
@@ -1867,7 +1868,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@veltra/router@workspace:packages/veltra-router"
   dependencies:
+    "@babel/core": "npm:^7.27.4"
     "@babel/preset-typescript": "npm:^7.27.1"
+    "@babel/preset-veltra": "workspace:^"
     "@rollup/plugin-babel": "npm:^6.0.4"
     "@rollup/plugin-node-resolve": "npm:^16.0.1"
     "@types/rollup-plugin-delete": "npm:^1.0.0"
@@ -1879,8 +1882,6 @@ __metadata:
     rollup-plugin-dts: "npm:^6.2.1"
     rollup-plugin-esbuild: "npm:^6.2.1"
     rollup-plugin-tsconfig-paths: "npm:^1.5.2"
-    rollup-plugin-typescript2: "npm:^0.36.0"
-    tslib: "npm:^2.8.1"
     typescript: "npm:^5.8.3"
   peerDependencies:
     "@veltra/app": ^0.0.0

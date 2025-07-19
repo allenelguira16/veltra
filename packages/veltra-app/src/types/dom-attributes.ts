@@ -1,4 +1,5 @@
 import { AriaAttributes, CoreAttributes, EventAttributes } from "./common-attribute";
+import { JSX } from "./jsx";
 
 export type HTMLAttributes<T extends Element = Element> = CoreAttributes &
   EventAttributes<T> &

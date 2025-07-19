@@ -1,3 +1,5 @@
+import { JSX } from "~/types";
+
 import { getNode } from "../client/get-node";
 import { memo } from "./memo";
 

@@ -5,6 +5,6 @@ import { Plugin } from 'vite';
  *
  * @returns The vite plugin.
  */
-declare const vitePlugin: () => Plugin;
+declare function vitePlugin(): Plugin;
 
 export { vitePlugin as default };

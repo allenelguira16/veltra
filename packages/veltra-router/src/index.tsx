@@ -1,4 +1,4 @@
-import { effect, state, store } from "@veltra/app";
+import { effect, JSX, state, store } from "@veltra/app";
 
 export type Route = {
   path: string;

@@ -12,10 +12,15 @@ const { default: pkg } = await import("./package.json", {
 
 const IS_DEV = process.env.NODE_ENV === "development";
 
+const external = [
+  ...Object.keys(pkg.dependencies ?? {}),
+  ...Object.keys(pkg.devDependencies ?? {}),
+];
+
 export default defineConfig([
   {
     input: "src/index.ts",
-    external: Object.keys(pkg.dependencies),
+    external,
     output: [
       {
         dir: "dist",
@@ -35,7 +40,7 @@ export default defineConfig([
       },
     ],
     plugins: [
-      del({ targets: "dist/*", verbose: true }),
+      del({ targets: "dist/*", runOnce: IS_DEV }),
       json(),
       resolve(),
       commonjs(),
@@ -47,7 +52,7 @@ export default defineConfig([
   },
   {
     input: "src/index.ts",
-    external: Object.keys(pkg.dependencies),
+    external,
     output: {
       dir: "dist/types",
       format: "es",

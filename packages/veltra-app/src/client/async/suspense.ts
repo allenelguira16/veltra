@@ -1,4 +1,5 @@
 import { onMount } from "~/lifecycle";
+import { JSX } from "~/types";
 import { createTargetNode, memo, toArray } from "~/util";
 
 import { renderChildren } from "../dom";

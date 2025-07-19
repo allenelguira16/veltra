@@ -1,4 +1,5 @@
 import { effect } from "~/reactivity";
+import { JSX } from "~/types";
 import { createTargetNode, toArray } from "~/util";
 
 import { getSuspenseHandler } from "../async";

@@ -5,6 +5,7 @@ import {
   setRuntimeContext,
 } from "~/context";
 import { getCurrentOwner, untrack } from "~/reactivity";
+import { JSX } from "~/types";
 import { createTargetNode, toArray } from "~/util";
 
 import { Suspense } from "../async";

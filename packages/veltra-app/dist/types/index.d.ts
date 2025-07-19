@@ -1,4 +1,5 @@
-export { F as Fragment } from './fragment-DHIT8DJc.js';
+import { J as JSX } from './fragment-BbyLuDT8.js';
+export { F as Fragment } from './fragment-BbyLuDT8.js';
 
 declare function lazy<M extends Record<string, any>, K extends keyof M = "default">(loader: () => Promise<M>, namedExport?: K): () => JSX.Element;
 
@@ -146,5 +147,5 @@ declare function memo<T>(fn: (...args: any[]) => T): (...args: any[]) => T;
  */
 declare function unwrap<T>(value: any): Partial<T>;
 
-export { Suspense, computed, createApp, createContext, effect, hydrateApp, lazy, logJsx, loop, memo, onDestroy, onMount, resolveChildren, resource, state, stopEffect, store, untrack, unwrap };
+export { JSX, Suspense, computed, createApp, createContext, effect, hydrateApp, lazy, logJsx, loop, memo, onDestroy, onMount, resolveChildren, resource, state, stopEffect, store, untrack, unwrap };
 export type { Computed, DestroyFn, MountFn, State };

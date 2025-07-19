@@ -1,4 +1,5 @@
 import { Fragment } from "~/jsx-runtime";
+import { JSX } from "~/types";
 
 import { applyProps, renderChildren } from "./dom";
 import { mountComponent } from "./mount-component";

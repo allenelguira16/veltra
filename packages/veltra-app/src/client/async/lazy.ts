@@ -1,4 +1,5 @@
 import { jsx } from "~/jsx-runtime";
+import { JSX } from "~/types";
 
 export function lazy<M extends Record<string, any>, K extends keyof M = "default">(
   loader: () => Promise<M>,

@@ -1,3 +1,5 @@
+import * as _veltra_app from '@veltra/app';
+
 type Route = {
     path: string;
     component?: (props: {
@@ -32,13 +34,13 @@ declare const params: Record<string, string>;
  */
 declare function Router({ routes }: {
     routes: Route[];
-}): () => JSX.Element;
+}): () => _veltra_app.JSX.Element;
 declare function Link({ children, href, activeClass, class: className, }: {
     children: () => JSX.Element;
     href: string;
     activeClass?: string;
     class?: string;
-}): JSX.Element;
+}): _veltra_app.JSX.Element;
 
 export { Link, Router, isActiveRoute, location, navigate, params };
 export type { Location, Route };

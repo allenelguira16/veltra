@@ -23,11 +23,14 @@
     },
     "./package.json": "./package.json"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@babel/core": "^7.27.4",
     "@babel/preset-typescript": "^7.27.1",
+    "@babel/preset-veltra": "workspace:^",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@types/rollup-plugin-delete": "^1.0.0",
+    "@veltra/app": "workspace:^",
     "esbuild": "^0.25.5",
     "rimraf": "^6.0.1",
     "rollup": "^4.41.1",
@@ -35,12 +38,7 @@
     "rollup-plugin-dts": "^6.2.1",
     "rollup-plugin-esbuild": "^6.2.1",
     "rollup-plugin-tsconfig-paths": "^1.5.2",
-    "rollup-plugin-typescript2": "^0.36.0",
-    "tslib": "^2.8.1",
     "typescript": "^5.8.3"
-  },
-  "devDependencies": {
-    "@veltra/app": "workspace:^"
   },
   "peerDependencies": {
     "@veltra/app": "^0.0.0"

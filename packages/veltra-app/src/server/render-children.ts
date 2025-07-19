@@ -1,3 +1,4 @@
+import { JSX } from "~/types";
 import { isNil, toArray } from "~/util";
 
 /**

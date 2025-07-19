@@ -1,22 +1,23 @@
-import { transformAsync } from "@babel/core";
+import { transform } from "@babel/core";
 // @ts-expect-error - babel-preset-typescript is not typed
 import babelPluginTS from "@babel/preset-typescript";
-import babelPluginVeltra from "@babel/preset-veltra";
 import type { Plugin } from "vite";
+
+import babelPluginVeltra from "../../babel-preset-veltra/src/index";
 
 /**
  * vite plugin for veltra
  *
  * @returns The vite plugin.
  */
-const vitePlugin = (): Plugin => {
+export default function vitePlugin(): Plugin {
   return {
     name: "vite-plugin-veltra",
     enforce: "pre",
-    async transform(code, id) {
-      if (/\.(tsx?|jsx?)$/.test(id)) {
-        const result = await transformAsync(code, {
-          filename: id,
+    transform: (code, filename) => {
+      if (/\.(tsx?|jsx?)$/.test(filename)) {
+        const result = transform(code, {
+          filename,
           sourceMaps: true,
           presets: [babelPluginVeltra, babelPluginTS],
         });
@@ -30,6 +31,4 @@ const vitePlugin = (): Plugin => {
       }
     },
   };
-};
-
-export default vitePlugin;
+}

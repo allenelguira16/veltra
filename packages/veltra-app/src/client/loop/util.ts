@@ -1,5 +1,6 @@
 import { runComponentCleanup } from "~/lifecycle";
 import { State, state, untrack } from "~/reactivity";
+import { JSX } from "~/types";
 import { toArray } from "~/util";
 
 import { Entry } from "./loop";

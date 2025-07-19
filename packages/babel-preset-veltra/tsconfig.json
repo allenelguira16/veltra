@@ -1,33 +1,8 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    /* Output */
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "dist/types",
-
-    /* Module resolution */
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "lib": ["ESNext", "DOM"],
     "baseUrl": ".",
-    "esModuleInterop": true,
-    "importHelpers": true,
-    "allowImportingTsExtensions": true,
-    "composite": true,
-    "allowSyntheticDefaultImports": true,
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-
-    /* Optimization */
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "moduleDetection": "force"
+    "composite": true
   },
   "include": ["src"],
   "exclude": ["dist"]

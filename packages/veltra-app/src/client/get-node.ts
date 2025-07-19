@@ -1,4 +1,5 @@
-import { isNil } from "../util/is-node-nil";
+import { JSX } from "~/types";
+import { isNil } from "~/util";
 
 /**
  * get the node for a JSX element

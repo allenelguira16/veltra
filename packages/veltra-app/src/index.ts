@@ -11,4 +11,5 @@ export {
   store,
   untrack,
 } from "./reactivity";
+export { type JSX } from "./types";
 export { logJsx, memo, resolveChildren, unwrap } from "./util";

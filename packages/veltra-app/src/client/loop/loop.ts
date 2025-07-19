@@ -1,6 +1,7 @@
 import { jsx } from "~/jsx-runtime";
 import { onDestroy, onMount } from "~/lifecycle";
 import { effect, State } from "~/reactivity";
+import { JSX } from "~/types";
 import { createTargetNode } from "~/util";
 
 import { getSuspenseHandler } from "../async";
