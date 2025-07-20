@@ -1,6 +1,6 @@
 import { CodeBlock } from "src/components/CodeBlock";
 
-export const Introduction = () => {
+export const IntroductionPage = () => {
   return (
     <div>
       <h1>Introduction</h1>
@@ -33,7 +33,7 @@ export const Introduction = () => {
         </ul>
 
         <h2 class="mt-6">How it feels</h2>
-        <p>Here’s a basic counter example:</p>
+        <p>Here's a basic counter example:</p>
 
         <CodeBlock
           lang="tsx"

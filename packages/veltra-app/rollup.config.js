@@ -1,3 +1,4 @@
+import babel from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import { defineConfig } from "rollup";
 import del from "rollup-plugin-delete";
@@ -46,15 +47,21 @@ export default defineConfig([
       del({ targets: "dist/*", runOnce: IS_DEV }),
       tsConfigPaths(),
       resolve(),
+      babel({
+        babelHelpers: "bundled",
+        presets: ["@babel/preset-typescript", "@babel/preset-veltra"],
+        extensions: [".ts", ".tsx", ".js", ".jsx"],
+      }),
       esbuild({
         tsconfig: "tsconfig.json",
         minify: !IS_DEV,
       }),
-      filesize({
-        showGzippedSize: true,
-        showBrotliSize: true,
-      }),
-    ],
+      !IS_DEV &&
+        filesize({
+          showGzippedSize: true,
+          showBrotliSize: true,
+        }),
+    ].filter(Boolean),
   },
   {
     input,

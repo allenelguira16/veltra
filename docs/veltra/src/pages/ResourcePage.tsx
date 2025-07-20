@@ -1,6 +1,6 @@
 import { CodeBlock } from "src/components/CodeBlock";
 
-export const Resource = () => {
+export const ResourcePage = () => {
   return (
     <div>
       <h1>resource</h1>
@@ -16,22 +16,24 @@ export const Resource = () => {
         </p>
         <CodeBlock
           lang="tsx"
-          code={`import { createApp, resource } from "@veltra/app";
+          code={`
+            import { createApp, resource } from "@veltra/app";
 
-function App() {
-  const msg = resource(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return "hello world";
-  });
+            function App() {
+              const msg = resource(async () => {
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                return "hello world";
+              });
 
-  return (
-    <div>
-      <div>Msg: {msg.data}</div>
-    </div>
-  );
-}
+              return (
+                <div>
+                  <div>Msg: {msg.data}</div>
+                </div>
+              );
+            }
 
-createApp(App).mount("#app");`}
+            createApp(App).mount("#app");
+          `}
         />
 
         <h2 class="mt-6">Features</h2>
@@ -78,8 +80,10 @@ createApp(App).mount("#app");`}
         </p>
         <CodeBlock
           lang="tsx"
-          code={`const count = state(0);
-const doubled = resource(() => Promise.resolve(count.value * 2));`}
+          code={`
+            const count = state(0);
+            const doubled = resource(() => Promise.resolve(count.value * 2));
+          `}
         />
         <p>
           The fetcher will re-run whenever <code>count.value</code> changes due to dependency

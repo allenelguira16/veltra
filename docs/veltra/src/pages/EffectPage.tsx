@@ -1,6 +1,6 @@
 import { CodeBlock } from "src/components/CodeBlock";
 
-export const Effect = () => {
+export const EffectPage = () => {
   return (
     <div>
       <h1>effect</h1>
@@ -8,10 +8,10 @@ export const Effect = () => {
         <p>
           <code>effect</code> runs a function whenever any reactive value used inside it changes. It
           automatically tracks dependencies like <code>state</code>, <code>store</code>, or
-          <code>computed</code>—you don’t need to manually list them.
+          <code>computed</code>—you don't need to manually list them.
         </p>
         <p>
-          It’s great for performing side effects like logging, syncing, or triggering animations
+          It's great for performing side effects like logging, syncing, or triggering animations
           whenever reactive values update.
         </p>
         <CodeBlock

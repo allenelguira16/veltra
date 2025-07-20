@@ -1,6 +1,6 @@
 import { CodeBlock } from "src/components/CodeBlock";
 
-export const Memo = () => {
+export const MemoPage = () => {
   return (
     <div>
       <h1>memo</h1>
@@ -13,7 +13,7 @@ export const Memo = () => {
 
         <h2 class="mt-6">Usage</h2>
         <CodeBlock
-          lang="ts"
+          lang="tsx"
           code={`
             import { memo } from "@veltra/app";
 

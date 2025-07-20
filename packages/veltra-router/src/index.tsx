@@ -1,11 +1,10 @@
-import { effect, JSX, state, store } from "@veltra/app";
+import { JSX, store } from "@veltra/app";
 
 export type Route = {
   path: string;
-  component?: (props: { children: () => JSX.Element }) => JSX.Element;
+  component?: () => JSX.Element;
   children?: Route[];
-  guard?: () => boolean;
-  lazy?: () => Promise<{ default: (props: { children: () => JSX.Element }) => JSX.Element }>;
+  lazy?: () => Promise<JSX.Element>;
 };
 
 export type Location = {
@@ -22,11 +21,6 @@ window.addEventListener("popstate", () => {
   location.pathname = window.location.pathname;
 });
 
-/**
- * navigate to a path
- *
- * @param path - The path to navigate to.
- */
 export function navigate(path: string) {
   history.pushState(null, "", path);
   location.pathname = path;
@@ -96,60 +90,54 @@ function matchRoute(
 
 export const params = store<Record<string, string>>({});
 
-/**
- * create a router
- *
- * @param props - The properties of the router.
- * @returns The router.
- */
 export function Router({ routes }: { routes: Route[] }) {
-  const current = state<() => JSX.Element>(() => <></>);
-
-  effect(() => {
+  return () => {
     const matched = matchRoute(location.pathname, routes);
 
     if (matched) {
       const { chain, params: extractedParams } = matched;
-
-      // Clear and assign params
       for (const key in params) delete params[key];
       Object.assign(params, extractedParams);
 
-      const lastRoute = chain[chain.length - 1];
-      if (lastRoute.guard && !lastRoute.guard()) {
-        current.value = () => <div>Access Denied</div>;
-        return;
-      }
-
-      current.value = () => buildComponentTree(chain);
-    } else {
-      for (const key in params) delete params[key];
-      current.value = () => <></>;
+      return buildComponentTree(chain);
     }
-  });
 
-  return () => {
-    const Comp = current.value;
-    return <Comp />;
+    for (const key in params) delete params[key];
+    return <></>;
   };
 }
 
+const lazyCache = new WeakMap<() => Promise<JSX.Element>, JSX.Element>();
+
+let outletContent: JSX.Element = <></>;
+
+export function Outlet() {
+  return outletContent;
+}
+
 function buildComponentTree(chain: Route[]): JSX.Element {
-  let current: JSX.Element = <></>;
+  outletContent = <></>;
 
   for (let i = chain.length - 1; i >= 0; i--) {
     const route = chain[i];
 
     if (route.lazy) {
-      // Optional: support async lazy chain, currently we just fallback
-      current = <div>Loading...</div>;
+      const cached = lazyCache.get(route.lazy);
+      if (!cached) {
+        const promise = route.lazy().then((el) => {
+          lazyCache.set(route.lazy!, el);
+        });
+
+        throw promise;
+      }
+
+      outletContent = cached;
     } else if (route.component) {
-      const prev = current;
-      current = route.component({ children: () => prev });
+      outletContent = route.component();
     }
   }
 
-  return current;
+  return outletContent;
 }
 
 export function Link({

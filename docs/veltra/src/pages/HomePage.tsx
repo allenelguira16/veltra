@@ -3,7 +3,7 @@ import { Link } from "@veltra/router";
 import veltraLogo from "../assets/veltra.svg";
 import { CodeBlock } from "../components/CodeBlock";
 
-export const Home = () => {
+export const HomePage = () => {
   return (
     <div class="prose max-w-full min-h-screen flex items-center justify-center px-6 py-16">
       <div class="max-w-6xl w-full flex flex-col lg:flex-row items-start gap-12">

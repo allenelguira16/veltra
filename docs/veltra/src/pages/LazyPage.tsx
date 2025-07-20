@@ -1,6 +1,6 @@
 import { CodeBlock } from "src/components/CodeBlock";
 
-export const Lazy = () => {
+export const LazyPage = () => {
   return (
     <div>
       <h1>lazy</h1>
@@ -32,7 +32,7 @@ export const Lazy = () => {
 
         <h2 class="mt-6">Named export support</h2>
         <p>
-          You can optionally specify a named export as the second argument. If the export doesn’t
+          You can optionally specify a named export as the second argument. If the export doesn't
           exist, it throws an error.
         </p>
 
@@ -59,7 +59,7 @@ export const Lazy = () => {
           <li>
             If the module fails to load, an <code>Error</code> is thrown
           </li>
-          <li>If the export doesn’t exist, you get a custom error message</li>
+          <li>If the export doesn't exist, you get a custom error message</li>
         </ul>
 
         <CodeBlock

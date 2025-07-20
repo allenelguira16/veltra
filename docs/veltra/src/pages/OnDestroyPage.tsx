@@ -1,13 +1,13 @@
 import { CodeBlock } from "src/components/CodeBlock";
 
-export const OnDestroy = () => {
+export const OnDestroyPage = () => {
   return (
     <div>
       <h1>onDestroy</h1>
       <section>
         <p>
           <code>onDestroy()</code> lets you run cleanup logic right before the component is removed
-          from the DOM. It’s useful for:
+          from the DOM. It's useful for:
         </p>
         <ul>
           <li>Clearing timers or intervals</li>
@@ -16,7 +16,7 @@ export const OnDestroy = () => {
         </ul>
 
         <p class="mt-4">
-          If your teardown is directly related to logic inside <code>onMount()</code>, it’s often
+          If your teardown is directly related to logic inside <code>onMount()</code>, it's often
           better to return a cleanup function from <code>onMount()</code> instead. But
           <code>onDestroy()</code> gives you more flexibility when the setup isn't colocated.
         </p>

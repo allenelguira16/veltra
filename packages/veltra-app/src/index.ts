@@ -11,5 +11,5 @@ export {
   store,
   untrack,
 } from "./reactivity";
-export { type JSX } from "./types";
+export { type JSX, type PropsWithChildren, type PropsWithRef } from "./types";
 export { logJsx, memo, resolveChildren, unwrap } from "./util";

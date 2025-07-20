@@ -1,6 +1,6 @@
 import { CodeBlock } from "src/components/CodeBlock";
 
-export const OnMount = () => {
+export const OnMountPage = () => {
   return (
     <div>
       <h1>onMount</h1>

@@ -1,6 +1,6 @@
 import { CodeBlock } from "../components/CodeBlock";
 
-export const Computed = () => {
+export const ComputedPage = () => {
   return (
     <div>
       <h1>computed</h1>
@@ -11,7 +11,7 @@ export const Computed = () => {
           dependencies and updates only when those dependencies change.
         </p>
         <p>
-          It’s useful for calculating values that depend on other signals, without needing to
+          It's useful for calculating values that depend on other signals, without needing to
           manually re-calculate them yourself.
         </p>
         <p>
@@ -55,7 +55,7 @@ export const Computed = () => {
         <p>
           If you're using <code>store</code>, you can define reactive getters directly inside the
           object. These getters will automatically re-compute when their dependencies change, so you
-          don’t need to use <code>computed()</code>.
+          don't need to use <code>computed()</code>.
         </p>
         <CodeBlock
           lang="tsx"

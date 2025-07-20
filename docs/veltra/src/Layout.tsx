@@ -1,35 +1,8 @@
-// import { Link } from "@veltra/router";
-
-import { isActiveRoute, navigate } from "@veltra/router";
+import { Link, Outlet } from "@veltra/router";
 
 import veltraLogo from "./assets/veltra.svg";
 
-export const Link = ({
-  children,
-  href,
-  activeClass,
-  class: className,
-}: {
-  children: () => JSX.Element;
-  href: string;
-  activeClass?: string;
-  class?: string;
-}) => {
-  return (
-    <a
-      href={href}
-      class={(className + (isActiveRoute(href) ? ` ${activeClass}` : "")).trim()}
-      onClick={(e) => {
-        e.preventDefault();
-        navigate(href);
-      }}
-    >
-      {children()}
-    </a>
-  );
-};
-
-export const Layout = ({ children }: { children: () => JSX.Element }) => {
+export const Layout = () => {
   return (
     <div class="drawer max-w-screen-2xl mx-auto lg:drawer-open">
       <input id="home-drawer" type="checkbox" class="drawer-toggle" />
@@ -53,6 +26,11 @@ export const Layout = ({ children }: { children: () => JSX.Element }) => {
                   <li>
                     <Link href="/docs/installation" activeClass="menu-active">
                       Installation
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/docs/things-to-know" activeClass="menu-active">
+                      Things to know
                     </Link>
                   </li>
                 </ul>
@@ -167,7 +145,7 @@ export const Layout = ({ children }: { children: () => JSX.Element }) => {
             <span>Veltra</span>
           </Link>
         </div>
-        {children()}
+        <Outlet />
       </div>
     </div>
   );

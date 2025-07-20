@@ -1,6 +1,13 @@
 import { J as JSX } from './fragment-CX6EvM6I.js';
 export { F as Fragment } from './fragment-CX6EvM6I.js';
 
+type PropsWithChildren<T = unknown> = T & {
+    children: () => JSX.Element;
+};
+type PropsWithRef<T = unknown> = T & {
+    ref: (element: HTMLElement) => void;
+};
+
 declare function lazy<M extends Record<string, any>, K extends keyof M = "default">(loader: () => Promise<M>, namedExport?: K): () => JSX.Element;
 
 type ResourceReturn<T> = {
@@ -148,4 +155,4 @@ declare function memo<T>(fn: (...args: any[]) => T): (...args: any[]) => T;
 declare function unwrap<T>(value: any): Partial<T>;
 
 export { JSX, Suspense, computed, createApp, createContext, effect, hydrateApp, lazy, logJsx, loop, memo, onDestroy, onMount, resolveChildren, resource, state, stopEffect, store, untrack, unwrap };
-export type { Computed, DestroyFn, MountFn, State };
+export type { Computed, DestroyFn, MountFn, PropsWithChildren, PropsWithRef, State };

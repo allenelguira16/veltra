@@ -1,6 +1,6 @@
 import { effect } from "~/reactivity";
 import { JSX } from "~/types";
-import { createTargetNode, toArray } from "~/util";
+import { toArray } from "~/util";
 
 import { getSuspenseHandler } from "../async";
 import { getNode } from "../get-node";
@@ -19,21 +19,22 @@ export function renderChildren(parentNode: Node, rawChildren: JSX.Element[], bas
   };
 
   const children = toArray(rawChildren instanceof Function ? rawChildren() : rawChildren);
+  const oldNodes: (ChildNode | undefined)[][] = [];
+  const newNodes: (ChildNode | undefined)[][] = [];
 
   for (let i = 0; i < children.length; i++) {
     const child = children[i];
-    const anchor = createTargetNode("renderChildren");
-    parentNode.insertBefore(anchor, baseAnchor ?? null);
+    // const anchor = createTargetNode("renderChildren");
+    // parentNode.insertBefore(anchor, baseAnchor ?? null);
 
     const handler = getSuspenseHandler();
 
     const run = () => {
-      let oldNodes: (ChildNode | undefined)[] = [];
-      let newNodes: (ChildNode | undefined)[] = [];
-
       const disposer = effect(() => {
+        oldNodes[i] ??= [];
+        newNodes[i] ??= [];
         try {
-          newNodes = toArray(getNode<ChildNode>(child)).flat();
+          newNodes[i] = toArray(getNode<ChildNode>(child)).flat();
         } catch (error) {
           if (error instanceof Promise) {
             if (handler) {
@@ -47,11 +48,15 @@ export function renderChildren(parentNode: Node, rawChildren: JSX.Element[], bas
           }
         }
 
-        oldNodes = patch(parentNode, oldNodes, newNodes, anchor);
+        const insertionAnchor = oldNodes[i - 1]?.find(
+          (i) => i instanceof HTMLElement,
+        )?.nextElementSibling;
+        const anchor = baseAnchor ?? insertionAnchor ?? undefined;
+
+        oldNodes[i] = patch(parentNode, oldNodes[i], newNodes[i], anchor);
 
         cleanups.oldNodes.push(() => {
-          patch(parentNode, oldNodes, [], anchor);
-          anchor.remove();
+          patch(parentNode, oldNodes[i], []);
         });
       });
 

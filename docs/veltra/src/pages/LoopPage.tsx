@@ -1,6 +1,6 @@
 import { CodeBlock } from "src/components/CodeBlock";
 
-export const Loop = () => {
+export const LoopPage = () => {
   return (
     <div>
       <h1>loop</h1>

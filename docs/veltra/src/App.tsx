@@ -1,95 +1,100 @@
+import { Suspense } from "@veltra/app";
 import { Route, Router } from "@veltra/router";
 
 import { Layout } from "./Layout";
-import { Computed } from "./pages/Computed";
-import { Effect } from "./pages/Effect";
-import { Home } from "./pages/Home";
-import { Installation } from "./pages/Installation";
-import { Introduction } from "./pages/Introduction";
-import { Lazy } from "./pages/Lazy";
-import { Loop } from "./pages/Loop";
-import { Memo } from "./pages/Memo";
-import { OnDestroy } from "./pages/OnDestroy";
-import { OnMount } from "./pages/OnMount";
-import { Resource } from "./pages/Resource";
-import { State } from "./pages/State";
-import { Store } from "./pages/Store";
-import { Suspense } from "./pages/Suspense";
+import { ComputedPage } from "./pages/ComputedPage";
+import { EffectPage } from "./pages/EffectPage";
+import { HomePage } from "./pages/HomePage";
+import { InstallationPage } from "./pages/InstallationPage";
+import { IntroductionPage } from "./pages/IntroductionPage";
+import { LazyPage } from "./pages/LazyPage";
+import { LoopPage } from "./pages/LoopPage";
+import { MemoPage } from "./pages/MemoPage";
+import { OnDestroyPage } from "./pages/OnDestroyPage";
+import { OnMountPage } from "./pages/OnMountPage";
+import { ResourcePage } from "./pages/ResourcePage";
+import { StatePage } from "./pages/StatePage";
+import { StorePage } from "./pages/StorePage";
+import { SuspensePage } from "./pages/SuspensePage";
+import { ThingsToKnowPage } from "./pages/ThingsToKnowPage";
 
 export const App = () => {
   return (
-    <>
+    <Suspense fallback={<div>Loading...</div>}>
       <Router routes={routes} />
-    </>
+    </Suspense>
   );
 };
 
 export const routes: Route[] = [
   {
     path: "/",
-    component: () => <Home />,
+    component: HomePage,
+    // lazy: () => import("./pages/HomePage").then(({ HomePage: Home }) => Home),
   },
   {
     path: "/docs",
-    component({ children }) {
-      return <Layout>{children()}</Layout>;
-    },
+    component: Layout,
     children: [
       {
         path: "/introduction",
-        component: () => <Introduction />,
+        component: IntroductionPage,
       },
       {
         path: "/installation",
-        component: () => <Installation />,
+        component: InstallationPage,
+      },
+      {
+        path: "/things-to-know",
+        component: ThingsToKnowPage,
       },
       {
         path: "/core-concepts/on-mount",
-        component: () => <OnMount />,
+        component: OnMountPage,
       },
       {
         path: "/core-concepts/on-destroy",
-        component: () => <OnDestroy />,
+        component: OnDestroyPage,
       },
       {
         path: "/core-concepts/state",
-        component: () => <State />,
+        component: StatePage,
       },
       {
         path: "/core-concepts/store",
-        component: () => <Store />,
+        component: StorePage,
       },
       {
         path: "/core-concepts/computed",
-        component: () => <Computed />,
+        component: ComputedPage,
       },
       {
         path: "/core-concepts/effect",
-        component: () => <Effect />,
+        component: EffectPage,
       },
       {
         path: "/core-concepts/resource",
-        component: () => <Resource />,
+        component: ResourcePage,
       },
       {
         path: "/core-concepts/resource",
-        component: () => <Resource />,
+        component: ResourcePage,
       },
       {
         path: "/core-concepts/suspense",
-        component: () => <Suspense />,
+        component: SuspensePage,
       },
       {
         path: "/core-concepts/lazy",
-        component: () => <Lazy />,
+        component: LazyPage,
       },
       {
         path: "/core-concepts/loop",
-        component: () => <Loop />,
+        component: LoopPage,
       },
       {
         path: "/core-concepts/memo",
-        component: () => <Memo />,
+        component: MemoPage,
       },
     ],
   },

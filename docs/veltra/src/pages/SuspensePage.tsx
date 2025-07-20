@@ -1,6 +1,6 @@
 import { CodeBlock } from "src/components/CodeBlock";
 
-export const Suspense = () => {
+export const SuspensePage = () => {
   return (
     <div>
       <h1>Suspense</h1>

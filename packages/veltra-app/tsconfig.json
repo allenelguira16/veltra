@@ -7,7 +7,7 @@
     },
     "composite": true,
     "jsx": "preserve",
-    "jsxImportSource": "./src",
+    "jsxImportSource": "src",
     "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
   "include": ["src"],

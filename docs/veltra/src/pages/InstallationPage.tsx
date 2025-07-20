@@ -1,6 +1,6 @@
 import { CodeBlock } from "../components/CodeBlock";
 
-export const Installation = () => {
+export const InstallationPage = () => {
   return (
     <div>
       <h1>Installation</h1>

@@ -30,9 +30,7 @@ export function loop<T>(items: T[]) {
 
       // Use jsx to register it as a component
       // That way we can use life cycles hooks
-      const component = jsx(Loop, { each, children, handler });
-
-      return component;
+      return jsx(Loop, { each, children, handler });
     },
   };
 }
