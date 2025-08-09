@@ -2,6 +2,7 @@ import { DestroyFn, MountFn } from "~/lifecycle";
 import { EffectFn, State } from "~/reactivity";
 
 export interface RuntimeContext {
+  id: string;
   mount: MountFn[];
   effect: EffectFn[];
   state: {

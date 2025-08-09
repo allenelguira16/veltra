@@ -24,27 +24,38 @@ function Form({ children }: { children: () => JSX.Element }) {
 }
 
 function Wrapper({ children }: { children: () => JSX.Element }) {
-  return <div>{children}</div>;
+  return (
+    <>
+      <div>Hi</div> {children()}
+    </>
+  );
 }
+
+const i = state(0);
+
+setInterval(() => {
+  i.value++;
+}, 1000);
 
 function Input() {
   const forms = formContext();
 
-  const i = state(0);
+  const nameEl = <div>Name: {forms.name} Hi</div>;
 
-  setInterval(() => {
-    i.value++;
-  }, 1000);
+  console.log("rerendering");
 
   return (
-    <div>
+    <>
       <div>Name: {forms.name}</div>
+      {nameEl}
       <input
         type="text"
+        name="name"
         onInput={(event) => (forms.name = event.currentTarget.value)}
         placeholder="name"
-      />
+        autoComplete="off"
+      />{" "}
       {i.value}
-    </div>
+    </>
   );
 }

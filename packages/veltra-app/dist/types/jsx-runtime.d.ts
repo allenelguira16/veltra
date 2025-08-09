@@ -1,5 +1,13 @@
-import { J as JSX } from './fragment-CX6EvM6I.js';
-export { F as Fragment } from './fragment-CX6EvM6I.js';
+import { J as JSX } from './fragment-rgqNNppe.js';
+export { F as Fragment } from './fragment-rgqNNppe.js';
+
+/**
+ * log the JSX elements
+ *
+ * @param nodes - The nodes to log.
+ * @returns The nodes that are not text nodes and are not in the componentRootNodes set.
+ */
+declare function logJsx(nodes: Node[]): ChildNode | ChildNode[];
 
 /**
  * jsx runtime
@@ -11,4 +19,4 @@ export { F as Fragment } from './fragment-CX6EvM6I.js';
  */
 declare const jsx: (type: string | ((props: any) => any), { children, ...props }: Record<string, any>, key?: () => string) => JSX.Element;
 
-export { JSX, jsx, jsx as jsxs };
+export { JSX, jsx, jsx as jsxs, logJsx };

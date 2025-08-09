@@ -19,19 +19,20 @@ export function runLifecycle(targetNode: Node) {
   setComponentCleanup(targetNode, cleanups);
 
   // Pass cleanups once dom is painted
-  queueMicrotask(async () => {
-    for (const mountFn of context.mount) {
-      const mountCleanup = await mountFn();
+  requestAnimationFrame(() => {
+    Promise.resolve().then(async () => {
+      for (const mountFn of context.mount) {
+        const cleanup = await mountFn();
+        if (cleanup) cleanups.push(cleanup);
+      }
 
-      if (mountCleanup) cleanups.push(mountCleanup);
-    }
+      for (const destroyFn of context.destroy) {
+        cleanups.push(destroyFn);
+      }
 
-    for (const destroyFn of context.destroy) {
-      cleanups.push(destroyFn);
-    }
-
-    for (const effectFn of context.effect) {
-      cleanups.push(() => Promise.resolve(removeEffect(effectFn)));
-    }
+      for (const effectFn of context.effect) {
+        cleanups.push(() => Promise.resolve(removeEffect(effectFn)));
+      }
+    });
   });
 }

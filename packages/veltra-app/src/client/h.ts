@@ -1,8 +1,9 @@
-import { Fragment } from "~/jsx-runtime";
 import { JSX } from "~/types";
 
 import { applyProps, renderChildren } from "./dom";
+import { setParentNode } from "./dom/get-parent";
 import { mountComponent } from "./mount-component";
+import { getServerRenderedDOM } from "./ssr-dom";
 
 /**
  * create a JSX element
@@ -18,33 +19,29 @@ export function h(
   children: JSX.Element[],
   key?: () => string,
 ): Node | Node[] | (() => Node[]) {
-  if (type === Fragment) {
-    return children as Node[];
-  }
-
   if (typeof type === "function") {
     return mountComponent(type, { key, ...props }, children);
   }
 
-  // Determine current namespace
-  const currentXmlns = xmlnsStack[xmlnsStack.length - 1];
+  xmlnsStack.push(props.xmlns?.() ?? xmlnsStack[xmlnsStack.length - 1]);
 
-  // If this element has xmlns prop, push it, else push current namespace
-  const xmlns = props.xmlns?.() ?? currentXmlns;
-  xmlnsStack.push(xmlns);
+  const element = createElement(type);
 
-  const element = createElement(type, xmlns);
+  setParentNode(element);
 
   applyProps(element, props);
   renderChildren(element, children);
 
   xmlnsStack.pop();
-
   return element;
 }
 
 const xmlnsStack: (string | undefined)[] = [];
 
-function createElement(tag: string, namespace?: string) {
-  return namespace ? document.createElementNS(namespace, tag) : document.createElement(tag);
+function createElement(tag: string) {
+  const serverDOM = getServerRenderedDOM();
+  if (serverDOM) return serverDOM;
+
+  const currentXmlns = xmlnsStack[xmlnsStack.length - 1];
+  return currentXmlns ? document.createElementNS(currentXmlns, tag) : document.createElement(tag);
 }

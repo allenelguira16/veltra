@@ -4,17 +4,18 @@ import {
   setComponentContext,
   setRuntimeContext,
 } from "~/context";
-import { getCurrentOwner, untrack } from "~/reactivity";
+import { untrack } from "~/reactivity";
 import { JSX } from "~/types";
 import { createTargetNode, toArray } from "~/util";
 
 import { Suspense } from "../async";
+import { Fragment } from "../dom";
 import { Loop } from "../loop";
 import { resolveComponentProps } from "./resolve-component-props";
 
-export const componentRootNodes = new Set<Node>();
+export const componentRootNodes = new WeakSet<Node>();
 
-const COMPONENTS = [Suspense, Loop] as Array<(...args: any[]) => any>;
+const COMPONENTS = [Suspense, Loop, Fragment] as Array<(...args: any[]) => any>;
 
 /**
  * mount a component
@@ -25,14 +26,15 @@ const COMPONENTS = [Suspense, Loop] as Array<(...args: any[]) => any>;
  */
 export function mountComponent(
   type: (props: Record<string, any>) => any,
-  { key: _key, ...props }: { key?: () => string } & Record<string, any>,
+  { key: _key, ...props }: { key?: () => string | number } & Record<string, any>,
   children: JSX.Element[] | (() => JSX.Element[]),
 ) {
   resolveComponentProps(type, props);
 
-  const key = _key ? _key() + getCurrentOwner() : undefined;
+  const key = _key ? _key().toString() + type.toString() : undefined;
 
   const context: RuntimeContext = {
+    id: crypto.randomUUID(),
     mount: [],
     state: createStateContext(key),
     effect: [],
@@ -51,6 +53,7 @@ export function mountComponent(
   }
 
   const targetNode = createTargetNode(type.name);
+  componentRootNodes.add(targetNode);
 
   setRuntimeContext(null);
   setComponentContext(targetNode, context);

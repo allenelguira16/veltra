@@ -1,4 +1,4 @@
-import { loop, onDestroy, onMount, state, store } from "@veltra/app";
+import { onDestroy, onMount, state, store } from "@veltra/app";
 
 import { name } from "../globalState";
 
@@ -8,7 +8,7 @@ export const Dropdowns = () => {
   const dropdownStore = store({
     showDropdown: true,
     sortDirection: "asc" as SortDirection,
-    numbers: [1],
+    numbers: [1, 2, 3, 4, 5, 6, 7, 8],
 
     handleSort() {
       this.numbers = [...this.numbers].sort((a, b) => {
@@ -55,7 +55,7 @@ export const Dropdowns = () => {
   return (
     <>
       <div class="flex flex-col gap-4">
-        {/* <div>
+        <div>
           <div class="flex gap-2 items-center">
             <span>Add Dropdown</span>
             <button class="btn" onClick={dropdownStore.addDropdown}>
@@ -74,7 +74,7 @@ export const Dropdowns = () => {
           <button class="btn" onClick={dropdownStore.handleRandomize}>
             Randomize
           </button>
-        </div> */}
+        </div>
         <div>
           <button onClick={() => (dropdownStore.showDropdown = !dropdownStore.showDropdown)}>
             Unmount Dropdown List
@@ -94,6 +94,7 @@ type TDropdownListProps = {
 };
 
 const DropdownList = ({ dropdowns }: TDropdownListProps) => {
+  console.log("rerender");
   onMount(async () => {
     console.log("DropdownList onMount");
   });
@@ -104,12 +105,12 @@ const DropdownList = ({ dropdowns }: TDropdownListProps) => {
 
   return (
     <div class="flex gap-2 flex-col lg:flex-row">
-      {loop(dropdowns.numbers).each((number) => (
+      {/* {loop(dropdowns.numbers).each((number) => (
         <Dropdown number={number} />
-      ))}
-      {/* {dropdowns.numbers.map((number) => (
-        <Dropdown number={number} key={number} />
       ))} */}
+      {dropdowns.numbers.map((number) => (
+        <Dropdown number={number} key={number} />
+      ))}
     </div>
   );
 };

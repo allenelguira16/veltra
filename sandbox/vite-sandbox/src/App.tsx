@@ -15,7 +15,9 @@ export const App = () => {
     <div class="p-2 flex flex-col container m-auto">
       <ButtonPageList />
       <Router routes={routes} />
-      <div>hi</div>
+      {i.value}
     </div>
   );
 };
+
+console.log(<App />);

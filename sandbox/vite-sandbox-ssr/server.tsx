@@ -1,69 +1,60 @@
 import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import express from "express";
-import { createServer as createViteServer } from "vite";
+import pretty from "pretty";
+import { createServer as createViteServer, ViteDevServer } from "vite";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const isDev = process.env.NODE_ENV === "development";
 
 async function createServer() {
   const app = express();
+  let vite: ViteDevServer | undefined;
 
-  // Create Vite server in middleware mode and configure the app type as
-  // 'custom', disabling Vite's own HTML serving logic so parent server
-  // can take control
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: "custom",
-  });
+  if (isDev) {
+    vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "custom",
+    });
 
-  // Use vite's connect instance as middleware. If you use your own
-  // express router (express.Router()), you should use router.use
-  // When the server restarts (for example after the user modifies
-  // vite.config.js), `vite.middlewares` is still going to be the same
-  // reference (with a new internal stack of Vite and plugin-injected
-  // middlewares). The following is valid even after restarts.
-  app.use(vite.middlewares);
+    app.use(vite.middlewares);
+  } else {
+    // app.use("/", express.static("./dist/client"));
+    const compression = (await import("compression")).default;
+    const sirv = (await import("sirv")).default;
+    app.use(compression());
+    app.use("/", sirv("./dist/client", { extensions: [] }));
+  }
 
-  app.use("*all", async (_req, res) => {
-    // serve index.html - we will tackle this next
+  app.use("*all", async (req, res, next) => {
+    const url = req.originalUrl;
 
-    const template = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf-8");
+    try {
+      let template: string;
+      let render: (url: string) => Promise<string>;
 
-    const { render } = await vite.ssrLoadModule("./src/entry-server.tsx");
+      if (isDev && vite) {
+        template = fs.readFileSync("./index.html", "utf-8");
+        template = await vite.transformIndexHtml(url, template);
+        render = (await vite.ssrLoadModule("/src/entry-server.jsx")).render;
+      } else {
+        template = fs.readFileSync("./dist/client/index.html", "utf-8");
+        render = (await import("./dist/server/entry-server.js")).render;
+      }
 
-    const html = template.replace("<!--ssr-outlet-->", () => render());
+      const appHtml = await render(url);
 
-    res.send(html);
+      const html = template.replace("<!--ssr-outlet-->", appHtml);
+
+      res.status(200).set({ "Content-Type": "text/html" }).end(pretty(html));
+    } catch (e) {
+      if (vite) {
+        vite.ssrFixStacktrace(e);
+      }
+      next(e);
+    }
   });
 
   app.listen(5173);
 }
 
 createServer();
-
-// import express from "express";
-// import { App } from "./App";
-
-// const app = express();
-
-// app.get("/", async (req, res) => {
-//   // console.log();
-
-//   res.send(`<!DOCTYPE html>
-// <html lang="en">
-//   <head>
-//     <meta charset="UTF-8" />
-//     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-//     <title>Veltra App</title>
-//   </head>
-//   <body>
-//     <div id="app">${(<App />)}</div>
-//   </body>
-// </html>
-// `);
-// });
-
-// app.listen(8000);

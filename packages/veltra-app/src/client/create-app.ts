@@ -1,4 +1,3 @@
-import { effect } from "~/reactivity";
 import { JSX } from "~/types";
 
 import { renderChildren } from "./dom";
@@ -23,10 +22,8 @@ export function createApp(App: () => JSX.Element) {
 
       if (!(node instanceof HTMLElement)) throw new Error("Node must be of type Element");
 
-      effect(() => {
-        const app = mountComponent(App, {}, []);
-        cleanup = renderChildren(node, app);
-      });
+      const app = mountComponent(App, {}, []);
+      cleanup = renderChildren(node, app);
     },
     unmount: () => {
       if (!cleanup) throw new Error("Can only unmount if the app is mounted");

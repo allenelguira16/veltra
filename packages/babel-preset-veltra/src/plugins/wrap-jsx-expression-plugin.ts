@@ -1,50 +1,68 @@
-import { NodePath, PluginObj } from "@babel/core";
 import { declare } from "@babel/helper-plugin-utils";
+import { NodePath } from "@babel/traverse";
 import * as t from "@babel/types";
 
-/**
- * babel plugin to wrap jsx expressions except loop and handle ref specially
- *
- * @param api - The babel api.
- * @returns The babel options.
- */
-export const wrapJSXExpressionsPlugin = declare((api): PluginObj => {
+export const wrapJsxExpressionsPlugin = declare((api) => {
   api.assertVersion(7);
 
   return {
-    name: "wrap-jsx-expressions",
+    name: "wrap-all-jsx-expressions-with-arrow-function",
     visitor: {
-      JSXExpressionContainer(path: NodePath<t.JSXExpressionContainer>) {
-        const expr = path.get("expression");
+      JSXOpeningElement(path) {
+        const attributes = path.node.attributes;
 
-        // Skip empty expressions
-        if (t.isJSXEmptyExpression(expr.node)) return;
+        const newAttributes = attributes.map((attr) => {
+          if (!t.isJSXAttribute(attr) || !attr.value) return attr;
 
-        // Check if parent is a JSXAttribute
-        const attr = path.parentPath;
-        if (attr.isJSXAttribute() && attr.node.name.name === "ref") {
-          // If already an arrow function, do nothing
-          if (t.isArrowFunctionExpression(expr.node)) return;
+          const attrName = t.isJSXIdentifier(attr.name) ? attr.name.name : null;
 
-          // If identifier (e.g., `ref={myRef}`), convert to: `ref={(elem) => myRef = elem}`
-          if (t.isIdentifier(expr.node) || t.isMemberExpression(expr.node)) {
-            path.replaceWith(
-              t.jSXExpressionContainer(
-                t.arrowFunctionExpression(
-                  [t.identifier("elem")],
-                  t.assignmentExpression("=", expr.node, t.identifier("elem")),
-                ),
-              ),
-            );
-            return;
+          if (
+            attrName === "ref" &&
+            t.isJSXExpressionContainer(attr.value) &&
+            t.isIdentifier(attr.value.expression)
+          ) {
+            const myRef = attr.value.expression;
+            const elemParam = t.identifier("elem");
+            const assignment = t.assignmentExpression("=", myRef, elemParam);
+            const wrappedRef = t.arrowFunctionExpression([elemParam], assignment);
+            return t.jsxAttribute(t.jsxIdentifier(attrName), t.jsxExpressionContainer(wrappedRef));
           }
 
-          // Optional: If it's not an identifier or arrow function, leave it unchanged or handle as needed
+          let propValue: t.Expression | null = null;
+
+          if (t.isStringLiteral(attr.value)) {
+            propValue = attr.value;
+          } else if (t.isJSXExpressionContainer(attr.value)) {
+            if (!t.isJSXEmptyExpression(attr.value.expression)) {
+              propValue = attr.value.expression;
+            }
+          }
+
+          if (propValue === null || attrName === null) return attr;
+
+          const wrappedFn = t.arrowFunctionExpression([], propValue);
+          return t.jsxAttribute(t.jsxIdentifier(attrName), t.jsxExpressionContainer(wrappedFn));
+        });
+
+        path.node.attributes = newAttributes;
+      },
+
+      JSXExpressionContainer(path: NodePath<t.JSXExpressionContainer>) {
+        const expr = path.node.expression;
+
+        // Skip if it's empty or already an arrow/function expression
+        if (
+          t.isJSXEmptyExpression(expr) ||
+          t.isFunction(expr) ||
+          t.isArrowFunctionExpression(expr) ||
+          t.isLiteral(expr)
+        ) {
           return;
         }
 
-        // Otherwise, wrap in an arrow function
-        path.node.expression = t.arrowFunctionExpression([], expr.node);
+        // Always wrap, even if it's already a function
+        const wrapped = t.arrowFunctionExpression([], expr);
+        path.replaceWith(t.jsxExpressionContainer(wrapped));
       },
     },
   };

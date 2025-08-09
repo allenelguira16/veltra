@@ -1,9 +1,8 @@
 import { onMount } from "~/lifecycle";
 import { JSX } from "~/types";
-import { createTargetNode, memo, toArray } from "~/util";
+import { createTargetNode } from "~/util";
 
 import { renderChildren } from "../dom";
-import { componentRootNodes } from "../mount-component";
 
 const suspenseHandlerStack: ((promise: Promise<void>) => void)[] = [];
 
@@ -22,9 +21,8 @@ export function Suspense(props: { fallback?: JSX.Element; children: JSX.Element 
   let parentNode: ParentNode | undefined;
 
   const rootNode = createTargetNode("Suspense");
-  componentRootNodes.add(rootNode);
 
-  const children = memo(() => _children());
+  const children = () => _children();
   const fallback = () => _fallback?.();
 
   const cleanups: (() => void)[] = [];
@@ -47,7 +45,7 @@ export function Suspense(props: { fallback?: JSX.Element; children: JSX.Element 
     if (!parentNode) return;
 
     suspenseHandlerStack.push(handler);
-    cleanups.push(renderChildren(parentNode, toArray(items), rootNode));
+    cleanups.push(renderChildren(parentNode, items, rootNode));
     suspenseHandlerStack.pop();
   };
 

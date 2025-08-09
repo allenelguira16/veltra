@@ -1,5 +1,5 @@
-import { J as JSX } from './fragment-CX6EvM6I.js';
-export { F as Fragment } from './fragment-CX6EvM6I.js';
+import { J as JSX } from './fragment-rgqNNppe.js';
+export { F as Fragment } from './fragment-rgqNNppe.js';
 
 type PropsWithChildren<T = unknown> = T & {
     children: () => JSX.Element;
@@ -23,7 +23,7 @@ type ResourceReturn<T> = {
  * @param fetcher - The function to fetch the data.
  * @returns The resource.
  */
-declare function resource<T>(fetcher: () => Promise<T>): ResourceReturn<T>;
+declare function resource<T>(fetcher: () => Promise<T>, key: string): ResourceReturn<T>;
 
 /**
  * Suspense component
@@ -108,8 +108,8 @@ declare function loop<T>(items: T[]): {
 
 declare function createContext<T>(): readonly [(props: {
     value: T;
-    children: JSX.Element;
-}) => Node | (Node | undefined)[] | undefined, () => T];
+    children: () => JSX.Element;
+}) => JSX.Element, () => T];
 
 type DestroyFn = () => Promise<void> | void;
 /**
@@ -128,15 +128,7 @@ type MountFn = () => Promise<void | DestroyFn> | (void | DestroyFn);
 declare function onMount(fn: () => Promise<DestroyFn> | DestroyFn): void;
 declare function onMount(fn: () => Promise<void> | void): void;
 
-declare function resolveChildren(child: JSX.Element): (...args: any[]) => Node | (Node | undefined)[] | undefined;
-
-/**
- * log the JSX elements
- *
- * @param nodes - The nodes to log.
- * @returns The nodes that are not text nodes and are not in the componentRootNodes set.
- */
-declare function logJsx(nodes: Node[]): Node | Node[];
+declare function resolveChildren(child: JSX.Element): (...args: any[]) => Node;
 
 /**
  * memoize a function
@@ -154,5 +146,5 @@ declare function memo<T>(fn: (...args: any[]) => T): (...args: any[]) => T;
  */
 declare function unwrap<T>(value: any): Partial<T>;
 
-export { JSX, Suspense, computed, createApp, createContext, effect, hydrateApp, lazy, logJsx, loop, memo, onDestroy, onMount, resolveChildren, resource, state, stopEffect, store, untrack, unwrap };
+export { JSX, Suspense, computed, createApp, createContext, effect, hydrateApp, lazy, loop, memo, onDestroy, onMount, resolveChildren, resource, state, stopEffect, store, untrack, unwrap };
 export type { Computed, DestroyFn, MountFn, PropsWithChildren, PropsWithRef, State };

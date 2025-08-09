@@ -3,6 +3,7 @@ import { State, state, untrack } from "~/reactivity";
 import { JSX } from "~/types";
 import { toArray } from "~/util";
 
+import { getNode } from "../get-node";
 import { Entry } from "./loop";
 
 /**
@@ -118,7 +119,7 @@ export function newEntries<T>(
       addedEntries.filter((e) => e.item === item).length;
     if (exists < (seenCounts.get(item) || 0)) {
       const indexState = state(-1);
-      const nodes = toArray(children(item, indexState)) as Node[];
+      const nodes = toArray(getNode(children(item, indexState))) as Node[];
       addedEntries.push({
         item,
         nodes,

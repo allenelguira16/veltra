@@ -16,7 +16,7 @@ export type ResourceReturn<T> = {
  * @param fetcher - The function to fetch the data.
  * @returns The resource.
  */
-export function resource<T>(fetcher: () => Promise<T>): ResourceReturn<T> {
+export function baseResource<T>(fetcher: () => Promise<T>): ResourceReturn<T> {
   let loading = true;
   let error = null as Error | null;
   let data = undefined as T | undefined;
@@ -79,4 +79,23 @@ export function resource<T>(fetcher: () => Promise<T>): ResourceReturn<T> {
       version.value++;
     },
   };
+}
+
+const resourceCache = new Map<string, ResourceReturn<any>>();
+
+/**
+ * Create a reactive resource
+ *
+ * @param fetcher - The function to fetch the data.
+ * @returns The resource.
+ */
+export function resource<T>(fetcher: () => Promise<T>, key: string): ResourceReturn<T> {
+  if (resourceCache.has(key)) {
+    return resourceCache.get(key) as ResourceReturn<T>;
+  }
+
+  const resourceFn = baseResource(fetcher);
+  resourceCache.set(key, resourceFn);
+
+  return resourceFn;
 }

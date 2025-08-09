@@ -24,5 +24,5 @@ export function h(
     return type({ ...props, children });
   }
 
-  return `<${type} ${applyProps(props)}>${renderChildren(children)}</${type}>`;
+  return `<${type}${applyProps(props)}>${renderChildren(children)}</${type}>`;
 }

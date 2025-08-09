@@ -5,7 +5,6 @@ import { getRuntimeContext } from "~/context";
  */
 export type EffectFn = (() => Promise<void>) & {
   deps?: Set<EffectFn>[];
-  owner?: string;
   cleanup?: () => void;
 };
 
@@ -16,14 +15,6 @@ export function setActiveEffect(newActiveEffect: EffectFn | null) {
 }
 
 let lastDisposer: (() => void) | null = null;
-let currentOwner: string | null = null;
-
-export function getCurrentOwner(): string {
-  if (!currentOwner) {
-    throw new Error("Must be inside an effect");
-  }
-  return currentOwner;
-}
 
 /**
  * Effect scheduling queue
@@ -60,10 +51,8 @@ export function effect(fn: (() => void | (() => void)) | (() => Promise<void | (
     }
 
     const previousEffect = activeEffect;
-    const previousOwner = currentOwner;
 
     activeEffect = wrappedEffect;
-    currentOwner = wrappedEffect.owner!;
 
     if (context) context.effect.push(wrappedEffect);
 
@@ -79,7 +68,6 @@ export function effect(fn: (() => void | (() => void)) | (() => Promise<void | (
       }
     } finally {
       activeEffect = previousEffect;
-      currentOwner = previousOwner;
     }
   };
 
@@ -87,7 +75,6 @@ export function effect(fn: (() => void | (() => void)) | (() => Promise<void | (
   lastDisposer = disposer;
 
   wrappedEffect.deps = [];
-  wrappedEffect.owner = crypto.randomUUID();
 
   wrappedEffect();
 

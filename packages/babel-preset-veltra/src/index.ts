@@ -5,9 +5,8 @@ import jsxTransformPlugin from "@babel/plugin-transform-react-jsx";
 import {
   logJsxPlugin,
   loopAutoWrapPlugin,
-  wrapJsxAttributesPlugin,
   wrapJsxChildrenPlugin,
-  wrapJsxReturnExpressionPlugin,
+  wrapJsxExpressionsPlugin,
 } from "./plugins";
 
 /**
@@ -31,8 +30,7 @@ export default function babelPresetVeltra(api: ConfigAPI): TransformOptions {
       logJsxPlugin,
       loopAutoWrapPlugin,
       wrapJsxChildrenPlugin,
-      wrapJsxAttributesPlugin,
-      wrapJsxReturnExpressionPlugin,
+      wrapJsxExpressionsPlugin,
     ],
   };
 }

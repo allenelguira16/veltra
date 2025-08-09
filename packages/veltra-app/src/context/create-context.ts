@@ -1,28 +1,38 @@
 import { JSX } from "~/types";
-import { resolveChildren } from "~/util";
-
-const contextStack: any[] = [];
 
 export function createContext<T>() {
-  function Provider(props: { value: T; children: JSX.Element }) {
-    contextStack.push(props.value);
+  // const contextStack: any[] = [];
+  let value: any;
 
-    const children = resolveChildren(props.children);
+  function Provider(props: { value: T; children: () => JSX.Element }) {
+    // const children = memo(() => props.children());
 
-    try {
-      return children();
-    } finally {
-      contextStack.pop();
-    }
+    // const rootNode = createTargetNode("Provider");
+    // componentRootNodes.add(rootNode);
+
+    // onMount(() => {
+    //   const parentNode = rootNode.parentNode;
+
+    //   if (!parentNode) return;
+
+    //   value = props.value;
+    //   renderChildren(parentNode, toArray(untrack(() => children())), rootNode);
+    //   // contextStack.pop();
+    // });
+
+    // return rootNode;
+    value = props.value;
+    return props.children();
   }
 
   function getContext(): T {
-    if (!contextStack.length) {
+    if (!value) {
       throw new Error("No provider found for context.");
     }
-    const context = contextStack[contextStack.length - 1];
+    // const context = contextStack[contextStack.length - 1];
 
-    return context;
+    // return context;
+    return value;
   }
 
   return [Provider, getContext] as const;

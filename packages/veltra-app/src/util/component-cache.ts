@@ -1,4 +1,4 @@
-import { getCurrentOwner } from "~/reactivity";
+import { getRuntimeContext } from "~/context";
 
 const __componentCaches = new Map<string, any>();
 
@@ -9,14 +9,18 @@ const __componentCaches = new Map<string, any>();
  * @returns The cached value.
  */
 export function componentCache<T>(factory: () => T): T {
-  const owner = getCurrentOwner();
+  const owner = getRuntimeContext();
 
-  if (__componentCaches.has(owner)) {
-    return __componentCaches.get(owner);
+  if (!owner) {
+    throw new Error("componentCache can only be used within a component context");
+  }
+
+  if (__componentCaches.has(owner.id)) {
+    return __componentCaches.get(owner.id);
   }
 
   const value = factory();
-  __componentCaches.set(owner, value);
+  __componentCaches.set(owner.id, value);
 
   return value;
 }

@@ -8,6 +8,7 @@ import { createStateContext, RuntimeContext, setRuntimeContext } from "~/context
  */
 export function createLifeCycleContext(key?: string) {
   const context: RuntimeContext = {
+    id: crypto.randomUUID(),
     mount: [],
     state: createStateContext(key),
     effect: [],

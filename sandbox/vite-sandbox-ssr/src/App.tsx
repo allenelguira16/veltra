@@ -1,25 +1,22 @@
-import { computed, effect, state } from "@veltra/app";
+import { Dropdowns } from "./pages/DropdownList";
 
 export function App() {
-  const count = state(0);
-  const double = computed(() => count.value * 2);
+  // const count = state(0);
+  // const double = computed(() => count.value * 2);
 
-  const handleCount = () => {
-    count.value++;
-  };
+  // const handleCount = () => {
+  //   count.value++;
+  // };
 
-  effect(() => {
-    console.log("hi");
-  });
+  // effect(() => {
+  //   console.log("hi");
+  // });
 
   return (
-    <div class="test" aria-role="display">
-      <div>Count: {count.value}</div>
-      <div>Double Count: {double.value}</div>
-      <button disabled={count.value >= 5} onClick={handleCount}>
-        Add counter
-      </button>
-      <div>{count.value <= 3 ? <div>Hi</div> : "string"}</div>
+    <div>
+      {/* <img src="https://media1.tenor.com/m/CNI1fSM1XSoAAAAC/shocked-surprised.gif" />
+      <h1>Veltra App</h1> */}
+      <Dropdowns />
     </div>
   );
 }

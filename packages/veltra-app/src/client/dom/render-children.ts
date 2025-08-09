@@ -1,75 +1,84 @@
+import { runComponentCleanup, runLifecycle } from "~/lifecycle";
 import { effect } from "~/reactivity";
 import { JSX } from "~/types";
-import { toArray } from "~/util";
+import { createTargetNode, isNil, toArray } from "~/util";
 
 import { getSuspenseHandler } from "../async";
 import { getNode } from "../get-node";
-import { patch } from "./patch";
 
 /**
- * render the children
- *
- * @param parentNode - The parent node.
- * @param children - The children to render.
+ * Render JSX children recursively into parentNode.
+ * Supports arrays, functions, and nested dynamic expressions.
  */
-export function renderChildren(parentNode: Node, rawChildren: JSX.Element[], baseAnchor?: Node) {
-  const cleanups: Record<"disposer" | "oldNodes", (() => void)[]> = {
-    disposer: [],
-    oldNodes: [],
-  };
+export function renderChildren(
+  parentNode: Node,
+  children: JSX.Element,
+  baseAnchor: Node | null = null,
+) {
+  const cleanups: (() => void)[] = [];
 
-  const children = toArray(rawChildren instanceof Function ? rawChildren() : rawChildren);
-  const oldNodes: (ChildNode | undefined)[][] = [];
-  const newNodes: (ChildNode | undefined)[][] = [];
+  function renderRecursive(value: JSX.Element, anchor: Node | null): () => void {
+    let nodes: Node[] = [];
+    let disposers: (() => void)[] = [];
 
-  for (let i = 0; i < children.length; i++) {
-    const child = children[i];
-    // const anchor = createTargetNode("renderChildren");
-    // parentNode.insertBefore(anchor, baseAnchor ?? null);
-
-    const handler = getSuspenseHandler();
-
-    const run = () => {
-      const disposer = effect(() => {
-        oldNodes[i] ??= [];
-        newNodes[i] ??= [];
-        try {
-          newNodes[i] = toArray(getNode<ChildNode>(child)).flat();
-        } catch (error) {
-          if (error instanceof Promise) {
-            if (handler) {
-              handler(error);
-            } else {
-              queueMicrotask(disposer);
-              error.then(run);
-            }
-          } else {
-            throw error;
-          }
+    const cleanup = () => {
+      for (const node of nodes) {
+        runComponentCleanup(node);
+        if (node.parentNode === parentNode) {
+          parentNode.removeChild(node);
         }
-
-        const insertionAnchor = oldNodes[i - 1]?.find(
-          (i) => i instanceof HTMLElement,
-        )?.nextElementSibling;
-        const anchor = baseAnchor ?? insertionAnchor ?? undefined;
-
-        oldNodes[i] = patch(parentNode, oldNodes[i], newNodes[i], anchor);
-
-        cleanups.oldNodes.push(() => {
-          patch(parentNode, oldNodes[i], []);
-        });
-      });
-
-      cleanups.disposer.push(() => {
-        disposer();
-      });
+      }
+      for (const dispose of disposers) dispose();
+      nodes = [];
+      disposers = [];
     };
 
-    run();
+    const disposer = effect(() => {
+      const handler = getSuspenseHandler();
+
+      try {
+        cleanup();
+
+        const children = toArray(value instanceof Function ? value() : value);
+
+        for (const child of children) {
+          if (isNil(child)) continue;
+
+          if (typeof child === "function") {
+            const childAnchor = createTargetNode("childAnchor");
+            parentNode.insertBefore(childAnchor, anchor);
+
+            const childDisposer = renderRecursive(child, childAnchor);
+            disposers.push(childDisposer);
+            nodes.push(childAnchor);
+          } else {
+            const node = getNode(child);
+            runLifecycle(node);
+            parentNode.insertBefore(node, anchor);
+            nodes.push(node);
+          }
+        }
+      } catch (error) {
+        if (error instanceof Promise) {
+          if (handler) {
+            handler(error);
+          }
+        } else {
+          throw error;
+        }
+      }
+    });
+
+    return () => {
+      disposer();
+      cleanup();
+    };
   }
 
+  const dispose = renderRecursive(children, baseAnchor);
+  cleanups.push(dispose);
+
   return () => {
-    cleanups.disposer.forEach((cleanup) => cleanup());
-    cleanups.oldNodes.forEach((cleanup) => cleanup());
+    for (const c of cleanups) c();
   };
 }

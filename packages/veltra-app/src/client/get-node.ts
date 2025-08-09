@@ -1,5 +1,5 @@
 import { JSX } from "~/types";
-import { isNil } from "~/util";
+import { toArray } from "~/util";
 
 /**
  * get the node for a JSX element
@@ -7,22 +7,18 @@ import { isNil } from "~/util";
  * @param jsxElement - The JSX element to get the node for.
  * @returns The node for the JSX element.
  */
-export function getNode<T extends Node | undefined>(jsxElement: JSX.Element): T | T[] {
+export function getNode<T extends Node>(jsxElement: JSX.Element): T {
   if (jsxElement instanceof Node) {
     return jsxElement as T;
   }
 
-  if (isNil(jsxElement)) {
-    return undefined as T;
+  if (typeof jsxElement === "string" || typeof jsxElement === "number") {
+    return document.createTextNode(String(jsxElement)) as unknown as T;
   }
 
-  if (typeof jsxElement === "function") {
-    return getNode(jsxElement());
-  }
+  throw new Error(`Unknown value: ${jsxElement}`);
+}
 
-  if (Array.isArray(jsxElement)) {
-    return jsxElement.map(getNode).flat() as T[];
-  }
-
-  return document.createTextNode(String(jsxElement)) as unknown as T;
+export function getNodes<T extends Node>(jsxElement: JSX.Element) {
+  return toArray(getNode<T>(jsxElement)).flat();
 }

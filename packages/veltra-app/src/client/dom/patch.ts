@@ -12,7 +12,7 @@ export function patch(
   parentNode: Node,
   oldNodes: (ChildNode | undefined)[],
   newNodes: (ChildNode | undefined)[],
-  insertBeforeNode?: Node,
+  insertBeforeNode: Node | null = null,
 ) {
   const maxLength = Math.max(oldNodes.length, newNodes.length);
 
@@ -22,7 +22,7 @@ export function patch(
 
     // Add new node
     if (isNil(oldNode) && !isNil(newNode)) {
-      parentNode.insertBefore(newNode, insertBeforeNode ?? null);
+      parentNode.insertBefore(newNode, insertBeforeNode);
       runLifecycle(newNode);
       oldNodes[i] = newNode;
       continue;
@@ -43,6 +43,8 @@ export function patch(
     }
 
     if (oldNode && newNode) {
+      if (oldNode.isEqualNode(newNode)) continue;
+
       runComponentCleanup(oldNode);
       runLifecycle(newNode);
       oldNode.replaceWith(newNode);

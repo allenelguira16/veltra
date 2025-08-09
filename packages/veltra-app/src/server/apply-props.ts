@@ -31,5 +31,7 @@ export function applyProps(props: Record<string, any>) {
     transformedProps.push(`${key}="${value}"`);
   }
 
+  if (transformedProps.length > 0) transformedProps.unshift("");
+
   return transformedProps.join(" ");
 }

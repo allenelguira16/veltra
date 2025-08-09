@@ -698,7 +698,7 @@ type HTMLInsAttributes<T extends Element = HTMLModElement> = HTMLAttributes<T> &
  * @returns The fragment.
  */
 declare function Fragment({ children }: {
-    children: JSX.Element[];
-}): JSX.Element[];
+    children: () => JSX.Element[];
+}): () => JSX.Element[];
 
 export { Fragment as F, JSX as J };

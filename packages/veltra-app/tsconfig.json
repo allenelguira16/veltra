@@ -3,6 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@veltra/app/jsx-runtime": ["./src/jsx-runtime.ts"],
       "~/*": ["./src/*"]
     },
     "composite": true,
