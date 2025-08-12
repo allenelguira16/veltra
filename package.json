@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsx ./scripts/build.ts",
     "clean": "tsx ./scripts/clean.ts",
-    "docs-dev": "yarn workspace veltra-docs dev",
+    "docs-dev": "yarn workspace vynn-docs dev",
     "sandbox-dev": "yarn workspace vite-sandbox dev",
     "sandbox-preview": "yarn workspace vite-sandbox preview",
     "sandbox-dev-ssr": "yarn workspace vite-sandbox-ssr dev"

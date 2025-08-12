@@ -1,6 +1,6 @@
-import { computed, effect, state } from "@veltra/app";
+import { computed, effect, state } from "@vynn/core";
 
-import { name } from "../globalState";
+import { name } from "../global-state";
 
 export const Forms = () => {
   return (

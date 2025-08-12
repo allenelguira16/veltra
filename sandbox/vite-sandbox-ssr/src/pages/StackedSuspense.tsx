@@ -1,4 +1,4 @@
-import { resource, Suspense } from "@veltra/app";
+import { resource, Suspense } from "@vynn/core";
 
 export const StackedSuspense = () => {
   const msg2 = resource(async () => {
@@ -7,7 +7,7 @@ export const StackedSuspense = () => {
     });
 
     return "hello world 2";
-  });
+  }, "outer-suspense");
 
   return (
     <div class="p-2 flex flex-col container m-auto">
@@ -24,8 +24,9 @@ function Component() {
     await new Promise((resolve) => {
       setTimeout(resolve, 1000); // delay for 1 second
     });
+
     return "hello world";
-  });
+  }, "inner-suspense");
 
   return <div>{msg.data}</div>;
 }

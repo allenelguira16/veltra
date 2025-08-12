@@ -1,6 +1,6 @@
-import { loop, resource, store, Suspense } from "@veltra/app";
+import { loop, resource, store, Suspense } from "@vynn/core";
 
-import { name } from "../globalState";
+import { name } from "../global-state";
 
 type PokeDexData = {
   count: number;
@@ -44,7 +44,7 @@ export const PokeDexSuspense = () => {
     const json = (await response.json()) as PokeDexData;
 
     return json;
-  });
+  }, "pokedex-resource");
 
   const showUrlOnClick = (url: string) => () => alert(url);
   const sortOnClick = (key: SortKey) => () => pokeDex.sort(key);

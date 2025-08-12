@@ -1,4 +1,4 @@
-import { JSX } from "@veltra/app";
+import { JSX } from "@vynn/core";
 
 export const Template = ({ title, children }: { title: string; children: () => JSX.Element }) => {
   return (

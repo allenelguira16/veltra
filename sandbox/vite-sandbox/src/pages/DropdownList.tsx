@@ -1,6 +1,6 @@
-import { onDestroy, onMount, state, store } from "@veltra/app";
+import { onDestroy, onMount, state, store } from "@vynn/core";
 
-import { name } from "../globalState";
+import { name } from "../global-state";
 
 type SortDirection = "asc" | "desc";
 

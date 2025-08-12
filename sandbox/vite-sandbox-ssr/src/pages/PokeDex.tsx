@@ -1,6 +1,8 @@
-import { loop, onMount, store } from "@veltra/app";
+import { loop, onMount, store } from "@vynn/core";
 
-import { name } from "../globalState";
+import { sleep } from "~/sleep";
+
+import { name } from "../global-state";
 
 type PokeDexData = {
   count: number;
@@ -30,6 +32,8 @@ export const PokeDex = () => {
 
       const response = await fetch(url, { signal: controller?.signal });
       const json = (await response.json()) as PokeDexData;
+
+      await sleep(200);
 
       this.pokeDexList = json.results;
       this.prevLink = json.previous?.replace(/limit=\d+/, "limit=20") ?? "";

@@ -1,6 +1,6 @@
 import "./main.css";
 
-import { createApp } from "@veltra/app";
+import { createApp } from "@vynn/core";
 
 import { App } from "./App";
 

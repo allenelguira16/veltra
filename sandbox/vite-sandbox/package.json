@@ -18,14 +18,14 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "dependencies": {
-    "@babel/preset-veltra": "workspace:^",
+    "@babel/preset-vynn": "workspace:^",
     "@tailwindcss/vite": "^4.1.8",
-    "@veltra/app": "workspace:^",
-    "@veltra/router": "workspace:^",
+    "@vynn/core": "workspace:^",
+    "@vynn/router": "workspace:^",
     "cross-env": "^7.0.3",
     "lodash": "^4.17.21",
     "tailwindcss": "^4.1.8",
     "vite-bundle-visualizer": "^1.2.1",
-    "vite-plugin-veltra": "workspace:^"
+    "vite-plugin-vynn": "workspace:^"
   }
 }

@@ -1,22 +1,23 @@
-import { Dropdowns } from "./pages/DropdownList";
+import { state } from "@vynn/core";
+
+import { PokeDex } from "./pages/PokeDex";
+import { StackedSuspense } from "./pages/StackedSuspense";
 
 export function App() {
-  // const count = state(0);
-  // const double = computed(() => count.value * 2);
+  const i = state(0);
 
-  // const handleCount = () => {
-  //   count.value++;
-  // };
-
-  // effect(() => {
-  //   console.log("hi");
-  // });
+  setInterval(() => {
+    i.value++;
+  }, 1000);
 
   return (
     <div>
-      {/* <img src="https://media1.tenor.com/m/CNI1fSM1XSoAAAAC/shocked-surprised.gif" />
-      <h1>Veltra App</h1> */}
-      <Dropdowns />
+      <img src="https://media1.tenor.com/m/CNI1fSM1XSoAAAAC/shocked-surprised.gif" />
+      <h1>Vynn App</h1>
+      <StackedSuspense />
+      <PokeDex />
+      {/* <PokeDexSuspense /> */}
+      {/* {i.value} */}
     </div>
   );
 }

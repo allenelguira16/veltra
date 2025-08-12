@@ -5,7 +5,7 @@
   },
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "cSpell.words": ["daisyui", "effectify", "jsxs", "onwarn", "pokedex", "shiki", "Veltra"],
+  "cSpell.words": ["daisyui", "effectify", "jsxs", "onwarn", "pokedex", "shiki", "shikijs", "vynn"],
   "search.exclude": {
     "**/.yarn": true,
     "**/.pnp.*": true

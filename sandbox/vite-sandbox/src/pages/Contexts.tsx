@@ -1,4 +1,4 @@
-import { createContext, JSX, state, store } from "@veltra/app";
+import { createContext, JSX, state, store } from "@vynn/core";
 
 export function Contexts() {
   return (

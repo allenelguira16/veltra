@@ -1,6 +1,6 @@
 import { execSync } from "child_process";
 
-const workspaces = ["@babel/preset-veltra", "vite-plugin-veltra", "@veltra/app"];
+const workspaces = ["@babel/preset-vynn", "vite-plugin-vynn", "@vynn/core"];
 
 for (const workspace of workspaces) {
   try {

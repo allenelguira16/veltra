@@ -1,5 +1,6 @@
-import { isActiveRoute, navigate } from "@veltra/router";
-import { Template } from "src/components/Template";
+import { isActiveRoute, navigate } from "@vynn/router";
+
+import { Template } from "../components/Template";
 
 export const ButtonPageList = () => {
   return (

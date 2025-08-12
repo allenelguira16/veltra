@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "composite": true
-  },
-  "include": ["src", "../babel-preset-veltra"],
-  "exclude": ["dist"]
-}

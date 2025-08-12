@@ -7,7 +7,7 @@
     },
     "composite": true,
     "jsx": "preserve",
-    "jsxImportSource": "@veltra/app",
+    "jsxImportSource": "@vynn/core",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "moduleResolution": "bundler"
   },

@@ -1,6 +1,6 @@
-import { computed, effect, state } from "@veltra/app";
+import { computed, effect, onDestroy, state } from "@vynn/core";
 
-import { name } from "../globalState";
+import { name } from "../global-state";
 
 export const Forms = () => {
   return (
@@ -30,14 +30,18 @@ export function Counter() {
   };
 
   effect(() => {
-    console.log(count.value);
+    // console.log(count.value);
   });
 
   effect(() => {
-    console.log(double.value);
+    // console.log(double.value);
   });
 
-  console.log("rerender?");
+  onDestroy(() => {
+    console.log("bye");
+  });
+
+  // console.log("rerender?");
 
   return (
     <>

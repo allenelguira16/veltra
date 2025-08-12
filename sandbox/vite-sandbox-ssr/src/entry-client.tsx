@@ -1,6 +1,6 @@
 import "./main.css";
 
-import { hydrateApp } from "@veltra/app";
+import { hydrateApp } from "@vynn/core";
 
 import { App } from "./App";
 

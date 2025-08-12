@@ -1,4 +1,4 @@
-import { params, Route } from "@veltra/router";
+import { params, Route } from "@vynn/router";
 
 import { Template } from "./components/Template";
 import { Contexts } from "./pages/Contexts";

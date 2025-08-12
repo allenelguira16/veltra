@@ -1,4 +1,4 @@
-import { resource, Suspense } from "@veltra/app";
+import { resource, Suspense } from "@vynn/core";
 
 import { sleep } from "~/sleep";
 
@@ -15,6 +15,7 @@ export const StackedSuspense = () => {
     <div class="p-2 flex flex-col container m-auto">
       <Suspense fallback={<div>loading 1...</div>}>
         <>
+          {/* {msg2.data} */}
           <Suspense fallback={<div>loading 2...</div>}>{msg2.data}</Suspense>
           <Component />
         </>

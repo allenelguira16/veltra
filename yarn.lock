@@ -351,9 +351,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/preset-veltra@workspace:^, @babel/preset-veltra@workspace:packages/babel-preset-veltra":
+"@babel/preset-vynn@workspace:^, @babel/preset-vynn@workspace:packages/babel-preset":
   version: 0.0.0-use.local
-  resolution: "@babel/preset-veltra@workspace:packages/babel-preset-veltra"
+  resolution: "@babel/preset-vynn@workspace:packages/babel-preset"
   dependencies:
     "@babel/core": "npm:^7.27.4"
     "@babel/generator": "npm:^7.27.5"
@@ -2034,9 +2034,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@veltra/app@workspace:^, @veltra/app@workspace:packages/veltra-app":
+"@vynn/core@workspace:^, @vynn/core@workspace:packages/core":
   version: 0.0.0-use.local
-  resolution: "@veltra/app@workspace:packages/veltra-app"
+  resolution: "@vynn/core@workspace:packages/core"
   dependencies:
     "@babel/core": "npm:^7.27.4"
     "@babel/preset-typescript": "npm:^7.27.1"
@@ -2057,17 +2057,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@veltra/router@workspace:^, @veltra/router@workspace:packages/veltra-router":
+"@vynn/router@workspace:^, @vynn/router@workspace:packages/router":
   version: 0.0.0-use.local
-  resolution: "@veltra/router@workspace:packages/veltra-router"
+  resolution: "@vynn/router@workspace:packages/router"
   dependencies:
     "@babel/core": "npm:^7.27.4"
     "@babel/preset-typescript": "npm:^7.27.1"
-    "@babel/preset-veltra": "workspace:^"
+    "@babel/preset-vynn": "workspace:^"
     "@rollup/plugin-babel": "npm:^6.0.4"
     "@rollup/plugin-node-resolve": "npm:^16.0.1"
     "@types/rollup-plugin-delete": "npm:^1.0.0"
-    "@veltra/app": "workspace:^"
+    "@vynn/core": "workspace:^"
     esbuild: "npm:^0.25.5"
     rimraf: "npm:^6.0.1"
     rollup: "npm:^4.41.1"
@@ -2078,7 +2078,7 @@ __metadata:
     rollup-plugin-tsconfig-paths: "npm:^1.5.2"
     typescript: "npm:^5.8.3"
   peerDependencies:
-    "@veltra/app": ^0.0.0
+    "@vynn/core": ^0.0.0
   languageName: unknown
   linkType: soft
 
@@ -7779,32 +7779,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"veltra-docs@workspace:docs/veltra":
-  version: 0.0.0-use.local
-  resolution: "veltra-docs@workspace:docs/veltra"
-  dependencies:
-    "@babel/preset-veltra": "workspace:^"
-    "@shikijs/transformers": "npm:^3.7.0"
-    "@tailwindcss/typography": "npm:^0.5.16"
-    "@tailwindcss/vite": "npm:^4.1.8"
-    "@types/lodash": "npm:^4.17.17"
-    "@types/node": "npm:^22.15.21"
-    "@veltra/app": "workspace:^"
-    "@veltra/router": "workspace:^"
-    cross-env: "npm:^7.0.3"
-    daisyui: "npm:^5.0.46"
-    lodash: "npm:^4.17.21"
-    shiki: "npm:^3.7.0"
-    tailwindcss: "npm:^4.1.8"
-    typescript: "npm:^5.8.3"
-    vite: "npm:^6.3.5"
-    vite-bundle-visualizer: "npm:^1.2.1"
-    vite-plugin-sitemap: "npm:^0.8.2"
-    vite-plugin-veltra: "workspace:^"
-    vite-tsconfig-paths: "npm:^5.1.4"
-  languageName: unknown
-  linkType: soft
-
 "vfile-message@npm:^4.0.0":
   version: 4.0.2
   resolution: "vfile-message@npm:4.0.2"
@@ -7856,9 +7830,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-plugin-veltra@workspace:^, vite-plugin-veltra@workspace:packages/vite-plugin-veltra":
+"vite-plugin-vynn@workspace:^, vite-plugin-vynn@workspace:packages/vite-plugin":
   version: 0.0.0-use.local
-  resolution: "vite-plugin-veltra@workspace:packages/vite-plugin-veltra"
+  resolution: "vite-plugin-vynn@workspace:packages/vite-plugin"
   dependencies:
     "@babel/core": "npm:^7.27.4"
     "@babel/preset-typescript": "npm:^7.27.1"
@@ -7889,7 +7863,7 @@ __metadata:
     "@types/express": "npm:^5.0.2"
     "@types/node": "npm:^22.15.29"
     "@types/pretty": "npm:^2.0.3"
-    "@veltra/app": "workspace:^"
+    "@vynn/core": "workspace:^"
     compression: "npm:^1.8.1"
     express: "npm:^5.1.0"
     pretty: "npm:^2.0.0"
@@ -7904,12 +7878,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "vite-sandbox@workspace:sandbox/vite-sandbox"
   dependencies:
-    "@babel/preset-veltra": "workspace:^"
+    "@babel/preset-vynn": "workspace:^"
     "@tailwindcss/vite": "npm:^4.1.8"
     "@types/lodash": "npm:^4.17.17"
     "@types/node": "npm:^22.15.21"
-    "@veltra/app": "workspace:^"
-    "@veltra/router": "workspace:^"
+    "@vynn/core": "workspace:^"
+    "@vynn/router": "workspace:^"
     cross-env: "npm:^7.0.3"
     lodash: "npm:^4.17.21"
     tailwindcss: "npm:^4.1.8"
@@ -7917,7 +7891,7 @@ __metadata:
     vite: "npm:^6.3.5"
     vite-bundle-visualizer: "npm:^1.2.1"
     vite-plugin-sitemap: "npm:^0.8.2"
-    vite-plugin-veltra: "workspace:^"
+    vite-plugin-vynn: "workspace:^"
     vite-tsconfig-paths: "npm:^5.1.4"
   languageName: unknown
   linkType: soft
@@ -7992,6 +7966,32 @@ __metadata:
   checksum: 10c0/df70201659085133abffc6b88dcdb8a57ef35f742a01311fc56a4cfcda6a404202860729cc65a2c401a724f6e25f9ab40ce4339ed4946f550541531ced6fe41c
   languageName: node
   linkType: hard
+
+"vynn-docs@workspace:docs/vynn":
+  version: 0.0.0-use.local
+  resolution: "vynn-docs@workspace:docs/vynn"
+  dependencies:
+    "@babel/preset-vynn": "workspace:^"
+    "@shikijs/transformers": "npm:^3.7.0"
+    "@tailwindcss/typography": "npm:^0.5.16"
+    "@tailwindcss/vite": "npm:^4.1.8"
+    "@types/lodash": "npm:^4.17.17"
+    "@types/node": "npm:^22.15.21"
+    "@vynn/core": "workspace:^"
+    "@vynn/router": "workspace:^"
+    cross-env: "npm:^7.0.3"
+    daisyui: "npm:^5.0.46"
+    lodash: "npm:^4.17.21"
+    shiki: "npm:^3.7.0"
+    tailwindcss: "npm:^4.1.8"
+    typescript: "npm:^5.8.3"
+    vite: "npm:^6.3.5"
+    vite-bundle-visualizer: "npm:^1.2.1"
+    vite-plugin-sitemap: "npm:^0.8.2"
+    vite-plugin-vynn: "workspace:^"
+    vite-tsconfig-paths: "npm:^5.1.4"
+  languageName: unknown
+  linkType: soft
 
 "which-boxed-primitive@npm:^1.1.0, which-boxed-primitive@npm:^1.1.1":
   version: 1.1.1

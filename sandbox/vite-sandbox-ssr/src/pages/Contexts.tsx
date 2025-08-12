@@ -1,4 +1,4 @@
-import { createContext, JSX, state, store } from "@veltra/app";
+import { createContext, JSX, state, store } from "@vynn/core";
 
 export function Contexts() {
   return (
@@ -23,10 +23,10 @@ function Form({ children }: { children: () => JSX.Element }) {
   return <FormProvider value={state}>{children()}</FormProvider>;
 }
 
-function Wrapper(props: { children: () => JSX.Element }) {
+function Wrapper({ children }: { children: () => JSX.Element }) {
   return (
     <>
-      <div>Hi</div> {props.children()}
+      <div>Hi</div> {children()}
     </>
   );
 }

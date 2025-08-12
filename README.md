@@ -1,8 +1,8 @@
-# Veltra
+# vynn
 
 An ultra fast and swift frontend library that breaks free from the virtual DOM.
 
-Veltra is a React-like UI library designed with one core principle: **go native**, **go fast**. By bypassing the virtual DOM and updating the real DOM directly, Veltra achieves ultra-low latency rendering: making it faster, leaner, and closer to the bare-metal than traditional frameworks.
+Vynn is a React-like UI library designed with one core principle: **go native**, **go fast**. By bypassing the virtual DOM and updating the real DOM directly, vynn achieves ultra-low latency rendering: making it faster, leaner, and closer to the bare-metal than traditional frameworks.
 
 ## Install
 
@@ -32,23 +32,23 @@ yarnPath: .yarn/releases/yarn-4.9.2.cjs
 nodeLinker: node-modules # add this line
 ```
 
-### Installing @veltra/app
+### Installing @vynn/core
 
 ```bash
-yarn add "@veltra/app@git+https://github.com/allenelguira16/veltra.git#workspace=@veltra/app"
+yarn add "@vynn/core@git+https://github.com/allenelguira16/vynn.git#workspace=@vynn/core"
 ```
 
 #### tsconfig.json (**important**)
 
 Also in your editor, it will show an error that _JSX_ runtime is missing since by default tsconfig will search for React JSX runtime
-For that to work, you must add the following config in tsconfig.json so it will use the @veltra/app JSX runtime
+For that to work, you must add the following config in tsconfig.json so it will use the @vynn/core JSX runtime
 
 ```json
 {
   "compilerOptions": {
     // add the following...
     "jsx": "react-jsx",
-    "jsxImportSource": "@veltra/app"
+    "jsxImportSource": "@vynn/core"
   }
 }
 ```
@@ -56,38 +56,38 @@ For that to work, you must add the following config in tsconfig.json so it will 
 ### Installing vite plugin
 
 ```bash
-yarn add "vite-plugin-veltra@git+https://github.com/allenelguira16/veltra.git#workspace=vite-plugin-veltra"
+yarn add "vite-plugin-vynn@git+https://github.com/allenelguira16/vynn.git#workspace=vite-plugin-vynn"
 ```
 
 And in your vite config add it to the plugin
 
 ```ts
 import { defineConfig } from "vite";
-import veltraPlugin from "vite-plugin-veltra";
+import vynn from "vite-plugin-vynn";
 
 export default defineConfig({
-  plugins: [veltraPlugin()],
+  plugins: [vynn()],
 });
 ```
 
 ### Installing babel preset
 
 ```bash
-yarn add "@babel/preset-veltra@git+https://github.com/allenelguira16/veltra.git#workspace=@babel/preset-veltra"
+yarn add "@babel/preset-vynn@git+https://github.com/allenelguira16/vynn.git#workspace=@babel/preset-vynn"
 ```
 
 Then add it as plugin in your babel config
 
 ```json
 {
-  "presets": ["@babel/preset-veltra"]
+  "presets": ["@babel/preset-vynn"]
 }
 ```
 
 ## Example
 
 ```tsx
-import { createRoot } from "@veltra/app";
+import { createRoot } from "@vynn/core";
 
 function App() {
   return (
@@ -111,7 +111,7 @@ onMount is a life-cycle that makes you do anything after the DOM is created. Thi
 There's also a cleanup function as return to do things when component is removed from the DOM tree
 
 ```tsx
-import { createRoot } from "@veltra/app";
+import { createRoot } from "@vynn/core";
 
 function App() {
   onMount(() => {
@@ -146,7 +146,7 @@ Yes it is similar to onMount's return, but there are cases where you need to use
 As much as possible use onMount's cleanup if it is tightly coupled with onMount.
 
 ```tsx
-import { createRoot } from "@veltra/app";
+import { createRoot } from "@vynn/core";
 
 function App() {
   onDestroy(() => {
@@ -166,7 +166,7 @@ There's two ways of creating state, using state and store
 #### State
 
 ```tsx
-import { createRoot } from "@veltra/app";
+import { createRoot } from "@vynn/core";
 
 function Counter() {
   const count = state(0);
@@ -192,7 +192,7 @@ createApp(Counter).mount("#app");
 #### Store
 
 ```tsx
-import { store, createRoot } from "@veltra/app";
+import { store, createRoot } from "@vynn/core";
 
 function Counter() {
   const state = store({ count });
@@ -226,7 +226,7 @@ It is fast and more efficient than React!
 Btw state is using the signal strategy
 
 ```tsx
-import { state, createRoot } from "@veltra/app";
+import { state, createRoot } from "@vynn/core";
 
 const name = state(""); // or use store
 
@@ -273,7 +273,7 @@ Computed are derived data from state with additional steps
 #### Creating computed derived, you need to use computed
 
 ```tsx
-import { state, computed, createRoot } from "@veltra/app";
+import { state, computed, createRoot } from "@vynn/core";
 
 function Counter() {
   const count = state(0);
@@ -300,7 +300,7 @@ createApp(App).mount("#app");
 #### In store you don't actually need to use computed
 
 ```tsx
-import { store, createRoot } from "@veltra/app";
+import { store, createRoot } from "@vynn/core";
 
 function Counter() {
   const state = store({
@@ -334,7 +334,7 @@ Effects are different from useEffect in react.
 Instead of manually track them, it knows what to check when changes are made
 
 ```tsx
-import { state, createRoot } from "@veltra/app";
+import { state, createRoot } from "@vynn/core";
 
 function Counter() {
   const count = state(0);
@@ -371,7 +371,7 @@ Use .map only if purely representational, if it needs cache like looping through
 With `loop` helper, it is efficient and cache's DOM elements properly.
 
 ```tsx
-import { effect, state, createRoot } from "@veltra/app";
+import { effect, state, createRoot } from "@vynn/core";
 
 type SortDirection = "asc" | "desc";
 
@@ -456,7 +456,7 @@ createApp(App).mount("#app");
 A way to fetch data dynamically
 
 ```tsx
-import { resource, createRoot } from "@veltra/app";
+import { resource, createRoot } from "@vynn/core";
 
 function App() {
   const msg = resource(async () => {
@@ -481,7 +481,7 @@ createApp(App).mount("#app");
 A way to fetch data dynamically
 
 ```tsx
-import { Suspense, createRoot } from "@veltra/app";
+import { Suspense, createRoot } from "@vynn/core";
 
 function Counter() {
   const msg = resource(async () => {

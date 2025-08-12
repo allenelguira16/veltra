@@ -2,9 +2,9 @@
   "extends": "./tsconfig.base.json",
   "files": [],
   "references": [
-    { "path": "packages/babel-preset-veltra" },
-    { "path": "packages/veltra-app" },
-    { "path": "packages/veltra-router" },
-    { "path": "packages/vite-plugin-veltra" }
+    { "path": "packages/babel-preset" },
+    { "path": "packages/core" },
+    { "path": "packages/router" },
+    { "path": "packages/vite-plugin" }
   ]
 }
