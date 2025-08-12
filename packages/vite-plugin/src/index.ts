@@ -1,7 +1,7 @@
 import { transform } from "@babel/core";
 // @ts-expect-error - not typed
 import babelPluginTS from "@babel/preset-typescript";
-import type { Plugin } from "vite";
+import type { Plugin, ViteDevServer } from "vite";
 
 import babelPluginVynn from "../../babel-preset/src/index";
 
@@ -10,7 +10,11 @@ import babelPluginVynn from "../../babel-preset/src/index";
  *
  * @returns The vite plugin.
  */
-export default function vitePlugin(): Plugin {
+export default (): Plugin[] => {
+  return [vynnPlugin(), ssrCSSDev()];
+};
+
+const vynnPlugin = (): Plugin => {
   return {
     name: "vite-plugin-vynn",
     enforce: "pre",
@@ -31,4 +35,52 @@ export default function vitePlugin(): Plugin {
       }
     },
   };
-}
+};
+
+const ssrCSSDev = (): Plugin => {
+  const virtualCssPath = "/@virtual:ssr-css.css";
+
+  const collectedStyles = new Map<string, string>();
+
+  let server: ViteDevServer;
+
+  return {
+    name: "vite-plugin-ssr-css-dev",
+    apply: "serve",
+    transform(code: string, id: string) {
+      if (id.includes("node_modules")) return null;
+      if (id.includes(".css")) {
+        collectedStyles.set(id, code);
+      }
+      return null;
+    },
+    configureServer(server_) {
+      server = server_;
+
+      server.middlewares.use((req, _res, next) => {
+        if (req.url === virtualCssPath) {
+          _res.setHeader("Content-Type", "text/css");
+          _res.write(Array.from(collectedStyles.values()).join("\n"));
+          _res.end();
+          return;
+        }
+        next();
+      });
+    },
+
+    transformIndexHtml: {
+      handler: async () => {
+        return [
+          {
+            tag: "link",
+            injectTo: "head",
+            attrs: {
+              rel: "stylesheet",
+              href: virtualCssPath,
+            },
+          },
+        ];
+      },
+    },
+  };
+};

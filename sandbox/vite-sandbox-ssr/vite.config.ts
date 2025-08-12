@@ -4,5 +4,5 @@ import vynn from "vite-plugin-vynn";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [tsconfigPaths(), vynn(), tailwindcss()],
+  plugins: [vynn(), tailwindcss(), tsconfigPaths()],
 });

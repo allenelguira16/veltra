@@ -4,9 +4,11 @@ import express from "express";
 import pretty from "pretty";
 import { createServer as createViteServer, ViteDevServer } from "vite";
 
+const PORT = 5173;
 const isDev = process.env.NODE_ENV === "development";
 
 async function createServer() {
+  const start = Date.now();
   const app = express();
   let vite: ViteDevServer | undefined;
 
@@ -54,7 +56,14 @@ async function createServer() {
     }
   });
 
-  app.listen(5173);
+  app.listen(PORT, () => {
+    const elapsed = Date.now() - start;
+
+    console.log(`\n  VYNN v0.0.0  ready in ${elapsed} ms\n`);
+    console.log(`  ➜  Local:   \x1b[36mhttp://localhost:${PORT}/\x1b[0m`);
+    console.log(`  ➜  Network: use --host to expose`);
+    console.log(`  ➜  press h + enter to show help\n`);
+  });
 }
 
 createServer();

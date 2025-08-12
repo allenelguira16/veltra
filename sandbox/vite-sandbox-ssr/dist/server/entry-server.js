@@ -1,607 +1,980 @@
-const ie = /* @__PURE__ */ new Set(["animationIterationCount", "borderImageOutset", "borderImageSlice", "borderImageWidth", "boxFlex", "boxFlexGroup", "boxOrdinalGroup", "columnCount", "flex", "flexGrow", "flexPositive", "flexShrink", "flexNegative", "flexOrder", "gridRow", "gridColumn", "fontWeight", "lineClamp", "lineHeight", "opacity", "order", "orphans", "tabSize", "widows", "zIndex", "zoom", "fillOpacity", "floodOpacity", "stopOpacity", "strokeDasharray", "strokeDashoffset", "strokeMiterlimit", "strokeOpacity", "strokeWidth"]), b = typeof document > "u";
-function fe(e) {
-  const n = [];
-  for (const t in e) {
-    if (t.startsWith("on") && typeof e[t] == "function") continue;
-    const o = typeof e[t] == "function" ? e[t]() : e[t];
-    if (t !== "ref" && t !== "style") {
-      if (typeof o == "boolean") {
-        o && n.push(t);
-        continue;
-      }
-      n.push(`${t}="${o}"`);
+const UNIT_LESS_PROPS = /* @__PURE__ */ new Set(["animationIterationCount", "borderImageOutset", "borderImageSlice", "borderImageWidth", "boxFlex", "boxFlexGroup", "boxOrdinalGroup", "columnCount", "flex", "flexGrow", "flexPositive", "flexShrink", "flexNegative", "flexOrder", "gridRow", "gridColumn", "fontWeight", "lineClamp", "lineHeight", "opacity", "order", "orphans", "tabSize", "widows", "zIndex", "zoom", "fillOpacity", "floodOpacity", "stopOpacity", "strokeDasharray", "strokeDashoffset", "strokeMiterlimit", "strokeOpacity", "strokeWidth"]);
+const IS_SSR = typeof document === "undefined";
+function applyProps$1(props) {
+  const transformedProps = [];
+  for (const key in props) {
+    if (key.startsWith("on") && typeof props[key] === "function") {
+      continue;
     }
+    const value = typeof props[key] === "function" ? props[key]() : props[key];
+    if (key === "ref") {
+      continue;
+    }
+    if (key === "style") {
+      continue;
+    }
+    if (typeof value === "boolean") {
+      if (value) transformedProps.push(key);
+      continue;
+    }
+    transformedProps.push(`${key}="${value}"`);
   }
-  return n.length > 0 && n.unshift(""), n.join(" ");
+  if (transformedProps.length > 0) transformedProps.unshift("");
+  return transformedProps.join(" ");
 }
-function L(e) {
-  if (e instanceof Node) return e;
-  if (typeof e == "string" || typeof e == "number") return document.createTextNode(String(e));
-  throw new Error(`Unknown value: ${e}`);
+function getNode$1(jsxElement) {
+  if (jsxElement instanceof Node) {
+    return jsxElement;
+  }
+  if (typeof jsxElement === "string" || typeof jsxElement === "number") {
+    return document.createTextNode(String(jsxElement));
+  }
+  throw new Error(`Unknown value: ${jsxElement}`);
 }
-const k$1 = /* @__PURE__ */ new Map(), ue = (e) => {
-  let n;
-  return e !== void 0 ? (k$1.has(e) || k$1.set(e, {
-    states: []
-  }), n = k$1.get(e)) : n = {
-    states: []
-  }, {
-    ...n,
+function memo(fn) {
+  let cachedResult;
+  let firstRun = true;
+  return (...args) => {
+    if (firstRun) {
+      cachedResult = fn(...args);
+      firstRun = false;
+    }
+    return cachedResult;
+  };
+}
+const stateMap = /* @__PURE__ */ new Map();
+const createStateContext = (key) => {
+  let instance;
+  if (key !== void 0) {
+    if (!stateMap.has(key)) {
+      stateMap.set(key, {
+        states: []
+      });
+    }
+    instance = stateMap.get(key);
+  } else {
+    instance = {
+      states: []
+    };
+  }
+  return {
+    ...instance,
     index: 0
   };
 };
-let U = null;
-function A(e) {
-  U = e;
+let runtimeContext = null;
+function setRuntimeContext(ctx) {
+  runtimeContext = ctx;
 }
-function x() {
-  return U;
+function getRuntimeContext() {
+  return runtimeContext;
 }
-const _ = /* @__PURE__ */ new Map();
-function q(e, n) {
-  _.set(e, n);
+function createTargetNode(name2) {
+  let targetNode;
+  if (process.env.NODE_ENV === "development") {
+    targetNode = document.createComment(toKebabCase(name2));
+  } else {
+    targetNode = document.createTextNode("");
+  }
+  rootNodes.add(targetNode);
+  return targetNode;
 }
-function ae(e) {
-  return _.get(e);
+function toKebabCase(str) {
+  return str.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/([A-Z])([A-Z][a-z])/g, "$1-$2").toLowerCase();
 }
-function E(e) {
-  let n;
-  return process.env.NODE_ENV === "development" ? n = document.createComment(le(e)) : n = document.createTextNode(""), v.add(n), n;
+const isNil = (value) => {
+  return value === void 0 || value === null || value === false;
+};
+const toArray = (item) => {
+  return (Array.isArray(item) ? item : [item]).flat(Infinity);
+};
+function renderChildren$1(children) {
+  const transformedChildren = [];
+  for (const child of toArray(getNode(children)).flat()) {
+    if (child) transformedChildren.push(child);
+  }
+  return transformedChildren.join("");
 }
-function le(e) {
-  return e.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/([A-Z])([A-Z][a-z])/g, "$1-$2").toLowerCase();
+function getNode(jsxElement) {
+  if (typeof jsxElement === "string") {
+    return jsxElement;
+  }
+  if (isNil(jsxElement)) {
+    return void 0;
+  }
+  if (jsxElement instanceof Function) {
+    return getNode(jsxElement());
+  }
+  if (Array.isArray(jsxElement)) {
+    return jsxElement.map(getNode).flat();
+  }
+  return String(jsxElement);
 }
-const B = (e) => e == null || e === false;
-const y = (e) => (Array.isArray(e) ? e : [e]).flat(1 / 0);
-function de(e) {
-  const n = [];
-  for (const t of y(O(e)).flat()) t && n.push(t);
-  return n.join("");
-}
-function O(e) {
-  if (typeof e == "string") return e;
-  if (!B(e)) return e instanceof Function ? O(e()) : Array.isArray(e) ? e.map(O).flat() : String(e);
-}
-function he(e, n, t) {
-  if (typeof e == "function") {
-    for (const o in n) n[o] = n[o] instanceof Function ? n[o]() : n[o];
-    return e({
-      ...n,
-      children: t
+function h$1(type, props, children) {
+  if (typeof type === "function") {
+    for (const key in props) {
+      props[key] = props[key] instanceof Function ? props[key]() : props[key];
+    }
+    return type({
+      ...props,
+      children
     });
   }
-  return `<${e}${fe(n)}>${de(t)}</${e}>`;
+  return `<${type}${applyProps$1(props)}>${renderChildren$1(children)}</${type}>`;
 }
-const G = (e, {
-  children: n = [],
-  ...t
-}, o) => b ? he(e, t, y(n)) : Pe(e, t, n, o);
-let a = null;
-function Z(e) {
-  a = e;
+const jsx = (type, {
+  children = [],
+  ...props
+}, key) => {
+  if (IS_SSR) {
+    return h$1(type, props, children);
+  }
+  return h(type, props, children, key);
+};
+let activeEffect = null;
+function setActiveEffect(newActiveEffect) {
+  activeEffect = newActiveEffect;
 }
-const T = /* @__PURE__ */ new Set();
-let P = false;
-function me(e) {
-  T.add(e), P || (P = true, queueMicrotask(() => {
-    for (const n of T) n();
-    T.clear(), P = false;
-  }));
+const effectQueue = /* @__PURE__ */ new Set();
+let isFlushing = false;
+function scheduleEffect(effect2) {
+  effectQueue.add(effect2);
+  if (!isFlushing) {
+    isFlushing = true;
+    queueMicrotask(() => {
+      for (const effect3 of effectQueue) {
+        effect3();
+      }
+      effectQueue.clear();
+      isFlushing = false;
+    });
+  }
 }
-function $(e) {
-  const n = x(), t = async () => {
-    F(t), t.cleanup && (t.cleanup(), t.cleanup = void 0);
-    const r = a;
-    a = t, n && n.effect.push(t);
+function effect(fn) {
+  const context = getRuntimeContext();
+  const wrappedEffect = async () => {
+    removeEffect(wrappedEffect);
+    if (wrappedEffect.cleanup) {
+      wrappedEffect.cleanup();
+      wrappedEffect.cleanup = void 0;
+    }
+    const previousEffect = activeEffect;
+    activeEffect = wrappedEffect;
+    if (context) context.effect.push(wrappedEffect);
     try {
-      const s = e();
-      if (typeof s == "function") t.cleanup = s;
-      else if (s instanceof Promise) {
-        const c = await s;
-        typeof c == "function" && (t.cleanup = c);
+      const result = fn();
+      if (typeof result === "function") {
+        wrappedEffect.cleanup = result;
+      } else if (result instanceof Promise) {
+        const cleanup = await result;
+        if (typeof cleanup === "function") {
+          wrappedEffect.cleanup = cleanup;
+        }
       }
     } finally {
-      a = r;
+      activeEffect = previousEffect;
     }
-  }, o = () => F(t);
-  return t.deps = [], t(), o;
+  };
+  const disposer = () => removeEffect(wrappedEffect);
+  wrappedEffect.deps = [];
+  wrappedEffect();
+  return disposer;
 }
-function F(e) {
-  if (e.deps) {
-    for (const n of e.deps) n.delete(e);
-    e.deps.length = 0;
+function removeEffect(effect2) {
+  if (effect2.deps) {
+    for (const depSet of effect2.deps) {
+      depSet.delete(effect2);
+    }
+    effect2.deps.length = 0;
   }
-  e.cleanup && (e.cleanup(), e.cleanup = void 0);
+  if (effect2.cleanup) {
+    effect2.cleanup();
+    effect2.cleanup = void 0;
+  }
 }
-const R = /* @__PURE__ */ new WeakMap();
-function J(e, n) {
-  if (!a) return;
-  let t = R.get(e);
-  t || (t = /* @__PURE__ */ new Map(), R.set(e, t));
-  let o = t.get(n);
-  o || (o = /* @__PURE__ */ new Set(), t.set(n, o)), o.has(a) || (o.add(a), a.deps ? a.deps.push(o) : a.deps = [o]);
+const targetToPropertyEffectsMap = /* @__PURE__ */ new WeakMap();
+function track(target, key) {
+  if (!activeEffect) return;
+  let propertyEffectsMap = targetToPropertyEffectsMap.get(target);
+  if (!propertyEffectsMap) {
+    propertyEffectsMap = /* @__PURE__ */ new Map();
+    targetToPropertyEffectsMap.set(target, propertyEffectsMap);
+  }
+  let effects = propertyEffectsMap.get(key);
+  if (!effects) {
+    effects = /* @__PURE__ */ new Set();
+    propertyEffectsMap.set(key, effects);
+  }
+  if (!effects.has(activeEffect)) {
+    effects.add(activeEffect);
+    if (activeEffect.deps) {
+      activeEffect.deps.push(effects);
+    } else {
+      activeEffect.deps = [effects];
+    }
+  }
 }
-function V(e, n) {
-  const t = R.get(e);
-  if (!t) return;
-  const o = t.get(n);
-  if (o) for (const r of o) me(r);
+function trigger(target, key) {
+  const propertyEffectsMap = targetToPropertyEffectsMap.get(target);
+  if (!propertyEffectsMap) return;
+  const effects = propertyEffectsMap.get(key);
+  if (!effects) return;
+  for (const effect2 of effects) {
+    scheduleEffect(effect2);
+  }
 }
-function K(e) {
-  const n = x();
-  if (n && n.state) {
+function state(initialValue) {
+  const context = getRuntimeContext();
+  if (context && context.state) {
     const {
-      states: t,
-      index: o
-    } = n.state;
-    if (t.length <= o) {
-      const r = Q(e);
-      t.push(r);
+      states,
+      index
+    } = context.state;
+    if (states.length <= index) {
+      const s = createState(initialValue);
+      states.push(s);
     }
-    return t[n.state.index++];
+    return states[context.state.index++];
   }
-  return Q(e);
+  return createState(initialValue);
 }
-function Q(e) {
-  const n = {
-    value: e
+function createState(initialValue) {
+  const state2 = {
+    value: initialValue
   };
-  return new Proxy(n, {
-    get(t, o, r) {
-      return J(t, o), Reflect.get(t, o, r);
+  return new Proxy(state2, {
+    get(target, key, receiver) {
+      track(target, key);
+      return Reflect.get(target, key, receiver);
     },
-    set(t, o, r, s) {
-      const c = t[o], i = Reflect.set(t, o, r, s);
-      return c !== r && V(t, o), i;
+    set(target, key, newValue, receiver) {
+      const oldValue = target[key];
+      const result = Reflect.set(target, key, newValue, receiver);
+      if (oldValue !== newValue) {
+        trigger(target, key);
+      }
+      return result;
     }
   });
 }
-function I(e) {
-  const n = a;
-  Z(null);
+function untrack(fn) {
+  const prevEffect = activeEffect;
+  setActiveEffect(null);
   try {
-    return e();
+    return fn();
   } finally {
-    Z(n);
+    setActiveEffect(prevEffect);
   }
 }
-const D = /* @__PURE__ */ new Map();
-function ye(e, n) {
-  D.set(e, n);
+const suspenseHandlerStack = [];
+function getSuspenseHandler() {
+  return suspenseHandlerStack[suspenseHandlerStack.length - 1];
 }
-function H(e) {
-  const n = D.get(e);
-  if (n) {
-    for (const t of n) t();
-    D.delete(e);
-  }
-  for (const t of e.childNodes) H(t);
-}
-function X(e) {
-  if (b) return;
-  const n = x();
-  if (n && n.destroy) n.destroy.push(e);
-  else throw new Error("onDestroy called outside of component");
-}
-function W(e) {
-  if (b) return;
-  const n = x();
-  if (n && n.mount) n.mount.push(e);
-  else throw new Error("onMount called outside of component");
-}
-function ve(e) {
-  const n = ae(e);
-  if (!n) return;
-  const t = [];
-  ye(e, t), requestAnimationFrame(() => {
-    Promise.resolve().then(async () => {
-      for (const o of n.mount) {
-        const r = await o();
-        r && t.push(r);
-      }
-      for (const o of n.destroy) t.push(o);
-      for (const o of n.effect) t.push(() => Promise.resolve(F(o)));
-    });
-  });
-}
-const C = /* @__PURE__ */ new WeakMap();
-function we(e, n, t) {
-  let o = C.get(e);
-  o || (o = /* @__PURE__ */ new Map(), C.set(e, o)), o.has(n) && e.removeEventListener(n, o.get(n)), e.addEventListener(n, t), o.set(n, t);
-}
-function xe(e, n) {
-  const t = C.get(e);
-  if (!t) return;
-  const o = t.get(n);
-  o && (e.removeEventListener(n, o), t.delete(n)), t.size === 0 && C.delete(e);
-}
-function Ee(e, n) {
-  for (const t in n) $(() => {
-    const o = n[t], r = typeof o == "function" && t !== "ref" ? o() : o;
-    if (t.startsWith("on") && e instanceof HTMLElement) {
-      const c = t.slice(2).toLowerCase();
-      return we(e, c, r), () => xe(e, c);
-    }
-    const s = e instanceof HTMLInputElement || e instanceof HTMLTextAreaElement || e instanceof HTMLSelectElement;
-    if (t === "value" && s && typeof n.onInput != "function" && typeof n.onChange != "function") {
-      e.value = r;
-      const c = () => {
-        e.value !== r && (e.value = r);
-      };
-      return e.setAttribute(t, r), e.addEventListener("input", c), () => e.removeEventListener("input", c);
-    }
-    if (t === "ref" && typeof r == "function") {
-      r(e);
-      return;
-    }
-    if (t === "style" && typeof r == "object" && e instanceof HTMLElement) {
-      Se(e, r);
-      return;
-    }
-    if (typeof r == "boolean") {
-      e.toggleAttribute(t, r);
-      return;
-    }
-    if (t === "html" && typeof r == "string") {
-      e.innerHTML = r;
-      return;
-    }
-    e.setAttribute(t, r);
-  });
-}
-function Se(e, n) {
-  if (e instanceof HTMLElement) for (const t in n) {
-    if (!Object.hasOwn(n, t)) continue;
-    const o = n[t];
-    if (o == null || t === "length" || t === "parentRule") continue;
-    const r = typeof o == "number", s = r && !ie.has(t);
-    e.style[t] = r ? s ? `${o}px` : `${o}` : String(o);
-  }
-}
-function Y({
-  children: e
-}) {
-  return () => e instanceof Function ? e() : e;
-}
-function N(e, n, t = null) {
-  const o = [];
-  function r(c, i) {
-    let f = [], u = [];
-    const l = () => {
-      for (const p2 of f) H(p2), p2.parentNode === e && e.removeChild(p2);
-      for (const p2 of u) p2();
-      f = [], u = [];
-    }, m = $(() => {
-      const p2 = ee();
-      try {
-        l();
-        const g = y(c instanceof Function ? c() : c);
-        for (const w of g) if (!B(w)) if (typeof w == "function") {
-          const d = E("childAnchor");
-          e.insertBefore(d, i);
-          const ce = r(w, d);
-          u.push(ce), f.push(d);
-        } else {
-          const d = L(w);
-          ve(d), e.insertBefore(d, i), f.push(d);
-        }
-      } catch (g) {
-        if (g instanceof Promise) p2 && p2(g);
-        else throw g;
-      }
-    });
-    return () => {
-      m(), l();
-    };
-  }
-  const s = r(n, t);
-  return o.push(s), () => {
-    for (const c of o) c();
-  };
-}
-const M = [];
-function z(e) {
+function Suspense(props) {
+  if (IS_SSR) return props.fallback;
   const {
-    fallback: n,
-    children: t
-  } = e;
-  let o;
-  const r = E("Suspense"), s = () => t(), c = () => n == null ? void 0 : n(), i = [], f = (l) => {
-    queueMicrotask(() => {
-      i.forEach((m) => m()), c && u(c);
-    }), l.then(() => {
-      i.forEach((m) => m()), u(s);
+    fallback: _fallback,
+    children: _children
+  } = props;
+  const children = memo(() => _children());
+  const fallback = () => _fallback == null ? void 0 : _fallback();
+  const view = state();
+  const handler = (promise) => {
+    suspenseHandlerStack.pop();
+    view.value = fallback;
+    promise.then(() => {
+      withSuspenseRender(children);
     });
-  }, u = (l) => {
-    o && (M.push(f), i.push(N(o, l, r)), M.pop());
   };
-  return W(() => {
-    r.parentNode && (o = r.parentNode, u(s));
-  }), r;
+  const withSuspenseRender = (newView) => {
+    suspenseHandlerStack.push(handler);
+    view.value = newView;
+  };
+  withSuspenseRender(children);
+  return () => {
+    var _a;
+    return (_a = view.value) == null ? void 0 : _a.call(view);
+  };
 }
-function ee() {
-  return M[M.length - 1];
+const eventRegistry = /* @__PURE__ */ new WeakMap();
+function addEventListener(element, type, listener) {
+  let handlers = eventRegistry.get(element);
+  if (!handlers) {
+    handlers = /* @__PURE__ */ new Map();
+    eventRegistry.set(element, handlers);
+  }
+  if (handlers.has(type)) {
+    element.removeEventListener(type, handlers.get(type));
+  }
+  element.addEventListener(type, listener);
+  handlers.set(type, listener);
 }
-function te(e, n) {
-  for (const t of n.nodes) e.contains(t) && (H(t), e.removeChild(t));
-}
-function $e(e, n, t) {
-  for (const o of n) e.insertBefore(o, t);
-}
-function Ce(e, n, t, o) {
-  const r = /* @__PURE__ */ new Map();
-  let s = e.nextSibling;
-  for (let c = 0; c < o.length; c++) {
-    const i = o[c];
-    r.set(i, (r.get(i) || 0) + 1);
-    let f = 0;
-    const u = t.find((l) => l.item === i && ++f === r.get(i));
-    u && (I(() => u.index.value = c), $e(n, u.nodes, s), s = u.nodes[u.nodes.length - 1].nextSibling);
+function removeEventListener(element, type) {
+  const handlers = eventRegistry.get(element);
+  if (!handlers) return;
+  const listener = handlers.get(type);
+  if (listener) {
+    element.removeEventListener(type, listener);
+    handlers.delete(type);
+  }
+  if (handlers.size === 0) {
+    eventRegistry.delete(element);
   }
 }
-function ne(e) {
-  const n = /* @__PURE__ */ new Map();
-  for (const t of e) n.set(t, (n.get(t) || 0) + 1);
-  return n;
-}
-function Ne(e, n, t) {
-  const o = ne(n), r = ne(t.map((s) => s.item));
-  return t.filter((s) => (r.get(s.item) ?? 0) > (o.get(s.item) ?? 0) ? (te(e, s), r.set(s.item, (r.get(s.item) ?? 0) - 1), false) : true);
-}
-function Me(e, n, t) {
-  const o = [], r = /* @__PURE__ */ new Map();
-  for (const s of e) if (r.set(s, (r.get(s) || 0) + 1), n.filter((c) => c.item === s).length + o.filter((c) => c.item === s).length < (r.get(s) || 0)) {
-    const c = K(-1), i = y(L(t(s, c)));
-    o.push({
-      item: s,
-      nodes: i,
-      index: c
-    });
-  }
-  return o;
-}
-function j({
-  children: e,
-  each: n,
-  handler: t
-}) {
-  const o = E("Loop");
-  v.add(o);
-  let r = [];
-  function s(i, f) {
-    r = Ne(i, f, r), r.push(...Me(f, r, e)), Ce(o, i, r, f);
-  }
-  const c = () => {
-    $(() => {
-      try {
-        const i = o.parentNode;
-        if (!i) return;
-        const f = n();
-        if (!f) return;
-        s(i, [...f]);
-      } catch (i) {
-        if (i instanceof Promise) t && t(i);
-        else throw i;
+function applyProps(element, props) {
+  for (const key in props) {
+    effect(() => {
+      const raw = props[key];
+      const value = typeof raw === "function" && key !== "ref" ? raw() : raw;
+      if (key.startsWith("on") && element instanceof HTMLElement) {
+        const type = key.slice(2).toLowerCase();
+        addEventListener(element, type, value);
+        return () => removeEventListener(element, type);
       }
+      const isFormControl = element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement;
+      if (key === "value" && isFormControl && typeof props["onInput"] !== "function" && typeof props["onChange"] !== "function") {
+        element.value = value;
+        const revert = () => {
+          if (element.value !== value) {
+            element.value = value;
+          }
+        };
+        element.setAttribute(key, value);
+        element.addEventListener("input", revert);
+        return () => element.removeEventListener("input", revert);
+      }
+      if (key === "ref" && typeof value === "function") {
+        value(element);
+        return;
+      }
+      if (key === "style" && typeof value === "object" && element instanceof HTMLElement) {
+        applyStyle(element, value);
+        return;
+      }
+      if (typeof value === "boolean") {
+        element.toggleAttribute(key, value);
+        return;
+      }
+      if (key === "html" && typeof value === "string") {
+        element.innerHTML = value;
+        return;
+      }
+      element.setAttribute(key, value);
     });
-  };
-  return W(() => {
-    c();
-  }), X(() => {
-    for (const i of r) te(o.parentNode, i);
-  }), o;
+  }
 }
-const Le = [z, j];
-function ke(e, n) {
-  if (!Le.includes(e)) for (const t in n) n[t] = n[t] instanceof Function ? n[t]() : n[t];
+function applyStyle(element, style) {
+  if (!(element instanceof HTMLElement)) return;
+  for (const key in style) {
+    if (!Object.hasOwn(style, key)) continue;
+    const value = style[key];
+    if (value == null) continue;
+    if (key === "length" || key === "parentRule") continue;
+    const isNumeric = typeof value === "number";
+    const needsUnit = isNumeric && !UNIT_LESS_PROPS.has(key);
+    element.style[key] = isNumeric ? needsUnit ? `${value}px` : `${value}` : String(value);
+  }
 }
-const v = /* @__PURE__ */ new WeakSet(), Ae = [z, j, Y];
-function oe(e, {
-  key: n,
-  ...t
-}, o) {
-  ke(e, t);
-  const r = n ? n().toString() + e.toString() : void 0, s = {
+function Fragment({
+  children
+}) {
+  return () => children instanceof Function ? children() : children;
+}
+const cleanupMap = /* @__PURE__ */ new Map();
+function setComponentCleanup(node, cleanups) {
+  cleanupMap.set(node, cleanups);
+}
+function runComponentCleanup(node) {
+  const cleanups = cleanupMap.get(node);
+  if (cleanups) {
+    for (const cleanup of cleanups) {
+      cleanup();
+    }
+    cleanupMap.delete(node);
+  }
+  for (const child of node.childNodes) {
+    runComponentCleanup(child);
+  }
+}
+function createLifeCycleContext(key) {
+  const context = {
     id: crypto.randomUUID(),
     mount: [],
-    state: ue(r),
+    state: createStateContext(key),
     effect: [],
     destroy: []
   };
-  A(s);
-  const c = y(I(() => e({
-    ...t,
-    children: o
-  })));
-  if (v.has(c[0]) && Ae.includes(e)) return A(null), q(c[0], s), c;
-  const i = E(e.name);
-  return v.add(i), A(null), q(i, s), [i, ...c];
+  return context;
 }
-let re = [], se = 0;
-function Oe() {
-  try {
-    const e = re[se];
-    if (!e) return;
-    for (let n = 0; n < e.childNodes.length; n++) {
-      const t = e.childNodes[n];
-      t instanceof Text && t.remove();
+let renderedDOM = [];
+let deferredRenderedDOM = [];
+let i = 0;
+function serverRenderedDOM() {
+  const nextDOM = () => {
+    const dom = [...renderedDOM, ...deferredRenderedDOM][i];
+    if (!dom) {
+      return void 0;
     }
-    return e;
-  } finally {
-    se++;
-  }
+    for (let j = 0; j < dom.childNodes.length; j++) {
+      const child = dom.childNodes[j];
+      if (child instanceof Text) {
+        child.remove();
+      }
+    }
+    return dom;
+  };
+  return {
+    renderedDOM: [...renderedDOM, ...deferredRenderedDOM],
+    get currentDOM() {
+      return nextDOM();
+    },
+    get isHydrating() {
+      return i < renderedDOM.length;
+    },
+    next: () => i++
+  };
 }
-function Pe(e, n, t, o) {
-  var _a;
-  if (typeof e == "function") return oe(e, {
-    key: o,
-    ...n
-  }, t);
-  h.push(((_a = n.xmlns) == null ? void 0 : _a.call(n)) ?? h[h.length - 1]);
-  const r = Fe(e);
-  return Ee(r, n), N(r, t), h.pop(), r;
+function runLifecycle(rootNode, context) {
+  if (!context) return;
+  const cleanups = [];
+  setComponentCleanup(rootNode, cleanups);
+  const runMounts = async () => {
+    for (const mountFn of context.mount) {
+      const cleanup = await mountFn();
+      if (cleanup) cleanups.push(cleanup);
+    }
+    for (const destroyFn of context.destroy) {
+      cleanups.push(destroyFn);
+    }
+    for (const effectFn of context.effect) {
+      cleanups.push(() => Promise.resolve(removeEffect(effectFn)));
+    }
+  };
+  const waitForHydration = () => {
+    if (!serverRenderedDOM().isHydrating) {
+      queueMicrotask(() => Promise.resolve().then(runMounts));
+    } else {
+      requestAnimationFrame(waitForHydration);
+    }
+  };
+  waitForHydration();
 }
-const h = [];
-function Fe(e) {
-  const n = Oe();
-  if (n) return n;
-  const t = h[h.length - 1];
-  return t ? document.createElementNS(t, e) : document.createElement(e);
-}
-const p = /* @__PURE__ */ new WeakMap();
-function k(r) {
-  function t(e) {
-    if (p.has(e)) return p.get(e);
-    const n = new Proxy(e, {
-      get(o, c, f) {
-        J(o, c);
-        const u = Reflect.get(o, c, f);
-        if (typeof u == "function") return u.bind(f);
-        const s = Reflect.getOwnPropertyDescriptor(o, c);
-        return (s == null ? void 0 : s.get) ? s.get.call(f) : typeof u == "object" && u !== null ? t(u) : u;
-      },
-      set(o, c, f, u) {
-        const s = o[c], y2 = Reflect.set(o, c, f, u);
-        return s !== f && V(o, c), y2;
+function renderChildren(parentNode, children, baseAnchor = null) {
+  const cleanups = [];
+  function renderRecursive(value, anchor) {
+    let nodes = [];
+    let disposers = [];
+    const cleanup = () => {
+      for (const node of nodes) {
+        runComponentCleanup(node);
+        if (node.parentNode === parentNode) {
+          parentNode.removeChild(node);
+        }
+      }
+      for (const dispose2 of disposers) dispose2();
+      nodes = [];
+      disposers = [];
+    };
+    const disposer = effect(() => {
+      try {
+        cleanup();
+        const resolvedChildren = value instanceof Function ? value() : value;
+        const children2 = toArray(resolvedChildren);
+        for (const child of children2) {
+          if (isNil(child)) continue;
+          if (typeof child === "function") {
+            const childAnchor = document.createTextNode("");
+            parentNode.insertBefore(childAnchor, anchor);
+            const childDisposer = renderRecursive(child, childAnchor);
+            disposers.push(childDisposer);
+            nodes.push(childAnchor);
+          } else {
+            const node = getNode$1(child);
+            parentNode.insertBefore(node, anchor);
+            nodes.push(node);
+          }
+        }
+      } catch (error) {
+        const handler = getSuspenseHandler();
+        if (error instanceof Promise && handler) {
+          handler(error);
+        } else {
+          throw error;
+        }
       }
     });
-    return p.set(e, n), n;
+    return () => {
+      disposer();
+      cleanup();
+    };
   }
-  return t(r);
+  const dispose = renderRecursive(children, baseAnchor);
+  cleanups.push(dispose);
+  return () => {
+    for (const c of cleanups) c();
+  };
 }
-const name = k({
+function setParentNode(node) {
+}
+function loop(items) {
+  return {
+    each: (children) => {
+      const each = items;
+      children = children;
+      if (IS_SSR) {
+        const renderedItems = each().map((item, i2) => children(item, {
+          value: i2
+        }));
+        return renderedItems;
+      }
+      return jsx(Loop, {
+        each,
+        children
+      });
+    }
+  };
+}
+function Loop({
+  each,
+  children
+}) {
+  const result = state([]);
+  const listFn = mapArray(each, children);
+  effect(() => {
+    try {
+      result.value = listFn();
+    } catch (err) {
+      if (err instanceof Promise) {
+        const handler = getSuspenseHandler();
+        handler == null ? void 0 : handler(err);
+      } else {
+        throw err;
+      }
+    }
+  });
+  return () => result.value;
+}
+function mapArray(list, mapFn) {
+  let items = [];
+  return () => {
+    var _a, _b;
+    const arr = list() || [];
+    const len = arr.length;
+    const newItems = new Array(len);
+    const oldIndexMap = /* @__PURE__ */ new Map();
+    for (let i2 = 0; i2 < items.length; i2++) {
+      const key = items[i2].value;
+      if (!oldIndexMap.has(key)) oldIndexMap.set(key, []);
+      oldIndexMap.get(key).push(i2);
+    }
+    const newToOld = new Array(len).fill(-1);
+    for (let i2 = 0; i2 < len; i2++) {
+      const value = arr[i2];
+      const oldIndices = oldIndexMap.get(value);
+      if (oldIndices && oldIndices.length) {
+        const oldIndex = oldIndices.shift();
+        newToOld[i2] = oldIndex;
+        newItems[i2] = items[oldIndex];
+      } else {
+        const idxState = state(i2);
+        const element = mapFn(value, idxState);
+        newItems[i2] = {
+          value,
+          index: idxState,
+          element
+        };
+      }
+    }
+    for (let i2 = 0; i2 < items.length; i2++) {
+      if (!newToOld.includes(i2)) {
+        const el = items[i2].element;
+        (_a = el.parentNode) == null ? void 0 : _a.removeChild(el);
+      }
+    }
+    const seq = longestIncreasingSubsequence(newToOld);
+    let seqIdx = seq.length - 1;
+    for (let i2 = len - 1; i2 >= 0; i2--) {
+      const item = newItems[i2];
+      if (newToOld[i2] === -1 || i2 !== seq[seqIdx]) {
+        const anchor = i2 + 1 < len ? newItems[i2 + 1].element : null;
+        (_b = item.element.parentNode) == null ? void 0 : _b.insertBefore(item.element, anchor);
+      } else {
+        seqIdx--;
+      }
+      item.index.value = i2;
+    }
+    items = newItems;
+    return items.map((it) => it.element);
+  };
+}
+function longestIncreasingSubsequence(arr) {
+  const p = arr.slice();
+  const result = [];
+  let u, v;
+  for (let i2 = 0; i2 < arr.length; i2++) {
+    const n = arr[i2];
+    if (n < 0) continue;
+    if (result.length === 0 || arr[result[result.length - 1]] < n) {
+      p[i2] = result.length > 0 ? result[result.length - 1] : -1;
+      result.push(i2);
+      continue;
+    }
+    u = 0;
+    v = result.length - 1;
+    while (u < v) {
+      const c = (u + v) / 2 | 0;
+      if (arr[result[c]] < n) u = c + 1;
+      else v = c;
+    }
+    if (n < arr[result[u]]) {
+      if (u > 0) p[i2] = result[u - 1];
+      result[u] = i2;
+    }
+  }
+  u = result.length;
+  v = result[u - 1];
+  while (u-- > 0) {
+    result[u] = v;
+    v = p[v];
+  }
+  return result;
+}
+const IGNORE_COMPONENT = [Suspense, Loop];
+function resolveComponentProps(type, props) {
+  if (IGNORE_COMPONENT.includes(type)) return;
+  for (const key in props) {
+    props[key] = props[key] instanceof Function ? props[key]() : props[key];
+  }
+}
+const rootNodes = /* @__PURE__ */ new WeakSet();
+function mountComponent(type, {
+  key: _key,
+  ...props
+}, children) {
+  resolveComponentProps(type, props);
+  const key = _key ? _key().toString() + type.toString() : void 0;
+  const context = createLifeCycleContext(key);
+  setRuntimeContext(context);
+  const rootNode = createTargetNode(type.name);
+  const jsxElements = toArray([rootNode, untrack(() => type({
+    ...props,
+    children
+  }))]);
+  setRuntimeContext(null);
+  runLifecycle(rootNode, context);
+  return jsxElements;
+}
+if (!IS_SSR) {
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const removedNodes of mutation.removedNodes) {
+        runComponentCleanup(removedNodes);
+      }
+    }
+  });
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
+function h(type, props, children, key) {
+  var _a;
+  try {
+    if (typeof type === "function") {
+      return mountComponent(type, {
+        key,
+        ...props
+      }, children);
+    }
+    xmlnsStack.push(((_a = props.xmlns) == null ? void 0 : _a.call(props)) ?? xmlnsStack[xmlnsStack.length - 1]);
+    const element = createElement(type);
+    setParentNode(element);
+    applyProps(element, props);
+    renderChildren(element, children);
+    xmlnsStack.pop();
+    return element;
+  } finally {
+  }
+}
+const xmlnsStack = [];
+function createElement(tag) {
+  const {
+    currentDOM,
+    isHydrating,
+    next
+  } = serverRenderedDOM();
+  if (isHydrating && currentDOM) {
+    try {
+      return currentDOM;
+    } finally {
+      next();
+    }
+  }
+  const currentXmlns = xmlnsStack[xmlnsStack.length - 1];
+  return currentXmlns ? document.createElementNS(currentXmlns, tag) : document.createElement(tag);
+}
+function baseResource(fetcher) {
+  let loading = true;
+  let error = null;
+  let data = void 0;
+  let promise = null;
+  let promiseStatus = "pending";
+  const version = state(0);
+  const refetch = async () => {
+    loading = true;
+    error = null;
+    data = void 0;
+    promiseStatus = "pending";
+    promise = fetcher();
+    promise.then((result) => {
+      data = result;
+      error = null;
+      promiseStatus = "fulfilled";
+      loading = false;
+      untrack(() => version.value++);
+    }).catch((err) => {
+      data = void 0;
+      error = err;
+      promiseStatus = "rejected";
+      loading = false;
+      untrack(() => version.value++);
+    });
+    untrack(() => version.value++);
+  };
+  effect(() => {
+    refetch();
+  });
+  return {
+    get loading() {
+      version.value;
+      return loading;
+    },
+    get error() {
+      return error;
+    },
+    get data() {
+      version.value;
+      if (promiseStatus === "pending") throw promise;
+      if (promiseStatus === "rejected") throw error;
+      return data;
+    },
+    refetch,
+    mutate(newValue) {
+      data = newValue;
+      version.value++;
+    }
+  };
+}
+const resourceCache = /* @__PURE__ */ new Map();
+function resource(fetcher, key) {
+  if (resourceCache.has(key)) {
+    return resourceCache.get(key);
+  }
+  const resourceFn = baseResource(fetcher);
+  resourceCache.set(key, resourceFn);
+  return resourceFn;
+}
+const proxyMap = /* @__PURE__ */ new WeakMap();
+function store(initialObject) {
+  function createReactiveObject(obj) {
+    if (proxyMap.has(obj)) return proxyMap.get(obj);
+    const proxy = new Proxy(obj, {
+      get(target, key, receiver) {
+        track(target, key);
+        const result = Reflect.get(target, key, receiver);
+        if (typeof result === "function") {
+          return result.bind(receiver);
+        }
+        const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
+        if (descriptor == null ? void 0 : descriptor.get) {
+          return descriptor.get.call(receiver);
+        }
+        if (typeof result === "object" && result !== null) {
+          return createReactiveObject(result);
+        }
+        return result;
+      },
+      set(target, key, value, receiver) {
+        const oldValue = target[key];
+        const result = Reflect.set(target, key, value, receiver);
+        if (oldValue !== value) {
+          trigger(target, key);
+        }
+        return result;
+      }
+    });
+    proxyMap.set(obj, proxy);
+    return proxy;
+  }
+  return createReactiveObject(initialObject);
+}
+function onMount(fn) {
+  if (IS_SSR) return;
+  const context = getRuntimeContext();
+  if (!context) {
+    throw new Error("onMount called outside of component");
+  }
+  context.mount.push(fn);
+}
+const sleep = (ms) => new Promise((resolve) => {
+  setTimeout(resolve, ms);
+});
+const name = store({
   firstName: "First name",
   lastName: "Last name"
 });
-const Dropdowns = () => {
-  const dropdownStore = k({
-    showDropdown: true,
+const PokeDex = () => {
+  const pokeDex = store({
+    isLoading: true,
+    pokeDexList: [],
+    prevLink: "",
+    nextLink: "",
     sortDirection: "asc",
-    numbers: [1, 2, 3, 4, 5, 6, 7, 8],
-    handleSort() {
-      this.numbers = [...this.numbers].sort((a2, b2) => {
-        return this.sortDirection === "desc" ? a2 - b2 : b2 - a2;
+    async fetchData(url, controller) {
+      var _a, _b;
+      if (!url) return;
+      this.isLoading = true;
+      const response = await fetch(url, {
+        signal: controller == null ? void 0 : controller.signal
       });
+      const json = await response.json();
+      await sleep(200);
+      this.pokeDexList = json.results;
+      this.prevLink = ((_a = json.previous) == null ? void 0 : _a.replace(/limit=\d+/, "limit=20")) ?? "";
+      this.nextLink = ((_b = json.next) == null ? void 0 : _b.replace(/limit=\d+/, "limit=20")) ?? "";
+      this.isLoading = false;
+    },
+    handleSort(key) {
       this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
-    },
-    handleRandomize() {
-      const result = [...this.numbers];
-      for (let i = result.length - 1; i > 0; i--) {
-        const j2 = Math.floor(Math.random() * (i + 1));
-        [result[i], result[j2]] = [result[j2], result[i]];
-      }
-      this.numbers = result;
-    },
-    addDropdown() {
-      let currentNumbers = [...this.numbers];
-      if (currentNumbers.length >= 8) return;
-      currentNumbers = currentNumbers.sort((a2, b2) => a2 - b2);
-      if (!currentNumbers.length) {
-        this.numbers = [1];
-      } else {
-        this.numbers = [...currentNumbers, currentNumbers[currentNumbers.length - 1] + 1];
-      }
-    },
-    removeDropdown() {
-      if (this.numbers.length > 0) {
-        this.numbers = this.numbers.slice(0, -1);
-      }
+      this.pokeDexList = [...this.pokeDexList].sort((a, b) => {
+        const cmp = a[key].localeCompare(b[key]);
+        return this.sortDirection === "asc" ? cmp : -cmp;
+      });
     }
   });
-  return G(Y, {
-    children: () => G("div", {
-      class: () => "flex flex-col gap-4",
-      children: () => [() => G("div", {
-        children: () => G("div", {
-          class: () => "flex gap-2 items-center",
-          children: () => [() => G("span", {
-            children: () => "Add Dropdown"
-          }), () => G("button", {
-            class: () => "btn",
-            onClick: () => dropdownStore.addDropdown,
-            children: () => "+"
-          }), () => G("button", {
-            class: () => "btn",
-            onClick: () => dropdownStore.removeDropdown,
-            children: () => "-"
+  onMount(async () => {
+    const controller = new AbortController();
+    await pokeDex.fetchData("https://pokeapi.co/api/v2/pokemon/?offset=1100&limit=20", controller);
+    return () => {
+      console.log("Cleaning up PokeDex component");
+      controller.abort();
+    };
+  });
+  return jsx(Fragment, {
+    children: () => [() => jsx("div", {
+      class: () => "break-all",
+      children: () => ["Hi ", () => name.firstName]
+    }), () => jsx("table", {
+      class: () => "w-full mx-auto my-2 table-fixed",
+      children: () => [() => jsx("thead", {
+        children: () => jsx("tr", {
+          children: () => [() => jsx("th", {
+            class: () => "w-1/3",
+            children: () => "ID"
+          }), () => jsx("th", {
+            onClick: () => () => pokeDex.handleSort("name"),
+            class: () => "select-none cursor-pointer w-1/3",
+            children: () => "Name"
+          }), () => jsx("th", {
+            onClick: () => () => pokeDex.handleSort("url"),
+            class: () => "select-none cursor-pointer w-1/3",
+            children: () => "URL"
           })]
         })
-      }), () => G("div", {
-        class: () => "flex gap-2 items-center",
-        children: () => [() => G("span", {
-          children: () => "Sort"
-        }), () => G("button", {
-          class: () => "btn",
-          onClick: () => dropdownStore.handleSort,
-          children: () => dropdownStore.sortDirection === "asc" ? "↑" : "↓"
-        }), () => G("button", {
-          class: () => "btn",
-          onClick: () => dropdownStore.handleRandomize,
-          children: () => "Randomize"
-        })]
-      }), () => G("div", {
-        children: () => G("button", {
-          onClick: () => () => dropdownStore.showDropdown = !dropdownStore.showDropdown,
-          children: () => "Unmount Dropdown List"
-        })
-      }), () => dropdownStore.showDropdown && G(DropdownList, {
-        dropdowns: () => dropdownStore
-      }), () => G("div", {
-        children: () => "Hi"
-      })]
-    })
-  });
-};
-const DropdownList = ({
-  dropdowns
-}) => {
-  return G("div", {
-    class: () => "flex gap-2 flex-col lg:flex-row",
-    children: () => dropdowns.numbers.map((number) => G(Dropdown, {
-      number: () => number
-    }, () => number))
-  });
-};
-const Dropdown = ({
-  number
-}) => {
-  const isOpen = K(false);
-  const handleToggle = () => {
-    isOpen.value = !isOpen.value;
-  };
-  return G(Y, {
-    children: () => G("div", {
-      class: () => "relative lg:w-[calc(100%/8)]",
-      children: () => [() => G("div", {
-        children: () => [() => G("button", {
-          class: () => "btn w-full",
-          onClick: () => handleToggle,
-          children: () => ["Open Dropdown ", () => number]
-        }), () => G("div", {
-          class: () => "break-all",
-          children: () => ["Hi ", () => name.firstName]
-        })]
-      }), () => isOpen.value && G("div", {
-        class: () => "absolute bg-white border border-gray-200 rounded p-4 w-[200px] z-10",
-        children: () => G("ul", {
-          children: () => Array.from({
-            length: 3
-          }).map((_2, i) => i + 1).map((item) => G("li", {
-            class: () => "cursor-pointer p-2 rounded hover:bg-gray-100",
-            children: () => ["Dropdown ", () => item]
+      }), () => jsx("tbody", {
+        children: () => [() => pokeDex.isLoading && jsx(Fragment, {
+          children: () => loop(() => Array.from({
+            length: 20
+          }).map((_, i2) => i2 + 1)).each((number) => jsx("tr", {
+            children: () => jsx("td", {
+              colSpan: () => 3,
+              class: () => "h-[24px] text-center",
+              children: () => number === 10 && "loading..."
+            })
           }))
-        })
+        }), () => !pokeDex.isLoading && jsx(Fragment, {
+          children: () => loop(() => pokeDex.pokeDexList).each(({
+            name: name2,
+            url
+          }, index) => jsx("tr", {
+            children: () => [() => jsx("td", {
+              class: () => "w-1/3 text-center",
+              children: () => index.value + 1
+            }), () => jsx("td", {
+              class: () => "w-1/3 text-center truncate",
+              children: () => name2
+            }), () => jsx("td", {
+              class: () => "w-1/3 text-center truncate",
+              onClick: () => () => alert(url),
+              children: () => url
+            })]
+          }))
+        })]
       })]
+    }), () => jsx("div", {
+      class: () => "flex gap-4 justify-center",
+      children: () => [() => jsx("button", {
+        class: () => "btn",
+        onClick: () => () => pokeDex.fetchData(pokeDex.prevLink),
+        disabled: () => pokeDex.isLoading || !pokeDex.prevLink,
+        children: () => "Previous"
+      }), () => jsx("button", {
+        class: () => "btn",
+        onClick: () => () => pokeDex.fetchData(pokeDex.nextLink),
+        disabled: () => pokeDex.isLoading || !pokeDex.nextLink,
+        children: () => "Next"
+      })]
+    })]
+  });
+};
+const StackedSuspense = () => {
+  const msg2 = resource(async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 2e3);
+    });
+    return "hello world 2";
+  }, "outer-suspense");
+  return jsx("div", {
+    class: () => "p-2 flex flex-col container m-auto",
+    children: () => jsx(Suspense, {
+      fallback: () => jsx("div", {
+        children: () => "loading 1..."
+      }),
+      children: () => [() => jsx(Suspense, {
+        fallback: () => jsx("div", {
+          children: () => "loading 2..."
+        }),
+        children: () => msg2.data
+      }), () => jsx(Component, {})]
     })
   });
 };
+function Component() {
+  const msg = resource(async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1e3);
+    });
+    return "hello world";
+  }, "inner-suspense");
+  return jsx("div", {
+    children: () => msg.data
+  });
+}
 function App() {
-  return G("div", {
-    children: () => G(Dropdowns, {})
+  const i2 = state(0);
+  setInterval(() => {
+    i2.value++;
+  }, 1e3);
+  return jsx("div", {
+    children: () => [() => jsx("img", {
+      src: () => "https://media1.tenor.com/m/CNI1fSM1XSoAAAAC/shocked-surprised.gif"
+    }), () => jsx("h1", {
+      children: () => "Vynn App"
+    }), () => jsx(StackedSuspense, {}), () => jsx(PokeDex, {})]
   });
 }
 const render = () => {
-  return G(App, {});
+  return jsx(App, {});
 };
 export {
   render
