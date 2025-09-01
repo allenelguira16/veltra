@@ -28,6 +28,8 @@ if (!isServer) {
 }
 
 export function navigate(path: string) {
+  if (path === location.pathname) return;
+
   if (!isServer) {
     history.pushState(null, "", path);
     location.pathname = path;
@@ -178,6 +180,7 @@ export function Link({
   activeClass?: string;
   class?: string;
 }) {
+  className ??= "";
   return (
     <a
       href={href}
@@ -185,7 +188,8 @@ export function Link({
       onClick={(e) => {
         if (!isServer) {
           e.preventDefault();
-          navigate(href);
+          e.stopPropagation();
+          if (!isActiveRoute(href)) navigate(href);
         }
       }}
     >

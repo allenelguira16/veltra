@@ -53,8 +53,6 @@ type RouterOptions = {
 
 export function fileSystemRouter({ dir }: RouterOptions) {
   return (router: RouterSchemaInput, app: AppOptions) => {
-    console.log(dir);
-
     return new VynnFileSystemRouter(
       {
         dir,

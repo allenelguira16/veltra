@@ -3,45 +3,52 @@
 import pretty from "pretty";
 import { eventHandler } from "vinxi/http";
 import { getManifest } from "vinxi/manifest";
-import { JSX } from "vynn";
+import { JSX, NoHydration } from "vynn";
 import { renderToString } from "vynn/server";
 import { Router } from "vynn-router";
 
+import { AppProps } from ".";
 import { routes } from "./parse-route";
 
-// import Root from "./root";
-
-export let Assets: () => JSX.Element;
-export let Scripts: () => JSX.Element;
-export let VynnApp: () => JSX.Element;
-
-export function createServer(Root: () => JSX.Element) {
+export const renderServer = (App: (props: AppProps) => JSX.Element) => {
   return eventHandler(async (event) => {
+    // if (event.p)
     const clientManifest = getManifest("client");
 
     const rawAssets = await clientManifest.inputs[clientManifest.handler].assets();
 
     type Assets = ((typeof rawAssets)[number] & { children: string })[];
-    Assets = () =>
-      (rawAssets as Assets).map(({ tag: Tag, attrs, children }) => (
-        <Tag {...attrs}>{children}</Tag>
-      ));
-
-    Scripts = () => [
-      <script html={`window.manifest = ${JSON.stringify(clientManifest.json())}`} />,
-      <script type="module" src={clientManifest.inputs[clientManifest.handler].output.path} />,
-    ];
-
-    VynnApp = () => (
-      <div id="app">
-        <Router url={event.path} routes={routes} />
-      </div>
+    const assets = () => (
+      <>
+        {(rawAssets as Assets).map(({ tag: Tag, attrs, children }) => (
+          <Tag {...attrs}>{children}</Tag>
+        ))}
+      </>
     );
 
-    const html = "<!doctype html>" + renderToString(() => <Root />);
+    const manifest = await (clientManifest.json() as Promise<object>);
 
+    // TODO: Support NoHydration
+    const scripts = () => (
+      <NoHydration>
+        <script html={`window.manifest = ${JSON.stringify(manifest)}`} />
+        <script type="module" src={clientManifest.inputs[clientManifest.handler].output.path} />
+      </NoHydration>
+    );
+
+    const html =
+      "<!doctype html>" +
+      renderToString(() => (
+        <App assets={assets} scripts={scripts}>
+          <div id="app">
+            <Router url={event.path} routes={routes} />
+          </div>
+        </App>
+      ));
+
+    event.node.res.setHeader("Content-Type", "text/html");
     if (import.meta.env.PROD) return html;
 
-    return pretty(html, { ocd: true });
+    return pretty(html);
   });
-}
+};

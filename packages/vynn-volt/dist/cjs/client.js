@@ -1,17 +1,2 @@
-'use strict';
-
-var vynn = require('vynn');
-var vynnRouter = require('vynn-router');
-var parseRoute = require('./parse-route-Dv6iTiKO.js');
-var jsxRuntime = require('vynn/server/jsx-runtime');
-require('vinxi/routes');
-
-const createClient = () => {
-  vynn.hydrateApp(() => jsxRuntime.jsx(vynnRouter.Router, {
-    url: () => location.pathname,
-    routes: () => parseRoute.routes
-  })).mount("#app");
-};
-
-exports.createClient = createClient;
+"use strict";require("vinxi/client");var d=require("vinxi/manifest"),t=require("vynn"),l=require("vynn-router"),h=require("./parse-route-CvJ75pr7.js"),e=require("vynn/server/jsx-runtime");require("vinxi/routes");const p=async i=>{const r=d.getManifest("client"),s=await r.inputs[r.handler].assets(),a=()=>e.jsx(e.Fragment,{children:()=>s.map(({tag:u,attrs:o,children:c})=>e.jsx(u,{...o,children:()=>c}))}),n=()=>e.jsx(t.NoHydration,{});t.hydrateApp(()=>e.jsx(i,{assets:()=>a,scripts:()=>n,children:()=>e.jsx("div",{id:()=>"app",children:()=>e.jsx(l.Router,{url:()=>location.pathname,routes:()=>h.routes})})})).mount(document)};exports.hydrateClient=p;
 //# sourceMappingURL=client.js.map

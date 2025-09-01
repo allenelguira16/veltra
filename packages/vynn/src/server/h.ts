@@ -2,6 +2,8 @@ import { getSuspenseSSRHandler } from "~/component";
 import { resolveComponentProps } from "~/render/mount-component/resolve-component-props";
 
 import { applyProps } from "./apply-props";
+import { getNode } from "./get-node";
+import { JSX } from "./jsx-runtime";
 import { renderChildrenToString } from "./render-children-to-string";
 
 const voidElements = new Set([
@@ -54,10 +56,10 @@ export function h<T extends Record<string, any> & { children?: (...args: any[]) 
     return `<${type}${applyProps(props)}>`;
   }
 
-  return `<${type}${applyProps(props)}>${renderChildrenToString("html" in props ? props["html"] : children)}</${type}>`;
+  return `<${type}${applyProps(props)}>${renderChildrenToString(type, "html" in props ? props["html"] : children)}</${type}>`;
 }
 
-function normalizeToString(value: unknown): string {
+function normalizeToString(value: JSX.Element): string {
   if (value == null) return "";
 
   if (typeof value === "function") {
@@ -68,5 +70,5 @@ function normalizeToString(value: unknown): string {
     return value.map(normalizeToString).join("");
   }
 
-  return String(value);
+  return getNode(value);
 }

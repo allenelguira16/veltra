@@ -1,9 +1,9 @@
-import { PropsWithChildren } from "vynn";
-import { Link } from "vynn-router";
+import { Link, Outlet } from "vynn-router";
 
 import vynnLogo from "./assets/vynn.svg";
 
-export default function Layout({ children }: PropsWithChildren) {
+export default function Layout() {
+  console.log("Layout Rerender");
   return (
     <div class="drawer max-w-screen-2xl mx-auto lg:drawer-open">
       <input id="home-drawer" type="checkbox" class="drawer-toggle" />
@@ -146,7 +146,7 @@ export default function Layout({ children }: PropsWithChildren) {
             <span>Vynn</span>
           </Link>
         </div>
-        {children()}
+        <Outlet />
       </div>
     </div>
   );

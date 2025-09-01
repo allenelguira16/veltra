@@ -1,14 +1,21 @@
-import { BundledLanguage, createHighlighter, SpecialLanguage, StringLiteralUnion } from "shiki";
+// import { BundledLanguage, createHighlighter, SpecialLanguage, StringLiteralUnion } from "shiki";
+import { createHighlighterCore, StringLiteralUnion } from "shiki/core";
+import { createOnigurumaEngine } from "shiki/engine/oniguruma";
 import { state } from "vynn";
 
 type CodeBlockProps = {
   code: string;
-  lang: StringLiteralUnion<BundledLanguage | SpecialLanguage, string>;
+  lang: StringLiteralUnion<string, string>;
 };
 
-const highlighter = await createHighlighter({
-  themes: ["tokyo-night"],
-  langs: ["tsx", "bash", "json5"],
+const highlighter = await createHighlighterCore({
+  themes: [import("@shikijs/themes/tokyo-night")],
+  langs: [
+    import("@shikijs/langs/tsx"),
+    import("@shikijs/langs/bash"),
+    import("@shikijs/langs/json5"),
+  ],
+  engine: createOnigurumaEngine(import("shiki/wasm")),
 });
 
 export const CodeBlock = ({ code: rawCode, lang }: CodeBlockProps) => {

@@ -5,6 +5,6 @@ import { JSX } from "~/types";
  * @param children - The children of the fragment.
  * @returns The fragment.
  */
-export function Fragment({ children }: { children: () => JSX.Element[] }) {
+export function Fragment({ children }: { children?: () => JSX.Element }) {
   return children;
 }

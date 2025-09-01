@@ -216,5 +216,6 @@ export interface JSXIntrinsicElements {
   view: SVGAttributes<SVGViewElement>;
 
   title: HTMLAttributes<HTMLTitleElement> & SVGAttributes<SVGTitleElement>;
-  // [elemName: string]: Record<string, any> & { key?: string | number };
+
+  [elemName: string]: Record<string, any> & { key?: string | number };
 }

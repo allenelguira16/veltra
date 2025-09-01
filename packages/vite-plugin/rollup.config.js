@@ -1,11 +1,8 @@
-import commonjs from "@rollup/plugin-commonjs";
-import json from "@rollup/plugin-json";
-import resolve from "@rollup/plugin-node-resolve";
 import { defineConfig } from "rollup";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
 import esbuild from "rollup-plugin-esbuild";
-import filesize from "rollup-plugin-filesize";
+import summary from "rollup-plugin-summary";
 
 const { default: pkg } = await import("./package.json", {
   with: { type: "json" },
@@ -24,35 +21,30 @@ export default defineConfig([
     external,
     output: [
       {
-        dir: "dist",
+        dir: "dist/esm",
         format: "esm",
         sourcemap: true,
-        entryFileNames: "esm/[name].js",
-        chunkFileNames: "esm/chunks/[name]-[hash].js",
       },
       {
-        dir: "dist",
+        dir: "dist/cjs",
         format: "cjs",
         sourcemap: true,
-        entryFileNames: "cjs/[name].js",
-        chunkFileNames: "cjs/chunks/[name]-[hash].js",
         exports: "named",
-        inlineDynamicImports: true,
       },
     ],
     plugins: [
       del({ targets: "dist/*", runOnce: IS_DEV }),
-      json(),
-      resolve(),
-      commonjs(),
+      // tsConfigPaths(),
+      // babel({
+      //   babelHelpers: "bundled",
+      //   presets: [["@babel/preset-vynn", { ssr: true }], "@babel/preset-typescript"],
+      //   extensions: [".ts", ".tsx", ".js", ".jsx"],
+      // }),
       esbuild({
-        tsconfig: "./tsconfig.json",
+        tsconfig: "tsconfig.json",
         minify: !IS_DEV,
       }),
-      filesize({
-        showGzippedSize: true,
-        showBrotliSize: true,
-      }),
+      summary({ showBrotliSize: true, showGzippedSize: true, showMinifiedSize: true }),
     ],
   },
   {

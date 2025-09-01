@@ -1,6 +1,6 @@
+import { ssrDom } from "~/client";
 import { JSX } from "~/jsx-runtime";
 import { state } from "~/reactivity";
-import { serverRenderedDOM } from "~/render";
 import { isServer } from "~/util";
 import { memo } from "~/util";
 
@@ -74,7 +74,7 @@ export function Suspense(props: { fallback?: JSX.Element; children: JSX.Element 
   };
 
   function onDoneHydration(fn: () => void) {
-    if (!serverRenderedDOM().isHydrating) {
+    if (!ssrDom().isHydrating) {
       fn();
       return;
     }

@@ -30,6 +30,6 @@ export namespace JSX {
   };
 }
 
-type NormalizeChildren<T> = T extends { children: () => infer R }
-  ? Omit<T, "children"> & { children: R }
+type NormalizeChildren<T> = T extends { children?: () => infer R }
+  ? Omit<T, "children"> & { children?: R extends any[] ? R : R | R[] }
   : T;

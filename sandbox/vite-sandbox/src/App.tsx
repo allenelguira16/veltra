@@ -1,4 +1,4 @@
-import { Portal, state } from "vynn";
+import { state } from "vynn";
 import { Router } from "vynn-router";
 
 import { routes } from "./routes";
@@ -13,18 +13,18 @@ export const App = () => {
   return (
     <>
       <Router routes={routes} />
-      <div id="test-portal">{i.value}</div>
+      {/* <div id="test-portal">{i.value}</div>
       <Portal target={document.body}>
         <Test />
-      </Portal>
+      </Portal> */}
     </>
   );
 };
 
-function Test() {
-  return (
-    <div>
-      <h1>Portal</h1>
-    </div>
-  );
-}
+// function Test() {
+//   return (
+//     <div>
+//       <h1>Portal</h1>
+//     </div>
+//   );
+// }

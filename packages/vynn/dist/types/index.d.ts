@@ -1,5 +1,5 @@
-import { J as JSX } from './dom-attributes-ImFTtFmp.js';
-export { F as Fragment } from './fragment-CVbKNcBb.js';
+import { J as JSX } from './dom-attributes-CCUg0DNA.js';
+export { F as Fragment } from './fragment-CM6EtvGy.js';
 
 type PropsWithChildren<T = unknown> = T & {
     children: () => JSX.Element;
@@ -14,7 +14,7 @@ type PropsWithRef<T = unknown> = T & {
  * @param App - The app to render.
  */
 declare function hydrateApp(App: () => JSX.Element): {
-    mount: (id: string | HTMLElement) => void;
+    mount: (id: Document | HTMLElement | string) => void;
     unmount: () => void;
 };
 
@@ -119,6 +119,16 @@ declare function loop<T>(items: T[]): {
 };
 
 /**
+ * No Hydration component to tell renderer it should not be hydrated
+ *
+ * @param children - The children of the fragment.
+ * @returns The fragment.
+ */
+declare function NoHydration({ children }: {
+    children?: () => JSX.Element;
+}): () => JSX.Element;
+
+/**
  *
  * @param children The children of the Portal.
  * @param target
@@ -165,5 +175,5 @@ declare function createApp(App: () => JSX.Element): {
     unmount: () => void;
 };
 
-export { JSX, Portal, Suspense, computed, createApp, createContext, effect, hydrateApp, lazy, loop, memo, onDestroy, onMount, resource, state, stopEffect, store, untrack, unwrap };
+export { JSX, NoHydration, Portal, Suspense, computed, createApp, createContext, effect, hydrateApp, lazy, loop, memo, onDestroy, onMount, resource, state, stopEffect, store, untrack, unwrap };
 export type { Computed, DestroyFn, MountFn, PropsWithChildren, PropsWithRef, State };

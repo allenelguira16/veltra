@@ -1,10 +1,9 @@
-import babel from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
 import { defineConfig } from "rollup";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
 import esbuild from "rollup-plugin-esbuild";
-import filesize from "rollup-plugin-filesize";
+import summary from "rollup-plugin-summary";
 import tsConfigPaths from "rollup-plugin-tsconfig-paths";
 
 const { default: pkg } = await import("./package.json", {
@@ -33,14 +32,16 @@ export default defineConfig([
       {
         dir: "dist",
         format: "esm",
-        sourcemap: true,
+        sourcemap: IS_DEV,
+        sourcemapExcludeSources: true,
         entryFileNames: "esm/[name].js",
         chunkFileNames: "esm/chunks/[name]-[hash].js",
       },
       {
         dir: "dist",
         format: "cjs",
-        sourcemap: true,
+        sourcemap: IS_DEV,
+        sourcemapExcludeSources: true,
         entryFileNames: "cjs/[name].js",
         chunkFileNames: "cjs/chunks/[name]-[hash].js",
       },
@@ -49,21 +50,13 @@ export default defineConfig([
       del({ targets: "dist/*", runOnce: IS_DEV }),
       tsConfigPaths(),
       resolve(),
-      babel({
-        babelHelpers: "bundled",
-        presets: ["@babel/preset-typescript", "@babel/preset-vynn"],
-        extensions: [".ts", ".tsx", ".js", ".jsx"],
-      }),
       esbuild({
         tsconfig: "tsconfig.json",
         minify: !IS_DEV,
+        sourceMap: false,
       }),
-      !IS_DEV &&
-        filesize({
-          showGzippedSize: true,
-          showBrotliSize: true,
-        }),
-    ].filter(Boolean),
+      summary({ showBrotliSize: true, showGzippedSize: true, showMinifiedSize: true }),
+    ],
   },
   {
     input,

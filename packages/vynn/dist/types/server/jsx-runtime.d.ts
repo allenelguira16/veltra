@@ -1,6 +1,6 @@
-import { J as JSX } from '../dom-attributes-ImFTtFmp.js';
-export { l as logJsx } from '../log-jsx-DoXc7mAt.js';
-export { F as Fragment } from '../fragment-CVbKNcBb.js';
+import { J as JSX } from '../dom-attributes-CCUg0DNA.js';
+export { l as logJsx } from '../log-jsx-BuTAQJLg.js';
+export { F as Fragment } from '../fragment-CM6EtvGy.js';
 
 /**
  * jsx runtime
@@ -12,6 +12,6 @@ export { F as Fragment } from '../fragment-CVbKNcBb.js';
  */
 declare const jsx: <T extends Record<string, any> & {
     children?: (...args: any[]) => string;
-}>(type: string | ((props: T) => string | (() => string)), { children, ...props }: T, key?: () => string) => JSX.Element;
+}>(type: string | ((props: T) => string | (() => string)), { children, ...props }: T, key?: () => string) => T["children"] | JSX.Element;
 
 export { JSX, jsx, jsx as jsxs };

@@ -1,8 +1,8 @@
 import { JSX } from "~/types";
 
+import { ssrDom } from "../client/ssr-dom";
 import { applyProps, renderChildren } from "./dom";
 import { mountComponent } from "./mount-component";
-import { serverRenderedDOM } from "./ssr-dom";
 
 /**
  * create a JSX element
@@ -22,6 +22,10 @@ export function h<T extends Record<string, any> & { children?: (...args: any[]) 
     return mountComponent(type, props, children, key);
   }
 
+  if (type === "html") {
+    return children;
+  }
+
   xmlnsStack.push(props.xmlns?.() ?? xmlnsStack[xmlnsStack.length - 1]);
 
   const element = createElement(type);
@@ -36,19 +40,19 @@ export function h<T extends Record<string, any> & { children?: (...args: any[]) 
 const xmlnsStack: (string | undefined)[] = [];
 
 function createElement(tag: string) {
-  const { currentDOM, isHydrating, nextElement } = serverRenderedDOM();
+  const { currentNode, next } = ssrDom();
 
-  if (isHydrating && currentDOM) {
+  if (currentNode instanceof Element) {
     try {
-      if (currentDOM.tagName.toLocaleLowerCase() !== tag) {
+      if (currentNode.tagName.toLocaleLowerCase() !== tag) {
         throw new Error(
           "Hydration mismatch because the initial UI does not match what was rendered on the server",
         );
       }
 
-      return currentDOM;
+      return currentNode;
     } finally {
-      nextElement();
+      next();
     }
   }
 

@@ -44,7 +44,7 @@ app.use("*all", async (req, res, next) => {
     const appHtml = await render(url);
 
     let html = template.replace("<!--ssr-outlet-->", appHtml);
-    if (isDev) html = pretty(html, { ocd: true });
+    if (isDev) html = pretty(html);
     else html = html.replace(/\s*\n\s*/g, "").replace(/\s{2,}/g, " ");
 
     res.status(200).set({ "Content-Type": "text/html" }).end(html);

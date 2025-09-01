@@ -1,5 +1,5 @@
 export { hydrateApp } from "./client";
-export { Fragment, lazy, loop, Portal, resource, Suspense } from "./component";
+export { Fragment, lazy, loop, NoHydration, Portal, resource, Suspense } from "./component";
 export { createContext } from "./context";
 export { type DestroyFn, type MountFn, onDestroy, onMount } from "./lifecycle";
 export {

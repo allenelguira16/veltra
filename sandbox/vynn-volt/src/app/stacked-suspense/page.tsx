@@ -7,6 +7,8 @@ export default function StackedSuspense() {
   const msg2 = resource(async () => {
     "use server";
 
+    console.log("hi from server");
+
     await new Promise((resolve) => {
       setTimeout(resolve, 2000); // delay for 2 second
     });

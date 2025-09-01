@@ -1,3 +1,4 @@
+import { ssrDom } from "~/client";
 import { JSX } from "~/types";
 import { toArray } from "~/util";
 
@@ -13,6 +14,13 @@ export function getNode<T extends Node>(jsxElement: JSX.Element): T {
   }
 
   if (typeof jsxElement === "string" || typeof jsxElement === "number") {
+    const { currentNode, next } = ssrDom();
+
+    if (currentNode) {
+      next();
+      return currentNode as unknown as T;
+    }
+
     return document.createTextNode(String(jsxElement)) as unknown as T;
   }
 

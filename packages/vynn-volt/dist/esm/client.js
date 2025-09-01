@@ -1,15 +1,2 @@
-import { hydrateApp } from 'vynn';
-import { Router } from 'vynn-router';
-import { r as routes } from './parse-route-BIk3jRTk.js';
-import { jsx } from 'vynn/server/jsx-runtime';
-import 'vinxi/routes';
-
-const createClient = () => {
-  hydrateApp(() => jsx(Router, {
-    url: () => location.pathname,
-    routes: () => routes
-  })).mount("#app");
-};
-
-export { createClient };
+import"vinxi/client";import{getManifest as p}from"vinxi/manifest";import{hydrateApp as c,NoHydration as d}from"vynn";import{Router as l}from"vynn-router";import{r as h}from"./parse-route-CbrixlM2.js";import{jsx as t,Fragment as u}from"vynn/server/jsx-runtime";import"vinxi/routes";const f=async o=>{const r=p("client"),i=await r.inputs[r.handler].assets(),e=()=>t(u,{children:()=>i.map(({tag:n,attrs:s,children:m})=>t(n,{...s,children:()=>m}))}),a=()=>t(d,{});c(()=>t(o,{assets:()=>e,scripts:()=>a,children:()=>t("div",{id:()=>"app",children:()=>t(l,{url:()=>location.pathname,routes:()=>h})})})).mount(document)};export{f as hydrateClient};
 //# sourceMappingURL=client.js.map

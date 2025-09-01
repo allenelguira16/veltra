@@ -1,4 +1,4 @@
-import { J as JSX } from './dom-attributes-ImFTtFmp.js';
+import { J as JSX } from './dom-attributes-CCUg0DNA.js';
 
 /**
  * Create a JSX element for SSR

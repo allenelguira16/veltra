@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "vynn";
+import { memo, Suspense } from "vynn";
 import { Route, Router } from "vynn-router";
 
 import Layout from "./Layout";
@@ -29,7 +29,7 @@ export const App = () => {
 export const routes: Route[] = [
   {
     path: "/",
-    component: lazy(async () => ({ default: HomePage })),
+    component: memo(() => <HomePage />),
   },
   {
     path: "/docs",
@@ -37,59 +37,59 @@ export const routes: Route[] = [
     children: [
       {
         path: "/introduction",
-        component: lazy(async () => ({ default: IntroductionPage })),
+        component: IntroductionPage,
       },
       {
         path: "/installation",
-        component: lazy(async () => ({ default: InstallationPage })),
+        component: InstallationPage,
       },
       {
         path: "/things-to-know",
-        component: lazy(async () => ({ default: ThingsToKnowPage })),
+        component: ThingsToKnowPage,
       },
       {
         path: "/core-concepts/on-mount",
-        component: lazy(async () => ({ default: OnMountPage })),
+        component: OnMountPage,
       },
       {
         path: "/core-concepts/on-destroy",
-        component: lazy(async () => ({ default: OnDestroyPage })),
+        component: OnDestroyPage,
       },
       {
         path: "/core-concepts/state",
-        component: lazy(async () => ({ default: StatePage })),
+        component: StatePage,
       },
       {
         path: "/core-concepts/store",
-        component: lazy(async () => ({ default: StorePage })),
+        component: StorePage,
       },
       {
         path: "/core-concepts/computed",
-        component: lazy(async () => ({ default: ComputedPage })),
+        component: ComputedPage,
       },
       {
         path: "/core-concepts/effect",
-        component: lazy(async () => ({ default: EffectPage })),
+        component: EffectPage,
       },
       {
         path: "/core-concepts/resource",
-        component: lazy(async () => ({ default: ResourcePage })),
+        component: ResourcePage,
       },
       {
         path: "/core-concepts/suspense",
-        component: lazy(async () => ({ default: SuspensePage })),
+        component: SuspensePage,
       },
       {
         path: "/core-concepts/lazy",
-        component: lazy(async () => ({ default: LazyPage })),
+        component: LazyPage,
       },
       {
         path: "/core-concepts/loop",
-        component: lazy(async () => ({ default: LoopPage })),
+        component: LoopPage,
       },
       {
         path: "/core-concepts/memo",
-        component: lazy(async () => ({ default: MemoPage })),
+        component: MemoPage,
       },
     ],
   },

@@ -5,7 +5,7 @@ import { defineConfig } from "rollup";
 import del from "rollup-plugin-delete";
 import dts from "rollup-plugin-dts";
 import esbuild from "rollup-plugin-esbuild";
-import filesize from "rollup-plugin-filesize";
+import summary from "rollup-plugin-summary";
 
 const { default: pkg } = await import("./package.json", {
   with: { type: "json" },
@@ -24,20 +24,15 @@ export default defineConfig([
     external,
     output: [
       {
-        dir: "dist",
+        dir: "dist/esm",
         format: "esm",
         sourcemap: true,
-        entryFileNames: "esm/[name].js",
-        chunkFileNames: "esm/chunks/[name]-[hash].js",
       },
       {
-        dir: "dist",
+        dir: "dist/cjs",
         format: "cjs",
         sourcemap: true,
-        entryFileNames: "cjs/[name].js",
-        chunkFileNames: "cjs/chunks/[name]-[hash].js",
         exports: "named",
-        inlineDynamicImports: true,
       },
     ],
     plugins: [
@@ -49,10 +44,7 @@ export default defineConfig([
         tsconfig: "./tsconfig.json",
         minify: !IS_DEV,
       }),
-      filesize({
-        showGzippedSize: true,
-        showBrotliSize: true,
-      }),
+      summary({ showBrotliSize: true, showGzippedSize: true, showMinifiedSize: true }),
     ],
   },
   {

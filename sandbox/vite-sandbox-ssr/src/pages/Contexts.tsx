@@ -20,7 +20,7 @@ export function Contexts() {
 const [FormProvider, formContext] = createContext<{ name: string }>();
 
 function Form({ children }: { children: () => JSX.Element }) {
-  const state = store<{ name: string }>({ name: "" });
+  const state = store<{ name: string }>({ name: "asd" });
 
   return <FormProvider value={state}>{children()}</FormProvider>;
 }
@@ -44,7 +44,7 @@ function Input() {
 
   const nameEl = <div>Name: {forms.name} Hi</div>;
 
-  console.log("rerendering");
+  // console.log("rerendering");
 
   return (
     <>
@@ -56,6 +56,7 @@ function Input() {
         onInput={(event) => (forms.name = event.currentTarget.value)}
         placeholder="name"
         autoComplete="off"
+        value={forms.name}
       />{" "}
       {i.value}
     </>

@@ -90,6 +90,11 @@
 //         brotli: process.versions.bun ? false : true,
 //       },
 //       ...server,
+//       routeRules: {
+//         "/_build/assets/**": {
+//           headers: { "cache-control": "public, immutable, max-age=31536000" },
+//         },
+//       },
 //     },
 //     routers: [
 //       {

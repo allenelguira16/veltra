@@ -1,678 +1,1071 @@
-const b = /* @__PURE__ */ new Map(), se = (e) => {
-  let n;
-  return e !== void 0 ? (b.has(e) || b.set(e, { states: [] }), n = b.get(e)) : n = { states: [] }, { ...n, index: 0 };
+const stateMap = /* @__PURE__ */ new Map();
+const createStateContext = (key) => {
+  let instance;
+  if (key !== void 0) {
+    if (!stateMap.has(key)) {
+      stateMap.set(key, {
+        states: []
+      });
+    }
+    instance = stateMap.get(key);
+  } else {
+    instance = {
+      states: []
+    };
+  }
+  return {
+    ...instance,
+    index: 0
+  };
 };
-let q = null;
-function I(e) {
-  q = e;
+let runtimeContext = null;
+function setRuntimeContext(ctx) {
+  runtimeContext = ctx;
 }
-function w() {
-  return q;
+function getRuntimeContext() {
+  return runtimeContext;
 }
-let a$1 = null;
-function U(e) {
-  a$1 = e;
+let activeEffect = null;
+function setActiveEffect(newActiveEffect) {
+  activeEffect = newActiveEffect;
 }
-const A = /* @__PURE__ */ new Set();
-let H = false;
-function ce(e) {
-  A.add(e), H || (H = true, queueMicrotask(() => {
-    for (const n of A) n();
-    A.clear(), H = false;
-  }));
+const effectQueue = /* @__PURE__ */ new Set();
+let isFlushing = false;
+function scheduleEffect(effect2) {
+  effectQueue.add(effect2);
+  if (!isFlushing) {
+    isFlushing = true;
+    queueMicrotask(() => {
+      for (const effect3 of effectQueue) {
+        effect3();
+      }
+      effectQueue.clear();
+      isFlushing = false;
+    });
+  }
 }
-function M(e) {
-  const n = w(), t = async () => {
-    k$1(t), t.cleanup && (t.cleanup(), t.cleanup = void 0);
-    const r = a$1;
-    a$1 = t, n && n.effect.push(t);
+function effect(fn) {
+  const context = getRuntimeContext();
+  const wrappedEffect = async () => {
+    removeEffect(wrappedEffect);
+    if (wrappedEffect.cleanup) {
+      wrappedEffect.cleanup();
+      wrappedEffect.cleanup = void 0;
+    }
+    const previousEffect = activeEffect;
+    activeEffect = wrappedEffect;
+    if (context) context.effect.push(wrappedEffect);
     try {
-      const s2 = e();
-      if (typeof s2 == "function") t.cleanup = s2;
-      else if (s2 instanceof Promise) {
-        const u2 = await s2;
-        typeof u2 == "function" && (t.cleanup = u2);
+      const result = fn();
+      if (typeof result === "function") {
+        wrappedEffect.cleanup = result;
+      } else if (result instanceof Promise) {
+        const cleanup = await result;
+        if (typeof cleanup === "function") {
+          wrappedEffect.cleanup = cleanup;
+        }
       }
     } finally {
-      a$1 = r;
+      activeEffect = previousEffect;
     }
-  }, o = () => k$1(t);
-  return t.deps = [], t(), o;
+  };
+  const disposer = () => removeEffect(wrappedEffect);
+  wrappedEffect.deps = [];
+  wrappedEffect();
+  return disposer;
 }
-function k$1(e) {
-  if (e.deps) {
-    for (const n of e.deps) n.delete(e);
-    e.deps.length = 0;
-  }
-  e.cleanup && (e.cleanup(), e.cleanup = void 0);
-}
-const T = /* @__PURE__ */ new WeakMap();
-function W$1(e, n) {
-  if (!a$1) return;
-  let t = T.get(e);
-  t || (t = /* @__PURE__ */ new Map(), T.set(e, t));
-  let o = t.get(n);
-  o || (o = /* @__PURE__ */ new Set(), t.set(n, o)), o.has(a$1) || (o.add(a$1), a$1.deps ? a$1.deps.push(o) : a$1.deps = [o]);
-}
-function j$2(e, n) {
-  const t = T.get(e);
-  if (!t) return;
-  const o = t.get(n);
-  if (o) for (const r of o) ce(r);
-}
-function C(e) {
-  const n = w();
-  if (n && n.state) {
-    const { states: t, index: o } = n.state;
-    if (t.length <= o) {
-      const r = z(e);
-      t.push(r);
+function removeEffect(effect2) {
+  if (effect2.deps) {
+    for (const depSet of effect2.deps) {
+      depSet.delete(effect2);
     }
-    return t[n.state.index++];
+    effect2.deps.length = 0;
   }
-  return z(e);
-}
-function z(e) {
-  const n = { value: e };
-  return new Proxy(n, { get(t, o, r) {
-    return W$1(t, o), Reflect.get(t, o, r);
-  }, set(t, o, r, s2) {
-    const u2 = t[o], f = Reflect.set(t, o, r, s2);
-    return u2 !== r && j$2(t, o), f;
-  } });
-}
-function B$1(e) {
-  const n = a$1;
-  U(null);
-  try {
-    return e();
-  } finally {
-    U(n);
+  if (effect2.cleanup) {
+    effect2.cleanup();
+    effect2.cleanup = void 0;
   }
 }
-const L = /* @__PURE__ */ new WeakMap();
-function ie(e, n, t) {
-  let o = L.get(e);
-  o || (o = /* @__PURE__ */ new Map(), L.set(e, o)), o.has(n) && e.removeEventListener(n, o.get(n)), e.addEventListener(n, t), o.set(n, t);
+const targetToPropertyEffectsMap = /* @__PURE__ */ new WeakMap();
+function track(target, key) {
+  if (!activeEffect) return;
+  let propertyEffectsMap = targetToPropertyEffectsMap.get(target);
+  if (!propertyEffectsMap) {
+    propertyEffectsMap = /* @__PURE__ */ new Map();
+    targetToPropertyEffectsMap.set(target, propertyEffectsMap);
+  }
+  let effects = propertyEffectsMap.get(key);
+  if (!effects) {
+    effects = /* @__PURE__ */ new Set();
+    propertyEffectsMap.set(key, effects);
+  }
+  if (!effects.has(activeEffect)) {
+    effects.add(activeEffect);
+    if (activeEffect.deps) {
+      activeEffect.deps.push(effects);
+    } else {
+      activeEffect.deps = [effects];
+    }
+  }
 }
-function fe(e, n) {
-  const t = L.get(e);
-  if (!t) return;
-  const o = t.get(n);
-  o && (e.removeEventListener(n, o), t.delete(n)), t.size === 0 && L.delete(e);
+function trigger(target, key) {
+  const propertyEffectsMap = targetToPropertyEffectsMap.get(target);
+  if (!propertyEffectsMap) return;
+  const effects = propertyEffectsMap.get(key);
+  if (!effects) return;
+  for (const effect2 of effects) {
+    scheduleEffect(effect2);
+  }
 }
-function le(e, n) {
-  for (const t in n) M(() => {
-    const o = n[t], r = typeof o == "function" && t !== "ref" ? o() : o;
-    if (t.startsWith("on") && e instanceof HTMLElement) {
-      const u2 = t.slice(2).toLowerCase();
-      return ie(e, u2, r), () => fe(e, u2);
+function state(initialValue) {
+  const context = getRuntimeContext();
+  if (context && context.state) {
+    const {
+      states,
+      index
+    } = context.state;
+    if (states.length <= index) {
+      const s = createState(initialValue);
+      states.push(s);
     }
-    const s2 = e instanceof HTMLInputElement || e instanceof HTMLTextAreaElement || e instanceof HTMLSelectElement;
-    if (t === "value" && s2 && typeof n.onInput != "function" && typeof n.onChange != "function") {
-      e.value = r;
-      const u2 = () => {
-        e.value !== r && (e.value = r);
-      };
-      return e.setAttribute(t, r), e.addEventListener("input", u2), () => e.removeEventListener("input", u2);
+    return states[context.state.index++];
+  }
+  return createState(initialValue);
+}
+function createState(initialValue) {
+  const state2 = {
+    value: initialValue
+  };
+  return new Proxy(state2, {
+    get(target, key, receiver) {
+      track(target, key);
+      return Reflect.get(target, key, receiver);
+    },
+    set(target, key, newValue, receiver) {
+      const oldValue = target[key];
+      const result = Reflect.set(target, key, newValue, receiver);
+      if (oldValue !== newValue) {
+        trigger(target, key);
+      }
+      return result;
     }
-    if (t === "ref" && typeof r == "function") {
-      r(e);
-      return;
-    }
-    if (t === "style" && typeof r == "object" && e instanceof HTMLElement) {
-      pe(e, r);
-      return;
-    }
-    if (typeof r == "boolean") {
-      e.toggleAttribute(t, r);
-      return;
-    }
-    if (t === "html" && typeof r == "string") {
-      e.innerHTML = r;
-      return;
-    }
-    e.setAttribute(t, r);
   });
 }
-function ae(e) {
-  return CSS.supports(e, "0") && !CSS.supports(e, "0px");
-}
-function pe(e, n) {
-  if (e instanceof HTMLElement) for (const t in n) {
-    if (!Object.hasOwn(n, t)) continue;
-    const o = n[t];
-    if (o == null || t === "length" || t === "parentRule") continue;
-    const r = typeof o == "number", s2 = r && !ae(t);
-    e.style[t] = r ? s2 ? `${o}px` : `${o}` : String(o);
+function untrack(fn) {
+  const prevEffect = activeEffect;
+  setActiveEffect(null);
+  try {
+    return fn();
+  } finally {
+    setActiveEffect(prevEffect);
   }
 }
-function de(e) {
-  let n;
-  return process.env.NODE_ENV === "development" ? n = document.createComment(he(e)) : n = document.createTextNode(""), ee.add(n), n;
-}
-function he(e) {
-  return e.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/([A-Z])([A-Z][a-z])/g, "$1-$2").toLowerCase();
-}
-const Z = (e) => e == null || e === false;
-function P(e) {
-  let n, t = true;
-  return (...o) => (t && (n = e(...o), t = false), n);
-}
-const D$1 = (e) => (Array.isArray(e) ? e : [e]).flat(1 / 0), p$1 = typeof window > "u", O = /* @__PURE__ */ new Map();
-function ge(e, n) {
-  O.set(e, n);
-}
-function R$1(e) {
-  const n = O.get(e);
-  if (n) {
-    for (const t of n) t();
-    O.delete(e);
+const eventRegistry = /* @__PURE__ */ new WeakMap();
+function addEventListener(element, type, listener) {
+  let handlers = eventRegistry.get(element);
+  if (!handlers) {
+    handlers = /* @__PURE__ */ new Map();
+    eventRegistry.set(element, handlers);
   }
-  for (const t of e.childNodes) R$1(t);
+  if (handlers.has(type)) {
+    element.removeEventListener(type, handlers.get(type));
+  }
+  element.addEventListener(type, listener);
+  handlers.set(type, listener);
 }
-function ye(e) {
-  return { id: crypto.randomUUID(), mount: [], state: se(e), effect: [], destroy: [] };
+function removeEventListener(element, type) {
+  const handlers = eventRegistry.get(element);
+  if (!handlers) return;
+  const listener = handlers.get(type);
+  if (listener) {
+    element.removeEventListener(type, listener);
+    handlers.delete(type);
+  }
+  if (handlers.size === 0) {
+    eventRegistry.delete(element);
+  }
 }
-function J(e) {
-  if (p$1) return;
-  const n = w();
-  if (!n) throw new Error("onDestroy called outside of component");
-  n.destroy.push(e);
-}
-function V(e) {
-  if (p$1) return;
-  const n = w();
-  if (!n) throw new Error("onMount called outside of component");
-  n.mount.push(e);
-}
-function ve(e, n) {
-  if (!n) return;
-  const t = [];
-  ge(e, t);
-  const o = async () => {
-    for (const r of n.mount) {
-      const s2 = await r();
-      s2 && t.push(s2);
-    }
-    for (const r of n.destroy) t.push(r);
-    for (const r of n.effect) t.push(() => Promise.resolve(k$1(r)));
-  };
-  queueMicrotask(() => Promise.resolve().then(o));
-}
-const S = [], x$1 = [];
-function _() {
-  return S[S.length - 1];
-}
-function we() {
-  return x$1[x$1.length - 1];
-}
-function G(e) {
-  const { fallback: n, children: t } = e, o = P(() => t()), r = n ? P(() => n()) : void 0;
-  if (p$1) return r == null ? void 0 : r();
-  const s2 = C(() => r == null ? void 0 : r()), u2 = () => (x$1.pop(), r == null ? void 0 : r()), f = (c2) => {
-    S.pop(), queueMicrotask(() => {
-      r && (s2.value = r);
-    }), c2.then(() => {
-      d(o);
+function applyProps$1(element, props) {
+  for (const key in props) {
+    effect(() => {
+      const raw = props[key];
+      const value = typeof raw === "function" && key !== "ref" ? raw() : raw;
+      if (key.startsWith("on") && element instanceof HTMLElement) {
+        const type = key.slice(2).toLowerCase();
+        addEventListener(element, type, value);
+        return () => removeEventListener(element, type);
+      }
+      const isFormControl = element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement;
+      if (key === "value" && isFormControl && typeof props["onInput"] !== "function" && typeof props["onChange"] !== "function") {
+        element.value = value;
+        const revert = () => {
+          if (element.value !== value) {
+            element.value = value;
+          }
+        };
+        element.setAttribute(key, value);
+        element.addEventListener("input", revert);
+        return () => element.removeEventListener("input", revert);
+      }
+      if (key === "ref" && typeof value === "function") {
+        value(element);
+        return;
+      }
+      if (key === "style" && typeof value === "object" && element instanceof HTMLElement) {
+        applyStyle(element, value);
+        return;
+      }
+      if (typeof value === "boolean") {
+        element.toggleAttribute(key, value);
+        return;
+      }
+      if (key === "html" && typeof value === "string") {
+        element.innerHTML = value;
+        return;
+      }
+      element.setAttribute(key, value);
     });
-  }, d = (c2) => {
-    p$1 ? x$1.push(u2) : S.push(f);
-    try {
-      s2.value = c2;
-    } catch (i2) {
-      if (i2 instanceof Promise) p$1 ? s2.value = () => {
-        throw i2;
-      } : f(i2);
-      else throw i2;
+  }
+}
+function isUnitlessProp(prop) {
+  return CSS.supports(prop, "0") && !CSS.supports(prop, "0px");
+}
+function applyStyle(element, style) {
+  if (!(element instanceof HTMLElement)) return;
+  for (const key in style) {
+    if (!Object.hasOwn(style, key)) continue;
+    const value = style[key];
+    if (value == null) continue;
+    if (key === "length" || key === "parentRule") continue;
+    const isNumeric = typeof value === "number";
+    const needsUnit = isNumeric && !isUnitlessProp(key);
+    element.style[key] = isNumeric ? needsUnit ? `${value}px` : `${value}` : String(value);
+  }
+}
+function createTargetNode(_name) {
+  let targetNode;
+  if (process.env.NODE_ENV === "development") {
+    targetNode = document.createTextNode("");
+  } else {
+    targetNode = document.createTextNode("");
+  }
+  rootNodes.add(targetNode);
+  return targetNode;
+}
+const isNil = (value) => {
+  return value === void 0 || value === null || value === false;
+};
+function memo(fn) {
+  let cachedResult;
+  let firstRun = true;
+  return (...args) => {
+    if (firstRun) {
+      cachedResult = fn(...args);
+      firstRun = false;
+    }
+    return cachedResult;
+  };
+}
+const toArray = (item) => {
+  return (Array.isArray(item) ? item : [item]).flat(Infinity);
+};
+const isServer = typeof window === "undefined";
+const cleanupMap = /* @__PURE__ */ new Map();
+function setComponentCleanup(node, cleanups) {
+  cleanupMap.set(node, cleanups);
+}
+function runComponentCleanup(node) {
+  const cleanups = cleanupMap.get(node);
+  if (cleanups) {
+    for (const cleanup of cleanups) {
+      cleanup();
+    }
+    cleanupMap.delete(node);
+  }
+  for (const child of node.childNodes) {
+    runComponentCleanup(child);
+  }
+}
+function createLifeCycleContext(key) {
+  const context = {
+    id: crypto.randomUUID(),
+    mount: [],
+    state: createStateContext(key),
+    effect: [],
+    destroy: []
+  };
+  return context;
+}
+function onDestroy(fn) {
+  if (isServer) return;
+  const context = getRuntimeContext();
+  if (!context) {
+    throw new Error("onDestroy called outside of component");
+  }
+  context.destroy.push(fn);
+}
+function onMount(fn) {
+  if (isServer) return;
+  const context = getRuntimeContext();
+  if (!context) {
+    throw new Error("onMount called outside of component");
+  }
+  context.mount.push(fn);
+}
+function runLifecycle(rootNode, context) {
+  if (!context) return;
+  const cleanups = [];
+  setComponentCleanup(rootNode, cleanups);
+  const runMounts = async () => {
+    for (const mountFn of context.mount) {
+      const cleanup = await mountFn();
+      if (cleanup) cleanups.push(cleanup);
+    }
+    for (const destroyFn of context.destroy) {
+      cleanups.push(destroyFn);
+    }
+    for (const effectFn of context.effect) {
+      cleanups.push(() => Promise.resolve(removeEffect(effectFn)));
     }
   };
-  function h(c2) {
-    if (!ne().isHydrating) {
-      c2();
+  queueMicrotask(() => Promise.resolve().then(runMounts));
+}
+const suspenseHandlerStack = [];
+const suspenseSSRHandlerStack = [];
+function getSuspenseHandler() {
+  return suspenseHandlerStack[suspenseHandlerStack.length - 1];
+}
+function getSuspenseSSRHandler() {
+  return suspenseSSRHandlerStack[suspenseSSRHandlerStack.length - 1];
+}
+function Suspense(props) {
+  const {
+    fallback: _fallback,
+    children: _children
+  } = props;
+  const children = memo(() => _children());
+  const fallback = _fallback ? memo(() => _fallback()) : void 0;
+  if (isServer) return fallback == null ? void 0 : fallback();
+  const view = state(() => fallback == null ? void 0 : fallback());
+  const ssrHandler = () => {
+    suspenseSSRHandlerStack.pop();
+    return fallback == null ? void 0 : fallback();
+  };
+  const handler = (promise) => {
+    suspenseHandlerStack.pop();
+    queueMicrotask(() => {
+      if (fallback) view.value = fallback;
+    });
+    promise.then(() => {
+      withSuspenseRender(children);
+    });
+  };
+  const withSuspenseRender = (newView) => {
+    if (isServer) suspenseSSRHandlerStack.push(ssrHandler);
+    else suspenseHandlerStack.push(handler);
+    try {
+      view.value = newView;
+    } catch (error) {
+      if (error instanceof Promise) {
+        if (!isServer) handler(error);
+        else view.value = () => {
+          throw error;
+        };
+      } else {
+        throw error;
+      }
+    }
+  };
+  function onDoneHydration(fn) {
+    if (!ssrDom().isHydrating) {
+      fn();
       return;
     }
-    requestAnimationFrame(() => h(c2));
+    requestAnimationFrame(() => onDoneHydration(fn));
   }
   try {
-    return () => s2.value();
+    return () => {
+      return view.value();
+    };
   } finally {
-    h(() => {
-      d(o);
+    onDoneHydration(() => {
+      withSuspenseRender(children);
     });
   }
 }
-function Ee({ children: e }) {
-  return e;
+function Fragment({
+  children
+}) {
+  return children;
 }
-const K = (e, { children: n, ...t } = {}, o) => oe(e, t, n, o);
-function Me(e) {
-  return { each(n) {
-    const t = e;
-    return n = n, p$1 ? t().map((o, r) => n(o, { value: r })) : K(Q, { each: t, children: n });
-  } };
-}
-function Q({ each: e, children: n }) {
-  const t = _(), o = C([]), r = Ce(e, n);
-  return M(() => {
-    try {
-      o.value = r();
-    } catch (s2) {
-      if (s2 instanceof Promise && t) t(s2);
-      else throw s2;
-    }
-  }), () => o.value;
-}
-function Ce(e, n) {
-  let t = [];
-  return () => {
-    var _a, _b;
-    const o = e() || [], r = o.length, s2 = new Array(r), u2 = /* @__PURE__ */ new Map();
-    for (let c2 = 0; c2 < t.length; c2++) {
-      const i2 = t[c2].value;
-      u2.has(i2) || u2.set(i2, []), u2.get(i2).push(c2);
-    }
-    const f = new Array(r).fill(-1);
-    for (let c2 = 0; c2 < r; c2++) {
-      const i2 = o[c2], l2 = u2.get(i2);
-      if (l2 && l2.length) {
-        const m2 = l2.shift();
-        f[c2] = m2, s2[c2] = t[m2];
-      } else {
-        const m2 = C(c2), g2 = n(i2, m2);
-        s2[c2] = { value: i2, index: m2, element: g2 };
+const jsx$1 = (type, {
+  children,
+  ...props
+} = {}, key) => {
+  return h$1(type, props, children, key);
+};
+function loop(items) {
+  return {
+    each(children) {
+      const each = items;
+      children = children;
+      if (isServer) {
+        const renderedItems = each().map((item, i2) => children(item, {
+          value: i2
+        }));
+        return renderedItems;
       }
+      return jsx$1(Loop, {
+        each,
+        children
+      });
     }
-    for (let c2 = 0; c2 < t.length; c2++) if (!f.includes(c2)) {
-      const i2 = t[c2].element;
-      (_a = i2.parentNode) == null ? void 0 : _a.removeChild(i2);
-    }
-    const d = Le(f);
-    let h = d.length - 1;
-    for (let c2 = r - 1; c2 >= 0; c2--) {
-      const i2 = s2[c2];
-      if (f[c2] === -1 || c2 !== d[h]) {
-        const l2 = c2 + 1 < r ? s2[c2 + 1].element : null;
-        (_b = i2.element.parentNode) == null ? void 0 : _b.insertBefore(i2.element, l2);
-      } else h--;
-      i2.index.value = c2;
-    }
-    return t = s2, t.map((c2) => c2.element);
   };
 }
-function Le(e) {
-  const n = e.slice(), t = [];
-  let o, r;
-  for (let s2 = 0; s2 < e.length; s2++) {
-    const u2 = e[s2];
-    if (!(u2 < 0)) {
-      if (t.length === 0 || e[t[t.length - 1]] < u2) {
-        n[s2] = t.length > 0 ? t[t.length - 1] : -1, t.push(s2);
-        continue;
+function Loop({
+  each,
+  children
+}) {
+  const handler = getSuspenseHandler();
+  const result = state([]);
+  const listFn = mapArray(each, children);
+  effect(() => {
+    try {
+      result.value = listFn();
+    } catch (err) {
+      if (err instanceof Promise && handler) {
+        handler(err);
+      } else {
+        throw err;
       }
-      for (o = 0, r = t.length - 1; o < r; ) {
-        const f = (o + r) / 2 | 0;
-        e[t[f]] < u2 ? o = f + 1 : r = f;
+    }
+  });
+  return () => result.value;
+}
+function mapArray(list, mapFn) {
+  let items = [];
+  return () => {
+    var _a, _b;
+    const arr = list() || [];
+    const len = arr.length;
+    const newItems = new Array(len);
+    const oldIndexMap = /* @__PURE__ */ new Map();
+    for (let i2 = 0; i2 < items.length; i2++) {
+      const key = items[i2].value;
+      if (!oldIndexMap.has(key)) oldIndexMap.set(key, []);
+      oldIndexMap.get(key).push(i2);
+    }
+    const newToOld = new Array(len).fill(-1);
+    for (let i2 = 0; i2 < len; i2++) {
+      const value = arr[i2];
+      const oldIndices = oldIndexMap.get(value);
+      if (oldIndices && oldIndices.length) {
+        const oldIndex = oldIndices.shift();
+        newToOld[i2] = oldIndex;
+        newItems[i2] = items[oldIndex];
+      } else {
+        const idxState = state(i2);
+        const element = mapFn(value, idxState);
+        newItems[i2] = {
+          value,
+          index: idxState,
+          element
+        };
       }
-      u2 < e[t[o]] && (o > 0 && (n[s2] = t[o - 1]), t[o] = s2);
+    }
+    for (let i2 = 0; i2 < items.length; i2++) {
+      if (!newToOld.includes(i2)) {
+        const el = items[i2].element;
+        (_a = el.parentNode) == null ? void 0 : _a.removeChild(el);
+      }
+    }
+    const seq = longestIncreasingSubsequence(newToOld);
+    let seqIdx = seq.length - 1;
+    for (let i2 = len - 1; i2 >= 0; i2--) {
+      const item = newItems[i2];
+      if (newToOld[i2] === -1 || i2 !== seq[seqIdx]) {
+        const anchor = i2 + 1 < len ? newItems[i2 + 1].element : null;
+        (_b = item.element.parentNode) == null ? void 0 : _b.insertBefore(item.element, anchor);
+      } else {
+        seqIdx--;
+      }
+      item.index.value = i2;
+    }
+    items = newItems;
+    return items.map((it) => it.element);
+  };
+}
+function longestIncreasingSubsequence(arr) {
+  const p2 = arr.slice();
+  const result = [];
+  let u, v;
+  for (let i2 = 0; i2 < arr.length; i2++) {
+    const n = arr[i2];
+    if (n < 0) continue;
+    if (result.length === 0 || arr[result[result.length - 1]] < n) {
+      p2[i2] = result.length > 0 ? result[result.length - 1] : -1;
+      result.push(i2);
+      continue;
+    }
+    u = 0;
+    v = result.length - 1;
+    while (u < v) {
+      const c2 = (u + v) / 2 | 0;
+      if (arr[result[c2]] < n) u = c2 + 1;
+      else v = c2;
+    }
+    if (n < arr[result[u]]) {
+      if (u > 0) p2[i2] = result[u - 1];
+      result[u] = i2;
     }
   }
-  for (o = t.length, r = t[o - 1]; o-- > 0; ) t[o] = r, r = n[r];
-  return t;
+  u = result.length;
+  v = result[u - 1];
+  while (u-- > 0) {
+    result[u] = v;
+    v = p2[v];
+  }
+  return result;
 }
-function X({ children: e, target: n }) {
-  let t;
-  return V(() => {
-    const o = (n instanceof Function ? n() : n) ?? document.body;
-    t = N(o, e);
-  }), J(() => {
-    t();
-  }), null;
+function Portal({
+  children,
+  target
+}) {
+  let cleanup;
+  onMount(() => {
+    const mount = (target instanceof Function ? target() : target) ?? document.body;
+    cleanup = renderChildren(mount, children);
+  });
+  onDestroy(() => {
+    cleanup();
+  });
+  return null;
 }
-function Se(e) {
-  if (e instanceof Node) return e;
-  if (typeof e == "string" || typeof e == "number") return document.createTextNode(String(e));
-  throw new Error(`Unknown value: ${e}`);
+function getNode$1(jsxElement) {
+  if (jsxElement instanceof Node) {
+    return jsxElement;
+  }
+  if (typeof jsxElement === "string" || typeof jsxElement === "number") {
+    const {
+      currentNode,
+      next
+    } = ssrDom();
+    if (currentNode) {
+      next();
+      return currentNode;
+    }
+    return document.createTextNode(String(jsxElement));
+  }
+  throw new Error(`Unknown value: ${jsxElement}`);
 }
-function N(e, n) {
-  const t = [];
-  function o(s2, u2) {
-    let f = [], d = [];
-    const h = () => {
-      for (const l2 of f) R$1(l2), l2.parentNode === e && e.removeChild(l2);
-      for (const l2 of d) l2();
-      f = [], d = [];
-    }, c2 = _(), i2 = M(() => {
-      try {
-        h();
-        const l2 = s2 instanceof Function ? s2() : s2, m2 = D$1(l2);
-        for (const g2 of m2) if (!Z(g2)) if (typeof g2 == "function") {
-          const y2 = document.createTextNode("");
-          e.insertBefore(y2, u2);
-          const re = o(g2, y2);
-          d.push(re), f.push(y2);
-        } else {
-          const y2 = Se(g2);
-          e.insertBefore(y2, u2), f.push(y2);
+function renderChildren(parentNode, children) {
+  const cleanups = [];
+  function renderRecursive(value, parentAnchor) {
+    let nodes = [];
+    let disposers = [];
+    const cleanup = () => {
+      for (const node of nodes) {
+        runComponentCleanup(node);
+        if (node.parentNode === parentNode) {
+          parentNode.removeChild(node);
         }
-      } catch (l2) {
-        if (l2 instanceof Promise) c2 == null ? void 0 : c2(l2);
-        else throw l2;
+      }
+      for (const dispose2 of disposers) dispose2();
+      nodes = [];
+      disposers = [];
+    };
+    const handler = getSuspenseHandler();
+    const disposer = effect(() => {
+      try {
+        cleanup();
+        const resolvedChildren = value instanceof Function ? value() : value;
+        const children2 = toArray(resolvedChildren);
+        for (const child of children2) {
+          if (isNil(child)) continue;
+          if (typeof child === "function") {
+            const anchor = document.createTextNode("");
+            parentNode.insertBefore(anchor, parentAnchor);
+            const childDisposer = renderRecursive(child, anchor);
+            disposers.push(childDisposer);
+            nodes.push(anchor);
+          } else {
+            const node = getNode$1(child);
+            parentNode.insertBefore(node, parentAnchor);
+            nodes.push(node);
+          }
+        }
+      } catch (error) {
+        if (error instanceof Promise) {
+          handler == null ? void 0 : handler(error);
+        } else {
+          throw error;
+        }
       }
     });
     return () => {
-      i2(), h();
+      disposer();
+      cleanup();
     };
   }
-  const r = o(n, null);
-  return t.push(r), () => {
+  const dispose = renderRecursive(children, null);
+  cleanups.push(dispose);
+  return () => {
     console.log("run");
-    for (const s2 of t) s2();
+    for (const c2 of cleanups) c2();
   };
 }
-const xe = [G, Q, X];
-function Y(e, n) {
-  if (!xe.includes(e)) for (const t in n) n[t] = n[t] instanceof Function ? n[t]() : n[t];
+const IGNORE_COMPONENT = [Suspense, Loop, Portal];
+function resolveComponentProps(type, props) {
+  if (IGNORE_COMPONENT.includes(type)) return;
+  for (const key in props) {
+    props[key] = props[key] instanceof Function ? props[key]() : props[key];
+  }
 }
-const ee = /* @__PURE__ */ new WeakSet();
-function te(e, n = {}, t, o) {
-  Y(e, n);
-  const r = o ? o().toString() + e.toString() : void 0, s2 = ye(r);
-  I(s2);
-  const u2 = de(e.name), f = D$1([u2, B$1(() => e({ ...n, children: t }))]).flat();
-  return I(null), ve(u2, s2), f;
+const rootNodes = /* @__PURE__ */ new WeakSet();
+function mountComponent(type, props = {}, children, _key) {
+  resolveComponentProps(type, props);
+  const key = _key ? _key().toString() + type.toString() : void 0;
+  const context = createLifeCycleContext(key);
+  setRuntimeContext(context);
+  const rootNode = createTargetNode(type.name);
+  const jsxElements = toArray([rootNode, untrack(() => type({
+    ...props,
+    children
+  }))]).flat();
+  setRuntimeContext(null);
+  runLifecycle(rootNode, context);
+  return jsxElements;
 }
 queueMicrotask(() => {
-  p$1 || new MutationObserver((e) => {
-    for (const n of e) for (const t of n.removedNodes) R$1(t);
-  }).observe(document.body, { childList: true, subtree: true });
-});
-let $$1 = [], F = 0;
-function ne() {
-  return { renderedDOM: $$1, get currentDOM() {
-    if (p$1) return;
-    const e = $$1[F];
-    if (e) return e;
-  }, get isHydrating() {
-    return F < $$1.length;
-  }, nextElement: () => F++ };
-}
-function oe(e, n, t, o) {
-  var _a;
-  if (typeof e == "function") return te(e, n, t, o);
-  v$1.push(((_a = n.xmlns) == null ? void 0 : _a.call(n)) ?? v$1[v$1.length - 1]);
-  const r = $e(e);
-  return le(r, n), N(r, t), v$1.pop(), r;
-}
-const v$1 = [];
-function $e(e) {
-  const { currentDOM: n, isHydrating: t, nextElement: o } = ne();
-  if (t && n) try {
-    if (n.tagName.toLocaleLowerCase() !== e) throw new Error("Hydration mismatch because the initial UI does not match what was rendered on the server");
-    return n;
-  } finally {
-    o();
-  }
-  const r = v$1[v$1.length - 1];
-  return r ? document.createElementNS(r, e) : document.createElement(e);
-}
-function u$1(n) {
-  const o = [];
-  for (const t in n) {
-    if (t.startsWith("on") && typeof n[t] == "function") continue;
-    const e = typeof n[t] == "function" ? n[t]() : n[t];
-    if (t !== "ref" && t !== "style" && t !== "html") {
-      if (typeof e == "boolean") {
-        e && o.push(t);
-        continue;
+  if (!isServer) {
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const removedNodes of mutation.removedNodes) {
+          runComponentCleanup(removedNodes);
+        }
       }
-      o.push(`${t}="${e}"`);
-    }
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
   }
-  return o.length > 0 && o.unshift(""), o.join(" ");
-}
-function m$1(n) {
-  function o(t) {
-    const e = [], f = t instanceof Function ? t() : t, i2 = D$1(f);
-    for (const r of i2) if (!Z(r)) if (typeof r == "function") e.push(o(r));
-    else {
-      const c2 = y$2(r);
-      e.push(c2);
-    }
-    return e.join("");
-  }
-  return o(n);
-}
-function y$2(n) {
-  if (typeof n == "string" || typeof n == "number") return String(n);
-  throw new Error(`Unknown value: ${n}`);
-}
-const $ = /* @__PURE__ */ new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
-function g(n, o, t) {
-  if (typeof n == "function") {
-    Y(n, o);
-    const e = n({ ...o, children: t }), f = we();
-    try {
-      return s(e);
-    } catch (i2) {
-      if (i2 instanceof Promise) return (f == null ? void 0 : f()) || null;
-      throw i2;
-    }
-  }
-  return $.has(n) ? `<${n}${u$1(o)}>` : `<${n}${u$1(o)}>${m$1("html" in o ? o.html : t)}</${n}>`;
-}
-function s(n) {
-  return n == null ? "" : typeof n == "function" ? s(n()) : Array.isArray(n) ? n.map(s).join("") : String(n);
-}
-function m(e) {
-  return e();
-}
-const y$1 = /* @__PURE__ */ new WeakMap();
-function R() {
-  const r = Symbol("context");
-  function t(n) {
-    return y$1.set(r, n.value), n.children();
-  }
-  function e() {
-    const n = y$1.get(r);
-    if (!n) throw new Error("No provider found for context.");
-    return n;
-  }
-  return [t, e];
-}
-function j$1(r) {
-  const t = C();
-  return M(() => {
-    t.value = r();
-  }), { get value() {
-    return t.value;
-  } };
-}
-const p = /* @__PURE__ */ new WeakMap();
-function k(r) {
-  function t(e) {
-    if (p.has(e)) return p.get(e);
-    const n = new Proxy(e, { get(o, u2, s2) {
-      W$1(o, u2);
-      const c2 = Reflect.get(o, u2, s2);
-      if (typeof c2 == "function") return c2.bind(s2);
-      const f = Reflect.getOwnPropertyDescriptor(o, u2);
-      return (f == null ? void 0 : f.get) ? f.get.call(s2) : typeof c2 == "object" && c2 !== null ? t(c2) : c2;
-    }, set(o, u2, s2, c2) {
-      const f = o[u2], S2 = Reflect.set(o, u2, s2, c2);
-      return f !== s2 && j$2(o, u2), S2;
-    } });
-    return p.set(e, n), n;
-  }
-  return t(r);
-}
-function v(r) {
-  let t = true, e = null, n, o = null, u2 = "pending";
-  const s2 = C(0), c2 = async () => {
-    t = true, e = null, n = void 0, u2 = "pending", o = r(), o.then((f) => {
-      n = f, e = null, u2 = "fulfilled", t = false, B$1(() => s2.value++);
-    }).catch((f) => {
-      n = void 0, e = f, u2 = "rejected", t = false, B$1(() => s2.value++);
-    }), B$1(() => s2.value++);
+});
+let renderedNodes = [];
+let currentIndex = 0;
+function ssrDom() {
+  return {
+    renderedNodes,
+    get currentNode() {
+      if (isServer) return void 0;
+      return renderedNodes[currentIndex];
+    },
+    get isHydrating() {
+      return !!renderedNodes[currentIndex];
+    },
+    next: () => currentIndex++
   };
-  return M(() => {
-    c2();
-  }), { get loading() {
-    return s2.value, t;
-  }, get error() {
-    return e;
-  }, get data() {
-    if (s2.value, u2 === "pending") throw o;
-    if (u2 === "rejected") throw e;
-    return n;
-  }, refetch: c2, mutate(f) {
-    n = f, s2.value++;
-  } };
 }
-const l$1 = /* @__PURE__ */ new Map();
-function D(r, t) {
-  if (p$1) return v(r);
-  if (J(() => {
-    l$1.delete(t);
-  }), l$1.has(t)) return l$1.get(t);
-  const e = v(r);
-  return l$1.set(t, e), e;
+function h$1(type, props, children, key) {
+  var _a;
+  if (typeof type === "function") {
+    return mountComponent(type, props, children, key);
+  }
+  if (type === "html") {
+    return children;
+  }
+  xmlnsStack.push(((_a = props.xmlns) == null ? void 0 : _a.call(props)) ?? xmlnsStack[xmlnsStack.length - 1]);
+  const element = createElement(type);
+  applyProps$1(element, props);
+  renderChildren(element, children);
+  xmlnsStack.pop();
+  return element;
 }
-const a = (s2, { children: r, ...o }, t) => p$1 ? g(s2, o, r) : oe(s2, o, r, t);
-const u = typeof window > "u", c = k({ pathname: u ? "/" : window.location.pathname, search: u ? "" : window.location.search });
-u || window.addEventListener("popstate", () => {
+const xmlnsStack = [];
+function createElement(tag) {
+  const {
+    currentNode,
+    next
+  } = ssrDom();
+  if (currentNode instanceof Element) {
+    try {
+      if (currentNode.tagName.toLocaleLowerCase() !== tag) {
+        throw new Error("Hydration mismatch because the initial UI does not match what was rendered on the server");
+      }
+      return currentNode;
+    } finally {
+      next();
+    }
+  }
+  const currentXmlns = xmlnsStack[xmlnsStack.length - 1];
+  return currentXmlns ? document.createElementNS(currentXmlns, tag) : document.createElement(tag);
+}
+function applyProps(props) {
+  const transformedProps = [];
+  for (const key in props) {
+    if (key.startsWith("on") && typeof props[key] === "function") {
+      continue;
+    }
+    const value = typeof props[key] === "function" ? props[key]() : props[key];
+    if (key === "ref") {
+      continue;
+    }
+    if (key === "style") {
+      continue;
+    }
+    if (key === "html") {
+      continue;
+    }
+    if (typeof value === "boolean") {
+      if (value) transformedProps.push(key);
+      continue;
+    }
+    transformedProps.push(`${key}="${value}"`);
+  }
+  if (transformedProps.length > 0) transformedProps.unshift("");
+  return transformedProps.join(" ");
+}
+function hasNoHTMLTags(str) {
+  const htmlTagRegex = /<[^>]+>/g;
+  return !htmlTagRegex.test(str);
+}
+function getNode(jsxElement, skipWrappingTags2 = false) {
+  if (typeof jsxElement === "string" || typeof jsxElement === "number") {
+    let str = String(jsxElement);
+    if (hasNoHTMLTags(str) && !skipWrappingTags2) {
+      str = `<!--!-->${str}<!--/-->`;
+    }
+    return str;
+  }
+  throw new Error(`Unknown value: ${jsxElement}`);
+}
+const skipWrappingTags = /* @__PURE__ */ new Set(["title", "meta", "script", "style"]);
+function renderChildrenToString(parent, children) {
+  function renderRecursive(value) {
+    const transformedChildren = [];
+    const resolvedChildren = value instanceof Function ? value() : value;
+    const children2 = toArray(resolvedChildren);
+    for (const child of children2) {
+      if (isNil(child)) continue;
+      if (typeof child === "function") {
+        transformedChildren.push(renderRecursive(child));
+      } else {
+        const resolved = getNode(child, skipWrappingTags.has(parent));
+        transformedChildren.push(resolved);
+      }
+    }
+    return transformedChildren.join("");
+  }
+  return renderRecursive(children);
+}
+const voidElements = /* @__PURE__ */ new Set(["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]);
+function h(type, props, children) {
+  if (typeof type === "function") {
+    resolveComponentProps(type, props);
+    const resolved = type({
+      ...props,
+      children
+    });
+    const handler = getSuspenseSSRHandler();
+    try {
+      return normalizeToString(resolved);
+    } catch (error) {
+      if (error instanceof Promise) {
+        return (handler == null ? void 0 : handler()) || null;
+      }
+      throw error;
+    }
+  }
+  if (voidElements.has(type)) {
+    return `<${type}${applyProps(props)}>`;
+  }
+  return `<${type}${applyProps(props)}>${renderChildrenToString(type, "html" in props ? props["html"] : children)}</${type}>`;
+}
+function normalizeToString(value) {
+  if (value == null) return "";
+  if (typeof value === "function") {
+    return normalizeToString(value());
+  }
+  if (Array.isArray(value)) {
+    return value.map(normalizeToString).join("");
+  }
+  return getNode(value);
+}
+function renderToString(App) {
+  return App();
+}
+const map = /* @__PURE__ */ new WeakMap();
+function createContext() {
+  const id = Symbol("context");
+  function Provider(props) {
+    map.set(id, props.value);
+    return props.children();
+  }
+  function getContext() {
+    const value = map.get(id);
+    if (!value) {
+      throw new Error("No provider found for context.");
+    }
+    return value;
+  }
+  return [Provider, getContext];
+}
+function computed(getter) {
+  const result = state();
+  effect(() => {
+    result.value = getter();
+  });
+  return {
+    get value() {
+      return result.value;
+    }
+  };
+}
+const proxyMap = /* @__PURE__ */ new WeakMap();
+function store(initialObject) {
+  function createReactiveObject(obj) {
+    if (proxyMap.has(obj)) return proxyMap.get(obj);
+    const proxy = new Proxy(obj, {
+      get(target, key, receiver) {
+        track(target, key);
+        const result = Reflect.get(target, key, receiver);
+        if (typeof result === "function") {
+          return result.bind(receiver);
+        }
+        const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
+        if (descriptor == null ? void 0 : descriptor.get) {
+          return descriptor.get.call(receiver);
+        }
+        if (typeof result === "object" && result !== null) {
+          return createReactiveObject(result);
+        }
+        return result;
+      },
+      set(target, key, value, receiver) {
+        const oldValue = target[key];
+        const result = Reflect.set(target, key, value, receiver);
+        if (oldValue !== value) {
+          trigger(target, key);
+        }
+        return result;
+      }
+    });
+    proxyMap.set(obj, proxy);
+    return proxy;
+  }
+  return createReactiveObject(initialObject);
+}
+function baseResource(fetcher) {
+  let loading = true;
+  let error = null;
+  let data = void 0;
+  let promise = null;
+  let promiseStatus = "pending";
+  const version = state(0);
+  const refetch = async () => {
+    loading = true;
+    error = null;
+    data = void 0;
+    promiseStatus = "pending";
+    promise = fetcher();
+    promise.then((result) => {
+      data = result;
+      error = null;
+      promiseStatus = "fulfilled";
+      loading = false;
+      untrack(() => version.value++);
+    }).catch((err) => {
+      data = void 0;
+      error = err;
+      promiseStatus = "rejected";
+      loading = false;
+      untrack(() => version.value++);
+    });
+    untrack(() => version.value++);
+  };
+  effect(() => {
+    refetch();
+  });
+  return {
+    get loading() {
+      version.value;
+      return loading;
+    },
+    get error() {
+      return error;
+    },
+    get data() {
+      version.value;
+      if (promiseStatus === "pending") throw promise;
+      if (promiseStatus === "rejected") throw error;
+      return data;
+    },
+    refetch,
+    mutate(newValue) {
+      data = newValue;
+      version.value++;
+    }
+  };
+}
+const resourceCache = /* @__PURE__ */ new Map();
+function resource(fetcher, key) {
+  if (isServer) return baseResource(fetcher);
+  onDestroy(() => {
+    resourceCache.delete(key);
+  });
+  if (resourceCache.has(key)) {
+    return resourceCache.get(key);
+  }
+  const resourceFn = baseResource(fetcher);
+  resourceCache.set(key, resourceFn);
+  return resourceFn;
+}
+const jsx = (type, {
+  children,
+  ...props
+}, key) => {
+  if (isServer) {
+    return h(type, props, children);
+  }
+  return h$1(type, props, children, key);
+};
+const p = typeof window > "u", c = store({ pathname: p ? "/" : window.location.pathname, search: p ? "" : window.location.search });
+p || window.addEventListener("popstate", () => {
   c.pathname = window.location.pathname, c.search = window.location.search;
 });
-function j(n) {
-  u ? c.pathname = n : (history.pushState(null, "", n), c.pathname = n, c.search = window.location.search);
+function j(t) {
+  p ? c.pathname = t : (history.pushState(null, "", t), c.pathname = t, c.search = window.location.search);
 }
-function B(n, t = true) {
-  const e = c.pathname.split("/").filter(Boolean), a2 = n.split("/").filter(Boolean);
-  return t && e.length !== a2.length || !t && e.length < a2.length ? false : a2.every((r, o) => r.startsWith(":") || r === e[o]);
+function k(t, n = true) {
+  const e = c.pathname.split("/").filter(Boolean), a = t.split("/").filter(Boolean);
+  return n && e.length !== a.length || !n && e.length < a.length ? false : a.every((o, i2) => o.startsWith(":") || o === e[i2]);
 }
-function W(n, t, e = "") {
-  const a2 = (i2, m2) => (i2 + "/" + m2).replace(/\/+/g, "/"), r = n.split("/").filter(Boolean);
-  for (const i2 of t) {
-    const m2 = a2(e, i2.path), d = m2.split("/").filter(Boolean), h = {};
-    let w2 = true;
-    for (let s2 = 0; s2 < d.length; s2++) {
-      const f = d[s2], g2 = r[s2];
+function x(t, n, e = "") {
+  const a = (r, u) => (r + "/" + u).replace(/\/+/g, "/"), o = t.split("/").filter(Boolean);
+  for (const r of n) {
+    const u = a(e, r.path), d = u.split("/").filter(Boolean), h2 = {};
+    let w = true;
+    for (let s = 0; s < d.length; s++) {
+      const f = d[s], g = o[s];
       if (f == null ? void 0 : f.startsWith("*")) {
-        const b2 = f.slice(1) || "wildcard";
-        return h[b2] = r.slice(s2).join("/"), { chain: [i2], params: h };
+        const y = f.slice(1) || "wildcard";
+        return h2[y] = o.slice(s).join("/"), { chain: [r], params: h2 };
       }
       if (f == null ? void 0 : f.startsWith(":")) {
-        if (!g2) {
-          w2 = false;
+        if (!g) {
+          w = false;
           break;
         }
-        h[f.slice(1)] = g2;
-      } else if (f !== g2) {
-        w2 = false;
+        h2[f.slice(1)] = g;
+      } else if (f !== g) {
+        w = false;
         break;
       }
     }
-    if (w2) {
-      if (i2.children) {
-        const s2 = W(n, i2.children, m2);
-        if (s2) return { chain: [i2, ...s2.chain], params: { ...h, ...s2.params } };
+    if (w) {
+      if (r.children) {
+        const s = x(t, r.children, u);
+        if (s) return { chain: [r, ...s.chain], params: { ...h2, ...s.params } };
       }
-      if (d.length === r.length) return { chain: [i2], params: h };
+      if (d.length === o.length) return { chain: [r], params: h2 };
     }
   }
-  const o = t.find((i2) => i2.path.startsWith("*"));
-  if (o) {
-    const i2 = o.path.slice(1) || "wildcard";
-    return { chain: [o], params: { [i2]: r.join("/") } };
+  const i2 = n.find((r) => r.path.startsWith("*"));
+  if (i2) {
+    const r = i2.path.slice(1) || "wildcard";
+    return { chain: [i2], params: { [r]: o.join("/") } };
   }
 }
-const l = k({});
-function x({ url: n, routes: t }) {
-  return n && (c.pathname = n), () => {
-    const e = W(c.pathname, t);
+const l = store({});
+function b({ url: t, routes: n }) {
+  return t && (c.pathname = t), () => {
+    const e = x(c.pathname, n);
     if (e) {
-      const { chain: a2, params: r } = e;
-      for (const o in l) delete l[o];
-      return Object.assign(l, r), y(a2);
+      const { chain: a, params: o } = e;
+      for (const i2 in l) delete l[i2];
+      return Object.assign(l, o), R(a);
     }
-    for (const a2 in l) delete l[a2];
-    return a(Ee, {});
+    for (const a in l) delete l[a];
+    return jsx(Fragment, {});
   };
 }
-function y(n) {
-  let t = () => a(Ee, {});
-  for (let e = n.length - 1; e >= 0; e--) {
-    const a$12 = n[e];
-    if (a$12.component) {
-      const r = t, o = a$12.component;
-      t = () => a(o, { children: () => r });
-    }
+const [C, L] = createContext();
+function O() {
+  return L()();
+}
+function R(t) {
+  let n = () => null;
+  for (let e = t.length - 1; e >= 0; e--) {
+    const a = t[e];
+    if (!a.component) continue;
+    const o = a.component, i2 = n;
+    n = () => jsx(C, { value: () => i2, children: () => jsx(o, {}) });
   }
-  return a(t, {});
+  return n();
 }
 const Template = ({
   title,
   children
 }) => {
-  return a("div", {
+  return jsx("div", {
     class: () => "p-2 w-full",
-    children: () => [() => a("h1", {
+    children: () => [() => jsx("h1", {
       class: () => "font-bold text-2xl mb-2",
       children: () => title
     }), () => children()]
   });
 };
 const ButtonPageList = () => {
-  return a(Template, {
+  return jsx(Template, {
     title: () => "Pages",
-    children: () => a("ul", {
+    children: () => jsx("ul", {
       class: () => "flex flex-col gap-2",
-      children: () => [() => a("li", {
-        children: () => a("button", {
+      children: () => [() => jsx("li", {
+        children: () => jsx("button", {
           onClick: () => () => j("/"),
-          disabled: () => B("/"),
+          disabled: () => k("/"),
           children: () => "All"
         })
-      }), () => a("li", {
-        children: () => a("button", {
+      }), () => jsx("li", {
+        children: () => jsx("button", {
           onClick: () => () => j("/forms"),
-          disabled: () => B("/forms"),
+          disabled: () => k("/forms"),
           children: () => "Forms"
         })
-      }), () => a("li", {
-        children: () => a("button", {
+      }), () => jsx("li", {
+        children: () => jsx("button", {
           onClick: () => () => j("/contexts"),
-          disabled: () => B("/contexts"),
+          disabled: () => k("/contexts"),
           children: () => "Contexts"
         })
-      }), () => a("li", {
-        children: () => a("button", {
+      }), () => jsx("li", {
+        children: () => jsx("button", {
           onClick: () => () => j("/dropdown-list"),
-          disabled: () => B("/dropdown-list"),
+          disabled: () => k("/dropdown-list"),
           children: () => "Dropdown Lists"
         })
-      }), () => a("li", {
-        children: () => a("button", {
+      }), () => jsx("li", {
+        children: () => jsx("button", {
           onClick: () => () => j("/non-async-suspense"),
-          disabled: () => B("/non-async-suspense"),
+          disabled: () => k("/non-async-suspense"),
           children: () => "Non Async Suspense"
         })
-      }), () => a("li", {
-        children: () => a("button", {
+      }), () => jsx("li", {
+        children: () => jsx("button", {
           onClick: () => () => j("/stacked-suspense"),
-          disabled: () => B("/stacked-suspense"),
+          disabled: () => k("/stacked-suspense"),
           children: () => "Stacked Suspense"
         })
-      }), () => a("li", {
-        children: () => a("button", {
+      }), () => jsx("li", {
+        children: () => jsx("button", {
           onClick: () => () => j("/pokedex-list"),
-          disabled: () => B("/pokedex-list"),
+          disabled: () => k("/pokedex-list"),
           children: () => "PokeDex List"
         })
-      }), () => a("li", {
-        children: () => a("button", {
+      }), () => jsx("li", {
+        children: () => jsx("button", {
           onClick: () => () => j("/pokedex-list-suspense"),
-          disabled: () => B("/pokedex-list-suspense"),
+          disabled: () => k("/pokedex-list-suspense"),
           children: () => "PokeDex List with Suspense"
         })
       })]
@@ -680,25 +1073,25 @@ const ButtonPageList = () => {
   });
 };
 function Contexts() {
-  return a(Template, {
+  return jsx(Template, {
     title: () => "Contexts",
-    children: () => [() => a(Form, {
-      children: () => a(Input$1, {})
-    }), () => a(Form, {
-      children: () => a(Wrapper, {
-        children: () => a(Input$1, {})
+    children: () => [() => jsx(Form, {
+      children: () => jsx(Input$1, {})
+    }), () => jsx(Form, {
+      children: () => jsx(Wrapper, {
+        children: () => jsx(Input$1, {})
       })
     })]
   });
 }
-const [FormProvider, formContext] = R();
+const [FormProvider, formContext] = createContext();
 function Form({
   children
 }) {
-  const state2 = k({
-    name: ""
+  const state2 = store({
+    name: "asd"
   });
-  return a(FormProvider, {
+  return jsx(FormProvider, {
     value: () => state2,
     children: () => children()
   });
@@ -706,46 +1099,46 @@ function Form({
 function Wrapper({
   children
 }) {
-  return a(Ee, {
-    children: () => [() => a("div", {
+  return jsx(Fragment, {
+    children: () => [() => jsx("div", {
       children: () => "Hi"
     }), () => " ", () => children()]
   });
 }
-const i = C(0);
+const i = state(0);
 setInterval(() => {
   i.value++;
 }, 1e3);
 function Input$1() {
   const forms = formContext();
-  const nameEl = a("div", {
+  const nameEl = () => jsx("div", {
     children: () => [() => "Name: ", () => forms.name, () => " Hi"]
   });
-  console.log("rerendering");
-  return a(Ee, {
-    children: () => [() => a("div", {
+  return jsx(Fragment, {
+    children: () => [() => jsx("div", {
       children: () => [() => "Name: ", () => forms.name]
-    }), () => nameEl, () => a("input", {
+    }), () => nameEl, () => jsx("input", {
       type: () => "text",
       name: () => "name",
       onInput: () => (event) => forms.name = event.currentTarget.value,
       placeholder: () => "name",
-      autoComplete: () => "off"
+      autoComplete: () => "off",
+      value: () => forms.name
     }), " ", () => i.value]
   });
 }
-const name = k({
+const name = store({
   firstName: "First name",
   lastName: "Last name"
 });
 const Dropdowns = () => {
-  const dropdownStore = k({
+  const dropdownStore = store({
     showDropdown: true,
     sortDirection: "asc",
     numbers: [1, 2, 3, 4, 5, 6, 7, 8],
     handleSort() {
-      this.numbers = [...this.numbers].sort((a2, b2) => {
-        return this.sortDirection === "desc" ? a2 - b2 : b2 - a2;
+      this.numbers = [...this.numbers].sort((a, b2) => {
+        return this.sortDirection === "desc" ? a - b2 : b2 - a;
       });
       this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
     },
@@ -760,7 +1153,7 @@ const Dropdowns = () => {
     addDropdown() {
       let currentNumbers = [...this.numbers];
       if (currentNumbers.length >= 8) return;
-      currentNumbers = currentNumbers.sort((a2, b2) => a2 - b2);
+      currentNumbers = currentNumbers.sort((a, b2) => a - b2);
       if (!currentNumbers.length) {
         this.numbers = [1];
       } else {
@@ -773,52 +1166,52 @@ const Dropdowns = () => {
       }
     }
   });
-  V(async () => {
+  onMount(async () => {
     console.log("Dropdowns onMount");
   });
-  J(async () => {
+  onDestroy(async () => {
     console.log("Dropdowns onDestroy");
   });
-  return a(Template, {
+  return jsx(Template, {
     title: () => "Dropdown List",
-    children: () => a("div", {
+    children: () => jsx("div", {
       class: () => "flex flex-col gap-4",
-      children: () => [() => a("div", {
-        children: () => a("div", {
+      children: () => [() => jsx("div", {
+        children: () => jsx("div", {
           class: () => "flex gap-2 items-center",
-          children: () => [() => a("span", {
+          children: () => [() => jsx("span", {
             children: () => "Add Dropdown"
-          }), () => a("button", {
+          }), () => jsx("button", {
             class: () => "btn",
             onClick: () => dropdownStore.addDropdown,
             children: () => "+"
-          }), () => a("button", {
+          }), () => jsx("button", {
             class: () => "btn",
             onClick: () => dropdownStore.removeDropdown,
             children: () => "-"
           })]
         })
-      }), () => a("div", {
+      }), () => jsx("div", {
         class: () => "flex gap-2 items-center",
-        children: () => [() => a("span", {
+        children: () => [() => jsx("span", {
           children: () => "Sort"
-        }), () => a("button", {
+        }), () => jsx("button", {
           class: () => "btn",
           onClick: () => dropdownStore.handleSort,
           children: () => dropdownStore.sortDirection === "asc" ? "↑" : "↓"
-        }), () => a("button", {
+        }), () => jsx("button", {
           class: () => "btn",
           onClick: () => dropdownStore.handleRandomize,
           children: () => "Randomize"
         })]
-      }), () => a("div", {
-        children: () => a("button", {
+      }), () => jsx("div", {
+        children: () => jsx("button", {
           onClick: () => () => dropdownStore.showDropdown = !dropdownStore.showDropdown,
           children: () => "Unmount Dropdown List"
         })
-      }), () => dropdownStore.showDropdown && a(DropdownList, {
+      }), () => dropdownStore.showDropdown && jsx(DropdownList, {
         dropdowns: () => dropdownStore
-      }), () => a("div", {
+      }), () => jsx("div", {
         children: () => "Hi"
       })]
     })
@@ -828,15 +1221,15 @@ const DropdownList = ({
   dropdowns
 }) => {
   console.log("rerender");
-  V(async () => {
+  onMount(async () => {
     console.log("DropdownList onMount");
   });
-  J(async () => {
+  onDestroy(async () => {
     console.log("DropdownList onDestroy");
   });
-  return a("div", {
+  return jsx("div", {
     class: () => "flex gap-2 flex-col lg:flex-row",
-    children: () => dropdowns.numbers.map((number) => a(Dropdown, {
+    children: () => dropdowns.numbers.map((number) => jsx(Dropdown, {
       number: () => number
     }, () => number))
   });
@@ -844,28 +1237,28 @@ const DropdownList = ({
 const Dropdown = ({
   number
 }) => {
-  const isOpen = C(false);
+  const isOpen = state(false);
   const handleToggle = () => {
     isOpen.value = !isOpen.value;
   };
-  return a(Ee, {
-    children: () => a("div", {
+  return jsx(Fragment, {
+    children: () => jsx("div", {
       class: () => "relative lg:w-[calc(100%/8)]",
-      children: () => [() => a("div", {
-        children: () => [() => a("button", {
+      children: () => [() => jsx("div", {
+        children: () => [() => jsx("button", {
           class: () => "btn w-full",
           onClick: () => handleToggle,
           children: () => [() => "Open Dropdown ", () => number]
-        }), () => a("div", {
+        }), () => jsx("div", {
           class: () => "break-all",
           children: () => [() => "Hi ", () => name.firstName]
         })]
-      }), () => isOpen.value && a("div", {
+      }), () => isOpen.value && jsx("div", {
         class: () => "absolute bg-white border border-gray-200 rounded p-4 w-[200px] z-10",
-        children: () => a("ul", {
+        children: () => jsx("ul", {
           children: () => Array.from({
             length: 3
-          }).map((_2, i2) => i2 + 1).map((item) => a("li", {
+          }).map((_, i2) => i2 + 1).map((item) => jsx("li", {
             class: () => "cursor-pointer p-2 rounded hover:bg-gray-100",
             children: () => [() => "Dropdown ", () => item]
           }))
@@ -875,66 +1268,66 @@ const Dropdown = ({
   });
 };
 const Forms = () => {
-  return a(Template, {
+  return jsx(Template, {
     title: () => "Forms",
-    children: () => a("div", {
-      children: () => [() => a("div", {
-        children: () => [() => a("label", {
+    children: () => jsx("div", {
+      children: () => [() => jsx("div", {
+        children: () => [() => jsx("label", {
           class: () => "break-all",
           for: () => "name-input2",
           children: () => [() => "Hi ", () => name.firstName]
-        }), () => a("div", {
-          children: () => a("input", {
+        }), () => jsx("div", {
+          children: () => jsx("input", {
             type: () => "text",
             value: () => name.firstName,
             id: () => "name-input2"
           })
         })]
-      }), () => a("div", {
-        children: () => [() => a(Counter, {}), () => a(Input, {})]
+      }), () => jsx("div", {
+        children: () => [() => jsx(Counter, {}), () => jsx(Input, {})]
       })]
     })
   });
 };
 function Counter() {
-  const count = C(0);
-  const double = j$1(() => count.value);
+  const count = state(0);
+  const double = computed(() => count.value);
   const handleCount = () => {
     count.value++;
   };
-  M(() => {
+  effect(() => {
   });
-  M(() => {
+  effect(() => {
   });
-  J(() => {
+  onDestroy(() => {
     console.log("bye");
   });
-  return a(Ee, {
-    children: () => [() => count.value, () => a("div", {
+  return jsx(Fragment, {
+    children: () => [() => count.value, () => jsx("div", {
       children: () => [() => "Count: ", () => count.value]
-    }), () => a("div", {
+    }), () => jsx("div", {
       children: () => [() => "Double Count: ", () => double.value]
-    }), () => a("button", {
+    }), () => jsx("button", {
       disabled: () => count.value >= 5,
       onClick: () => handleCount,
       children: () => "Add counter"
-    }), () => a("div", {
-      children: () => count.value <= 3 ? a("div", {
+    }), () => jsx("div", {
+      children: () => count.value <= 3 ? jsx("div", {
         children: () => "Hi"
       }) : "string"
     })]
   });
 }
 function Input() {
-  return a("div", {
-    children: () => [() => a("label", {
+  return jsx("div", {
+    children: () => [() => jsx("label", {
       class: () => "break-all",
       for: () => "name-input",
-      children: () => [() => "Name ", () => name.firstName, () => " ", () => a("span", {
+      children: () => [() => "Name ", () => name.firstName, () => " ", () => jsx("span", {
         children: () => "Hi"
       })]
-    }), () => a("div", {
-      children: () => a("input", {
+    }), () => jsx("div", {
+      children: () => jsx("input", {
         id: () => "name-input",
         type: () => "text",
         onInput: () => (event) => {
@@ -946,14 +1339,14 @@ function Input() {
   });
 }
 function NonAsyncSuspense() {
-  return a(Template, {
+  return jsx(Template, {
     title: () => "Non-Async Suspense",
-    children: () => a("div", {
-      children: () => a(G, {
-        fallback: () => a("div", {
+    children: () => jsx("div", {
+      children: () => jsx(Suspense, {
+        fallback: () => jsx("div", {
           children: () => "hi"
         }),
-        children: () => a("div", {
+        children: () => jsx("div", {
           children: () => "Children"
         })
       })
@@ -964,7 +1357,7 @@ const sleep = (ms) => new Promise((resolve) => {
   setTimeout(resolve, ms);
 });
 const PokeDex = () => {
-  const pokeDex = k({
+  const pokeDex = store({
     isLoading: true,
     pokeDexList: [],
     prevLink: "",
@@ -986,13 +1379,13 @@ const PokeDex = () => {
     },
     handleSort(key) {
       this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
-      this.pokeDexList = [...this.pokeDexList].sort((a2, b2) => {
-        const cmp = a2[key].localeCompare(b2[key]);
+      this.pokeDexList = [...this.pokeDexList].sort((a, b2) => {
+        const cmp = a[key].localeCompare(b2[key]);
         return this.sortDirection === "asc" ? cmp : -cmp;
       });
     }
   });
-  V(async () => {
+  onMount(async () => {
     const controller = new AbortController();
     await pokeDex.fetchData("https://pokeapi.co/api/v2/pokemon/?offset=1100&limit=20", controller);
     return () => {
@@ -1000,51 +1393,51 @@ const PokeDex = () => {
       controller.abort();
     };
   });
-  return a(Template, {
+  return jsx(Template, {
     title: () => "PokeDex List",
-    children: () => [() => a("div", {
+    children: () => [() => jsx("div", {
       class: () => "break-all",
       children: () => [() => "Hi ", () => name.firstName]
-    }), () => a("table", {
+    }), () => jsx("table", {
       class: () => "w-full mx-auto my-2 table-fixed",
-      children: () => [() => a("thead", {
-        children: () => a("tr", {
-          children: () => [() => a("th", {
+      children: () => [() => jsx("thead", {
+        children: () => jsx("tr", {
+          children: () => [() => jsx("th", {
             class: () => "w-1/3",
             children: () => "ID"
-          }), () => a("th", {
+          }), () => jsx("th", {
             onClick: () => () => pokeDex.handleSort("name"),
             class: () => "select-none cursor-pointer w-1/3",
             children: () => "Name"
-          }), () => a("th", {
+          }), () => jsx("th", {
             onClick: () => () => pokeDex.handleSort("url"),
             class: () => "select-none cursor-pointer w-1/3",
             children: () => "URL"
           })]
         })
-      }), () => a("tbody", {
-        children: () => [() => pokeDex.isLoading && a(Ee, {
-          children: () => Me(() => Array.from({
+      }), () => jsx("tbody", {
+        children: () => [() => pokeDex.isLoading && jsx(Fragment, {
+          children: () => loop(() => Array.from({
             length: 20
-          }).map((_2, i2) => i2 + 1)).each((number) => a("tr", {
-            children: () => a("td", {
+          }).map((_, i2) => i2 + 1)).each((number) => jsx("tr", {
+            children: () => jsx("td", {
               colSpan: () => 3,
               class: () => "h-[24px] text-center",
               children: () => number === 10 && "loading..."
             })
           }))
-        }), () => !pokeDex.isLoading && a(Ee, {
-          children: () => Me(() => pokeDex.pokeDexList).each(({
+        }), () => !pokeDex.isLoading && jsx(Fragment, {
+          children: () => loop(() => pokeDex.pokeDexList).each(({
             name: name2,
             url
-          }, index) => a("tr", {
-            children: () => [() => a("td", {
+          }, index) => jsx("tr", {
+            children: () => [() => jsx("td", {
               class: () => "w-1/3 text-center",
               children: () => index.value + 1
-            }), () => a("td", {
+            }), () => jsx("td", {
               class: () => "w-1/3 text-center truncate",
               children: () => name2
-            }), () => a("td", {
+            }), () => jsx("td", {
               class: () => "w-1/3 text-center truncate",
               onClick: () => () => alert(url),
               children: () => url
@@ -1052,14 +1445,14 @@ const PokeDex = () => {
           }))
         })]
       })]
-    }), () => a("div", {
+    }), () => jsx("div", {
       class: () => "flex gap-4 justify-center",
-      children: () => [() => a("button", {
+      children: () => [() => jsx("button", {
         class: () => "btn",
         onClick: () => () => pokeDex.fetchData(pokeDex.prevLink),
         disabled: () => pokeDex.isLoading || !pokeDex.prevLink,
         children: () => "Previous"
-      }), () => a("button", {
+      }), () => jsx("button", {
         class: () => "btn",
         onClick: () => () => pokeDex.fetchData(pokeDex.nextLink),
         disabled: () => pokeDex.isLoading || !pokeDex.nextLink,
@@ -1069,7 +1462,7 @@ const PokeDex = () => {
   });
 };
 const PokeDexSuspense = () => {
-  const pokeDex = k({
+  const pokeDex = store({
     url: "https://pokeapi.co/api/v2/pokemon/?offset=1100&limit=20",
     sortDirection: "asc",
     sort(key) {
@@ -1077,8 +1470,8 @@ const PokeDexSuspense = () => {
       this.sortDirection = this.sortDirection === "asc" ? "desc" : "asc";
       pokeDexResource.mutate({
         ...pokeDexResource.data,
-        results: [...pokeDexResource.data.results].sort((a2, b2) => {
-          const cmp = a2[key].localeCompare(b2[key]);
+        results: [...pokeDexResource.data.results].sort((a, b2) => {
+          const cmp = a[key].localeCompare(b2[key]);
           return this.sortDirection === "asc" ? cmp : -cmp;
         })
       });
@@ -1088,7 +1481,7 @@ const PokeDexSuspense = () => {
       this.url = newUrl.replace(/limit=\d+/, "limit=20");
     }
   });
-  const pokeDexResource = D(async () => {
+  const pokeDexResource = resource(async () => {
     const response = await fetch(pokeDex.url);
     const json = await response.json();
     await sleep(1e3);
@@ -1096,54 +1489,54 @@ const PokeDexSuspense = () => {
   }, "pokedex-resource");
   const showUrlOnClick = (url) => () => alert(url);
   const sortOnClick = (key) => () => pokeDex.sort(key);
-  return a(Template, {
+  return jsx(Template, {
     title: () => "PokeDex List (via Suspense)",
-    children: () => a("div", {
-      children: () => [() => a("div", {
+    children: () => jsx("div", {
+      children: () => [() => jsx("div", {
         class: () => "break-all",
         children: () => [() => "Hi ", () => name.firstName]
-      }), () => a("table", {
+      }), () => jsx("table", {
         class: () => "w-full mx-auto my-2 table-fixed",
-        children: () => [() => a("thead", {
-          children: () => a("tr", {
-            children: () => [() => a("th", {
+        children: () => [() => jsx("thead", {
+          children: () => jsx("tr", {
+            children: () => [() => jsx("th", {
               class: () => "w-1/3",
               children: () => "ID"
-            }), () => a("th", {
+            }), () => jsx("th", {
               onClick: () => sortOnClick("name"),
               class: () => "select-none cursor-pointer w-1/3",
               children: () => "Name"
-            }), () => a("th", {
+            }), () => jsx("th", {
               onClick: () => sortOnClick("url"),
               class: () => "select-none cursor-pointer w-1/3",
               children: () => "URL"
             })]
           })
-        }), () => a("tbody", {
-          children: () => a(G, {
-            fallback: () => a(Ee, {
+        }), () => jsx("tbody", {
+          children: () => jsx(Suspense, {
+            fallback: () => jsx(Fragment, {
               children: () => Array.from({
                 length: 20
-              }).map((_2, i2) => i2 + 1).map((number) => a("tr", {
-                children: () => a("td", {
+              }).map((_, i2) => i2 + 1).map((number) => jsx("tr", {
+                children: () => jsx("td", {
                   colSpan: () => 3,
                   class: () => "h-[24px] text-center",
                   children: () => number === 10 && "loading..."
                 })
               }))
             }),
-            children: () => a(Ee, {
+            children: () => jsx(Fragment, {
               children: () => pokeDexResource.data.results.map(({
                 name: name2,
                 url
-              }, index) => a("tr", {
-                children: () => [() => a("td", {
+              }, index) => jsx("tr", {
+                children: () => [() => jsx("td", {
                   class: () => "w-1/3 text-center",
                   children: () => index + 1
-                }), () => a("td", {
+                }), () => jsx("td", {
                   class: () => "w-1/3 text-center truncate",
                   children: () => name2
-                }), () => a("td", {
+                }), () => jsx("td", {
                   class: () => "w-1/3 text-center truncate",
                   onClick: () => showUrlOnClick(url),
                   children: () => url
@@ -1152,9 +1545,9 @@ const PokeDexSuspense = () => {
             })
           })
         })]
-      }), () => a("div", {
+      }), () => jsx("div", {
         class: () => "flex gap-4 justify-center",
-        children: () => [() => a("button", {
+        children: () => [() => jsx("button", {
           class: () => "btn",
           onClick: () => () => {
             var _a;
@@ -1165,7 +1558,7 @@ const PokeDexSuspense = () => {
             return pokeDexResource.loading || !((_a = pokeDexResource.data) == null ? void 0 : _a.previous);
           },
           children: () => "Previous"
-        }), () => a("button", {
+        }), () => jsx("button", {
           class: () => "btn",
           onClick: () => () => {
             var _a;
@@ -1182,51 +1575,52 @@ const PokeDexSuspense = () => {
   });
 };
 const StackedSuspense = () => {
-  const msg2 = D(async () => {
+  const msg2 = resource(async () => {
     await new Promise((resolve) => {
       setTimeout(resolve, 2e3);
     });
     return "hello world 2";
   }, "outer-suspense");
-  return a(Template, {
+  return jsx(Template, {
     title: () => "Stacked Suspense",
-    children: () => a("div", {
+    children: () => jsx("div", {
       class: () => "p-2 flex flex-col container m-auto",
-      children: () => a(G, {
-        fallback: () => a("div", {
+      children: () => jsx(Suspense, {
+        fallback: () => jsx("div", {
           children: () => "loading 1..."
         }),
-        children: () => [() => a(G, {
-          fallback: () => a("div", {
+        children: () => [() => jsx(Suspense, {
+          fallback: () => jsx("div", {
             children: () => "loading 2..."
           }),
           children: () => msg2.data
-        }), () => a(Component, {})]
+        }), () => jsx(Component, {})]
       })
     })
   });
 };
 function Component() {
-  const msg = D(async () => {
+  const msg = resource(async () => {
     await sleep(1e3);
     return "hello world";
   }, "inner-suspense");
-  return a("div", {
+  return jsx("div", {
     children: () => msg.data
   });
 }
 const routes = [{
   path: "/",
-  component: ({
-    children
-  }) => a("div", {
-    class: () => "p-2 flex flex-col container m-auto",
-    children: () => [() => a(ButtonPageList, {}), () => children()]
-  }),
+  component: () => {
+    console.log("layout rerender");
+    return jsx("div", {
+      class: () => "p-2 flex flex-col container m-auto",
+      children: () => [() => jsx(ButtonPageList, {}), () => jsx(O, {})]
+    });
+  },
   children: [{
     path: "/",
-    component: () => a(Ee, {
-      children: () => [() => a(Forms, {}), () => a(Contexts, {}), () => a(Dropdowns, {}), () => a(NonAsyncSuspense, {}), () => a(StackedSuspense, {}), () => a(PokeDex, {}), () => a(PokeDexSuspense, {})]
+    component: () => jsx(Fragment, {
+      children: () => [() => jsx(Forms, {}), () => jsx(Contexts, {}), () => jsx(Dropdowns, {}), () => jsx(NonAsyncSuspense, {}), () => jsx(StackedSuspense, {}), () => jsx(PokeDex, {}), () => jsx(PokeDexSuspense, {})]
     })
   }, {
     path: "/contexts",
@@ -1252,7 +1646,7 @@ const routes = [{
   }]
 }];
 const render = (url) => {
-  return m(() => a(x, {
+  return renderToString(() => jsx(b, {
     url: () => url,
     routes: () => routes
   }));

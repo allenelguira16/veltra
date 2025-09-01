@@ -1,13 +1,17 @@
 import { JSX } from "~/types";
 import { isNil, toArray } from "~/util";
 
+import { getNode } from "./get-node";
+
+const skipWrappingTags = new Set(["title", "meta", "script", "style"]);
+
 /**
  * Handle the children of the element for SSR
  *
  * @param children - The children of the element.
  * @returns The transformed children.
  */
-export function renderChildrenToString(children: JSX.Element) {
+export function renderChildrenToString(parent: string, children: JSX.Element) {
   function renderRecursive(value: JSX.Element) {
     const transformedChildren: string[] = [];
 
@@ -20,7 +24,7 @@ export function renderChildrenToString(children: JSX.Element) {
       if (typeof child === "function") {
         transformedChildren.push(renderRecursive(child));
       } else {
-        const resolved = getNode(child);
+        const resolved = getNode(child, skipWrappingTags.has(parent));
         transformedChildren.push(resolved);
       }
     }
@@ -28,18 +32,4 @@ export function renderChildrenToString(children: JSX.Element) {
   }
 
   return renderRecursive(children);
-}
-
-/**
- * get the node for a JSX element
- *
- * @param jsxElement - The JSX element to get the node for.
- * @returns The node for the JSX element.
- */
-export function getNode<T extends string>(jsxElement: JSX.Element): T {
-  if (typeof jsxElement === "string" || typeof jsxElement === "number") {
-    return String(jsxElement) as unknown as T;
-  }
-
-  throw new Error(`Unknown value: ${jsxElement}`);
 }

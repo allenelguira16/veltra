@@ -7,6 +7,7 @@ import {
   loopAutoWrapPlugin,
   wrapJsxChildrenPlugin,
   wrapJsxExpressionsPlugin,
+  wrapJsxVariables,
 } from "./plugins";
 
 type BabelPresetVynnOptions = {
@@ -36,6 +37,7 @@ export default function babelPresetVynn(
         },
       ],
       logJsxPlugin,
+      wrapJsxVariables,
       loopAutoWrapPlugin,
       wrapJsxChildrenPlugin,
       wrapJsxExpressionsPlugin,
