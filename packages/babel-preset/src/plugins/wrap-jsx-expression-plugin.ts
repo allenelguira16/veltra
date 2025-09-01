@@ -16,6 +16,7 @@ export const wrapJsxExpressionsPlugin = declare((api) => {
 
           const attrName = t.isJSXIdentifier(attr.name) ? attr.name.name : null;
 
+          // Special handling for ref={myRef}
           if (
             attrName === "ref" &&
             t.isJSXExpressionContainer(attr.value) &&
@@ -24,7 +25,13 @@ export const wrapJsxExpressionsPlugin = declare((api) => {
             const myRef = attr.value.expression;
             const elemParam = t.identifier("elem");
             const assignment = t.assignmentExpression("=", myRef, elemParam);
-            const wrappedRef = t.arrowFunctionExpression([elemParam], assignment);
+
+            const wrappedRef = t.addComment(
+              t.arrowFunctionExpression([elemParam], assignment),
+              "leading",
+              "#__PURE__",
+            );
+
             return t.jsxAttribute(t.jsxIdentifier(attrName), t.jsxExpressionContainer(wrappedRef));
           }
 
@@ -40,7 +47,12 @@ export const wrapJsxExpressionsPlugin = declare((api) => {
 
           if (propValue === null || attrName === null) return attr;
 
-          const wrappedFn = t.arrowFunctionExpression([], propValue);
+          const wrappedFn = t.addComment(
+            t.arrowFunctionExpression([], propValue),
+            "leading",
+            "#__PURE__",
+          );
+
           return t.jsxAttribute(t.jsxIdentifier(attrName), t.jsxExpressionContainer(wrappedFn));
         });
 
@@ -50,7 +62,7 @@ export const wrapJsxExpressionsPlugin = declare((api) => {
       JSXExpressionContainer(path: NodePath<t.JSXExpressionContainer>) {
         const expr = path.node.expression;
 
-        // Skip if it's empty or already an arrow/function expression
+        // Skip if it's empty, function, arrow, or literal
         if (
           t.isJSXEmptyExpression(expr) ||
           t.isFunction(expr) ||
@@ -60,8 +72,9 @@ export const wrapJsxExpressionsPlugin = declare((api) => {
           return;
         }
 
-        // Always wrap, even if it's already a function
-        const wrapped = t.arrowFunctionExpression([], expr);
+        // Wrap expression in a pure arrow function
+        const wrapped = t.addComment(t.arrowFunctionExpression([], expr), "leading", "#__PURE__");
+
         path.replaceWith(t.jsxExpressionContainer(wrapped));
       },
     },

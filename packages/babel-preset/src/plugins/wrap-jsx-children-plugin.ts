@@ -16,17 +16,30 @@ export const wrapJsxChildrenPlugin = declare((api) => {
           if (i === 0) value = value.trimStart();
           if (i === path.node.children.length - 1) value = value.trimEnd();
 
-          processedChildren.push(t.arrowFunctionExpression([], t.stringLiteral(value)));
+          // wrap text child in a pure arrow function
+          processedChildren.push(
+            t.addComment(
+              t.arrowFunctionExpression([], t.stringLiteral(value)),
+              "leading",
+              "#__PURE__",
+            ),
+          );
         }
       } else if (t.isJSXElement(child) || t.isJSXFragment(child)) {
-        processedChildren.push(t.arrowFunctionExpression([], child));
+        // wrap JSX element/fragment in a pure arrow function
+        processedChildren.push(
+          t.addComment(t.arrowFunctionExpression([], child), "leading", "#__PURE__"),
+        );
       } else if (t.isJSXExpressionContainer(child) && !t.isJSXEmptyExpression(child.expression)) {
         const expr = child.expression;
 
         if (t.isStringLiteral(expr)) {
           processedChildren.push(expr);
         } else {
-          processedChildren.push(t.arrowFunctionExpression([], expr));
+          // wrap expression in a pure arrow function
+          processedChildren.push(
+            t.addComment(t.arrowFunctionExpression([], expr), "leading", "#__PURE__"),
+          );
         }
       }
     });
@@ -37,7 +50,7 @@ export const wrapJsxChildrenPlugin = declare((api) => {
       processedChildren.length === 1 ? processedChildren[0] : t.arrayExpression(processedChildren);
 
     if (!t.isArrowFunctionExpression(body)) {
-      body = t.arrowFunctionExpression([], body);
+      body = t.addComment(t.arrowFunctionExpression([], body), "leading", "#__PURE__");
     }
 
     path.node.children = [t.jsxExpressionContainer(body)];

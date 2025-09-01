@@ -12,8 +12,6 @@ export function renderToStream(App: () => JSX.Element) {
       const html = jsx(App, {}) as string;
       controller.enqueue(new TextEncoder().encode(html));
       controller.close();
-
-      isStreaming = false;
     },
   });
 }

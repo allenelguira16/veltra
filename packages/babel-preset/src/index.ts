@@ -9,6 +9,7 @@ import {
   wrapJsxExpressionsPlugin,
   wrapJsxVariables,
 } from "./plugins";
+import { pureJsxCallsPlugin } from "./plugins/wrap-pure-jsx";
 
 type BabelPresetVynnOptions = {
   ssr: boolean;
@@ -41,6 +42,7 @@ export default function babelPresetVynn(
       loopAutoWrapPlugin,
       wrapJsxChildrenPlugin,
       wrapJsxExpressionsPlugin,
+      pureJsxCallsPlugin,
     ],
   };
 }

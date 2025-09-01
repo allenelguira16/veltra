@@ -26,6 +26,10 @@ export default (options: VitePluginVynnOptions = { ssr: false }) => {
           filename,
           sourceMaps: true,
           presets: [[babelPluginVynn, options], babelPluginTS],
+          generatorOpts: {
+            comments: true,
+            shouldPrintComment: (val) => /#__PURE__/.test(val),
+          },
         });
 
         if (result?.code) {
